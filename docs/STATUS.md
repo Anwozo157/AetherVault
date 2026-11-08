@@ -23,7 +23,7 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 
 ## Next steps (in order)
 
-1. **Pitch deck honesty pass:** reword unverified claims (sub-second RPO, eBPF probes, design partners, AWS Marketplace, "Zero-Downtime") as targets/roadmap. Requires founder review of the copy.
+1. ✅ Pitch deck accuracy pass done (2026-11-08). Remaining founder inputs: source for market figures ($15.8B TAM, 22.4% CAGR, $4.2B SAM, 60% idle waste); confirm founder bio wording and "Built by engineers" (plural); real dates for design-partner pilots and seed round.
 2. **Redeploy live site** (`gh-pages` branch). Live site is still the pre-Phase-0 build: it lacks the pitch-deck crash fix, chaos overflow fix, abort, and simulated badge. Needs founder OK.
 3. **Phase 2:** keyboard-operable hold-to-confirm, reduced-motion fallback, audio off by default, Playwright E2E, GitHub Actions CI (free for public repos), bundle budget.
 

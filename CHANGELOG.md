@@ -5,6 +5,21 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Pitch deck accuracy pass (2026-11-08)
+
+#### Changed
+
+- Slide 2 statistics replaced with verified, cited figures: $14,056/min average unplanned downtime (EMA, Feb 2024, 415 IT leaders); over 90% of mid-size/large enterprises lose >$300K per hour (ITIC 2024); 85% of human-error outages tied to procedures (Uptime Institute, May 2025). Removed the misattributed "Gartner $9,000/min" claim.
+- Unbuilt capabilities reworded as planned/targets/roadmap (AWS DRS integration, cross-cloud failover, chaos testing, carrier connect, BGP peering). RPO target stated as "seconds", idle cost as "storage-only".
+- "Zero-Downtime" → "Near-Zero-Downtime"; "Apple-Grade" → "Consumer-Grade"; "live engine" → "interactive demo (simulated data)"; "99.999% RTO Guarantee" → "Contractual RTO SLA"; pricing labeled as proposed.
+- Roadmap slide: stale Q3/Q4 2026 dates replaced with [date TBD]; telemetry milestone labeled simulated.
+- Unverified market figures ($15.8B TAM, 22.4% CAGR, $4.2B SAM, 60% idle waste) marked **[source needed]**; SOM labeled as an assumption.
+- README: removed sub-second RPO / eBPF claims; states the demo is simulated.
+
+#### Added
+
+- Deck regression test that renders all 7 slides (guards the earlier black-screen crash).
+
 ### Globe visibility (2026-11-08)
 
 #### Changed
