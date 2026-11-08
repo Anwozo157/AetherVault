@@ -198,6 +198,16 @@ describe('SignInForm', () => {
     expect(await screen.findByRole('status')).toHaveTextContent('Sign-in link sent to a@b.co.');
   });
 
+  test('without password sign-in (hosted), the form only sends magic links', async () => {
+    const onMagicLink = vi.fn(async () => {});
+    render(<SignInForm onMagicLink={onMagicLink} />);
+    expect(screen.queryByLabelText('Password')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'a@b.co' } });
+    fireEvent.submit(screen.getByRole('form', { name: 'Sign in' }));
+    expect(await screen.findByRole('status')).toHaveTextContent('Sign-in link sent to a@b.co.');
+    expect(onMagicLink).toHaveBeenCalledWith('a@b.co');
+  });
+
   test('demo account shortcuts fill the form (local only)', () => {
     render(
       <SignInForm

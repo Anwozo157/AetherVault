@@ -2,7 +2,11 @@ import { KeyRound, Mail } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 
 export interface SignInFormProps {
-  onPasswordSignIn: (email: string, password: string) => Promise<void>;
+  /**
+   * Password sign-in. Passed only for the local Docker database (seeded demo accounts);
+   * hosted deployments use magic links only, per ADR 0002.
+   */
+  onPasswordSignIn?: (email: string, password: string) => Promise<void>;
   onMagicLink: (email: string) => Promise<void>;
   /** Seeded local accounts to show as a hint (local Docker database only). */
   demoAccounts?: readonly string[];
@@ -34,7 +38,8 @@ export default function SignInForm({
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    void run(() => onPasswordSignIn(email.trim(), password));
+    if (onPasswordSignIn) void run(() => onPasswordSignIn(email.trim(), password));
+    else sendLink();
   };
 
   const sendLink = () => {
@@ -74,28 +79,32 @@ export default function SignInForm({
           placeholder="you@company.com"
         />
       </label>
-      <label className="block mt-3 text-[11px] font-mono uppercase tracking-wider text-zinc-400">
-        Password
-        <input
-          type="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className={input}
-        />
-      </label>
+      {onPasswordSignIn && (
+        <>
+          <label className="block mt-3 text-[11px] font-mono uppercase tracking-wider text-zinc-400">
+            Password
+            <input
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={input}
+            />
+          </label>
 
+          <button
+            type="submit"
+            disabled={busy || !password}
+            className="w-full mt-5 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-aether-cyan/15 hover:bg-aether-cyan/25 border border-aether-cyan/40 text-xs font-mono tracking-widest uppercase text-aether-cyan hover:text-white transition-colors disabled:opacity-50"
+          >
+            <KeyRound className="w-4 h-4" aria-hidden="true" />
+            Sign in
+          </button>
+        </>
+      )}
       <button
-        type="submit"
-        disabled={busy || !password}
-        className="w-full mt-5 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-aether-cyan/15 hover:bg-aether-cyan/25 border border-aether-cyan/40 text-xs font-mono tracking-widest uppercase text-aether-cyan hover:text-white transition-colors disabled:opacity-50"
-      >
-        <KeyRound className="w-4 h-4" aria-hidden="true" />
-        Sign in
-      </button>
-      <button
-        type="button"
-        onClick={sendLink}
+        type={onPasswordSignIn ? 'button' : 'submit'}
+        onClick={onPasswordSignIn ? sendLink : undefined}
         disabled={busy}
         className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 text-xs font-mono tracking-widest uppercase text-zinc-300 hover:text-white transition-colors disabled:opacity-50"
       >

@@ -25,3 +25,11 @@ Enterprise DR tools must restrict who can trigger a failover and prove who did w
 
 - Each policy needs automated allow **and** deny tests (pgTAP or SQL tests in CI).
 - The public demo remains login-free and simulated.
+
+## Amendment (2026-11-08, Phase 3.4)
+
+- **Implemented:** email magic link. **Password sign-in exists only against the local Docker
+  database** (seeded demo accounts in `supabase/seed.sql`, used by `npm run e2e:console`); the
+  console hides it for any non-local backend.
+- **Deferred to 3.6:** GitHub OAuth (needs an OAuth app registered against the hosted project).
+  When the hosted project is created, disable password sign-ups in its Auth settings.

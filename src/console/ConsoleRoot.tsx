@@ -177,10 +177,14 @@ export default function ConsoleRoot() {
       <Screen>
         <SignInForm
           demoAccounts={isLocalBackend ? DEMO_ACCOUNTS : undefined}
-          onPasswordSignIn={async (email, password) => {
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) throw new Error(error.message);
-          }}
+          onPasswordSignIn={
+            isLocalBackend
+              ? async (email, password) => {
+                  const { error } = await supabase.auth.signInWithPassword({ email, password });
+                  if (error) throw new Error(error.message);
+                }
+              : undefined
+          }
           onMagicLink={async (email) => {
             const { error } = await supabase.auth.signInWithOtp({
               email,
