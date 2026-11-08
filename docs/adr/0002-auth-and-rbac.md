@@ -1,6 +1,6 @@
 # 0002. Auth and role-based access with row-level security
 
-- Status: Proposed (2026-11-08)
+- Status: Accepted (2026-11-08, approved by founder)
 
 ## Context
 
