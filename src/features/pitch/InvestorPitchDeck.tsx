@@ -412,7 +412,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 border-t border-white/5 pt-4 text-left">
             <div className="bg-black/40 p-3 rounded-xl border border-white/5">
               <p className="text-[10px] font-mono text-zinc-500">Core Expertise</p>
-              <p className="text-xs font-semibold text-white mt-0.5">mmWave & Fixed Wireless</p>
+              <p className="text-xs font-semibold text-white mt-0.5">DevOps Engineer</p>
             </div>
             <div className="bg-black/40 p-3 rounded-xl border border-white/5">
               <p className="text-[10px] font-mono text-zinc-500">Track Record</p>

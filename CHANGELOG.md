@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Founder slide (2026-11-08)
+
+- Core Expertise set to "DevOps Engineer" (founder request).
+
 ### Phase 2b: Test depth (2026-11-08)
 
 #### Added
