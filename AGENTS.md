@@ -34,6 +34,10 @@ Install with `npm install --legacy-peer-deps` (React Three Fiber peer ranges).
 9. **Verify in a real browser**, not just tests, for any UI change (desktop and ~390px phone width).
 10. **Ask before deleting** anything you didn't create.
 
+## CI
+
+GitHub Actions runs `.github/workflows/ci.yml` (verify + coverage + E2E + audit) and CodeQL on every push/PR. Keep `main` green; check the Actions tab after pushing.
+
 ## Architecture
 
 UI talks only to the `DrProvider` interface (`src/domain/dr.ts`) via `useDrProvider()` / `useDrSession()`; never import a concrete provider in UI code. Details: `docs/ARCHITECTURE.md`.

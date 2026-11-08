@@ -5,6 +5,25 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Phase 2c: Continuous integration (2026-11-08)
+
+#### Added
+
+- GitHub Actions CI (`.github/workflows/ci.yml`) on every push to `main` and every pull request: lint, typecheck, unit tests with coverage thresholds, build, bundle budget, production dependency audit, and the Playwright suite (desktop + mobile). Failure uploads the Playwright report.
+- CodeQL security scanning on pushes, PRs, and weekly.
+- Dependabot weekly updates for npm (minor/patch grouped) and GitHub Actions.
+- Bundle budget (`scripts/check-bundle-size.mjs`): initial JS must stay ≤ 120 kB gzip (currently 93 kB); part of `npm run verify`.
+- `.npmrc` with `legacy-peer-deps=true` so `npm ci` works identically locally and in CI.
+
+#### Changed
+
+- Security: Playwright → 1.64.1 (pinned; fixes high-severity advisory), PostCSS → 8.5.32. Production dependencies: 0 known vulnerabilities.
+- ESLint/Prettier ignore generated `coverage/` and Playwright output.
+
+#### Known
+
+- Remaining `npm audit` findings are dev-only (Vite 5, Vitest 2) and need major upgrades (Vite 8, Vitest 5); tracked as a separate task.
+
 ### Founder slide (2026-11-08)
 
 - Core Expertise set to "DevOps Engineer" (founder request).
