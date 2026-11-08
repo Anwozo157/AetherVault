@@ -16,6 +16,12 @@ fi
 
 npm run verify
 
+# Never publish a build wired to a local database (e.g. from a stray .env.local).
+if grep -rqE "127\.0\.0\.1:543|localhost:543" dist/; then
+  echo "dist/ references a local Supabase URL. Remove .env.local (use .env.development.local) and retry." >&2
+  exit 1
+fi
+
 REV="$(git rev-parse --short HEAD)"
 WORKTREE="$(mktemp -d)"
 cleanup() {

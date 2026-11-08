@@ -5,6 +5,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Local sign-in fixes (2026-11-08)
+
+- Sign-in form (local mode): "Email me a sign-in link" now says no real email is sent and points to the local inbox (Mailpit, http://127.0.0.1:54324), instead of claiming the email was sent.
+- Console dev env file renamed to `.env.development.local` (dev server only). A `.env.local` would also be read by `vite build`, which could have published a site pointing at a local database.
+- `npm run deploy` refuses to publish a build that references a local Supabase URL (verified against a deliberately bad build).
+
 ### Phase 3.4: Signed-in console with two-person approval (2026-11-08)
 
 - `SupabaseDrProvider`: second `DrProvider` implementation. Failover workflow, approvals and audit log are real and shared live across browsers (Realtime + 5 s poll fallback); stage derived from server time with clock-skew correction. Telemetry stays simulated; header shows **SIMULATED TELEMETRY**.

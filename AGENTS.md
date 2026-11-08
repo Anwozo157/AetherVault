@@ -17,7 +17,7 @@ Enterprise disaster-recovery command center by Aegis Core Labs. The public demo 
 - `npm run coverage`: tests with coverage thresholds
 - `npm run e2e`: Playwright browser tests (desktop + mobile; locally uses installed Google Chrome)
 - `npm run e2e:console`: signed-in console E2E (two browsers) against local Supabase; resets the local DB first
-- Console dev: copy `.env.example` to `.env.local`, fill values from `npx supabase status -o env`, then `npm run dev` and open `#/console`
+- Console dev: copy `.env.example` to `.env.development.local` (dev server only; never `.env.local`, which builds would read), fill values from `npx supabase status -o env`, then `npm run dev` and open `#/console`
 - `npm run typecheck` — strict TypeScript (`tsc --noEmit`)
 - `npm run lint` / `npm run format` — ESLint / Prettier
 - `npm run build` — production build to `dist/`
