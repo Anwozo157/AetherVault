@@ -8,7 +8,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 ### Deploy tooling (2026-11-08)
 
 - `npm run deploy` publishes to GitHub Pages after `npm run verify`; `DRY_RUN=1` does everything except push.
-- Fixed: first version failed copying the build (`cp: ././.git: Not a directory`) because it relied on `$OLDPWD`; now uses explicit paths. Nothing was published by the failed run.
+- Fixed: first version failed copying the build (`cp: ././.git: Not a directory`). Cause: an earlier manual deploy left a git repository inside `dist/` (Vite preserves `.git` when rebuilding). The copy now excludes `.git` and uses explicit paths. Nothing was published by the failed runs.
 
 ### Pitch deck accuracy pass (2026-11-08)
 
