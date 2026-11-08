@@ -33,7 +33,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
       subtitle: 'The Next-Generation Autonomous Multi-Cloud Disaster Recovery Engine',
       content: (
         <div className="flex flex-col items-center text-center max-w-2xl mx-auto">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-[#00F0FF]/20 to-[#00FF9D]/20 border border-white/20 p-2 shadow-2xl mb-6">
+          <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-aether-cyan/20 to-aether-green/20 border border-white/20 p-2 shadow-2xl mb-6">
             <img
               src="./aethervault-logo.jpeg"
               alt="AetherVault Logo"
@@ -42,7 +42,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
           </div>
           <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white mb-4">
             Zero-Downtime Resilience. <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00F0FF] to-[#00FF9D]">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-aether-cyan to-aether-green">
               Engineered for Enterprise.
             </span>
           </h2>
@@ -55,12 +55,12 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
             <div>
               <p className="text-[10px] font-mono uppercase text-zinc-500">Market TAM</p>
               <p className="text-xl sm:text-2xl font-bold text-white font-mono">$15.8B</p>
-              <p className="text-[11px] text-[#00FF9D]">22.4% CAGR</p>
+              <p className="text-[11px] text-aether-green">22.4% CAGR</p>
             </div>
             <div>
               <p className="text-[10px] font-mono uppercase text-zinc-500">Target RPO</p>
               <p className="text-xl sm:text-2xl font-bold text-white font-mono">&lt; 0.1s</p>
-              <p className="text-[11px] text-[#00F0FF]">Continuous Mirror</p>
+              <p className="text-[11px] text-aether-cyan">Continuous Mirror</p>
             </div>
             <div>
               <p className="text-[10px] font-mono uppercase text-zinc-500">Idle Cost</p>
@@ -127,7 +127,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-white/10">
-              <span className="text-2xl font-bold font-mono text-[#00F0FF]">74% Failure</span>
+              <span className="text-2xl font-bold font-mono text-aether-cyan">74% Failure</span>
               <p className="text-[10px] font-mono text-zinc-500">Caused by Manual Runbooks</p>
             </div>
           </div>
@@ -145,7 +145,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto my-auto items-center">
           <div className="space-y-4">
             <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex gap-4">
-              <div className="w-10 h-10 rounded-lg bg-[#00FF9D]/10 flex items-center justify-center text-[#00FF9D] shrink-0">
+              <div className="w-10 h-10 rounded-lg bg-aether-green/10 flex items-center justify-center text-aether-green shrink-0">
                 <Database className="w-5 h-5" />
               </div>
               <div>
@@ -158,7 +158,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
             </div>
 
             <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex gap-4">
-              <div className="w-10 h-10 rounded-lg bg-[#00F0FF]/10 flex items-center justify-center text-[#00F0FF] shrink-0">
+              <div className="w-10 h-10 rounded-lg bg-aether-cyan/10 flex items-center justify-center text-aether-cyan shrink-0">
                 <Cpu className="w-5 h-5" />
               </div>
               <div>
@@ -184,9 +184,9 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
             </div>
           </div>
 
-          <div className="bg-[#0B0F17] border border-white/10 rounded-2xl p-6 shadow-2xl flex flex-col items-center text-center">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#00F0FF]/20 to-[#00FF9D]/20 border border-[#00FF9D]/30 flex items-center justify-center mb-4">
-              <Sparkles className="w-8 h-8 text-[#00FF9D]" />
+          <div className="bg-aether-panel border border-white/10 rounded-2xl p-6 shadow-2xl flex flex-col items-center text-center">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-aether-cyan/20 to-aether-green/20 border border-aether-green/30 flex items-center justify-center mb-4">
+              <Sparkles className="w-8 h-8 text-aether-green" />
             </div>
             <h4 className="text-lg font-bold text-white mb-2">Live Demo Available Now</h4>
             <p className="text-xs text-zinc-400 mb-6">
@@ -194,7 +194,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
             </p>
             <button
               onClick={onLaunchDemo}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-[#00F0FF] to-[#00FF9D] text-black font-mono font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-aether-cyan to-aether-green text-black font-mono font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
             >
               <span>Launch Live Command Center</span>
               <ArrowRight className="w-4 h-4" />
@@ -215,7 +215,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto my-auto">
           <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6 text-center flex flex-col justify-between">
             <div>
-              <p className="text-xs font-mono uppercase text-[#00F0FF] tracking-widest mb-1">
+              <p className="text-xs font-mono uppercase text-aether-cyan tracking-widest mb-1">
                 Total Addressable
               </p>
               <h3 className="text-4xl font-extrabold font-mono text-white mb-2">$15.8B</h3>
@@ -230,7 +230,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
 
           <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6 text-center flex flex-col justify-between">
             <div>
-              <p className="text-xs font-mono uppercase text-[#00FF9D] tracking-widest mb-1">
+              <p className="text-xs font-mono uppercase text-aether-green tracking-widest mb-1">
                 Serviceable Addressable
               </p>
               <h3 className="text-4xl font-extrabold font-mono text-white mb-2">$4.2B</h3>
@@ -278,20 +278,21 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
                 STANDARD
               </span>
               <h3 className="text-xl font-bold text-white mt-2 mb-1">Foundation</h3>
-              <p className="text-2xl font-mono font-bold text-[#00F0FF] mb-4">
+              <p className="text-2xl font-mono font-bold text-aether-cyan mb-4">
                 $2,500 <span className="text-xs font-normal text-zinc-500">/ mo</span>
               </p>
               <ul className="space-y-2 text-xs text-zinc-400">
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> Up to 25 Protected
+                  <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> Up to 25 Protected
                   Workloads
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> AWS DRS Staging
+                  <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> AWS DRS Staging
                   Integration
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> 3D HUD & Mobile Controls
+                  <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> 3D HUD & Mobile
+                  Controls
                 </li>
               </ul>
             </div>
@@ -301,12 +302,12 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
           </div>
 
           {/* Enterprise Pro Tier */}
-          <div className="bg-gradient-to-b from-[#00F0FF]/10 to-transparent border border-[#00F0FF]/30 rounded-2xl p-6 flex flex-col justify-between shadow-xl relative">
-            <span className="absolute -top-3 right-6 bg-[#00F0FF] text-black text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded-full">
+          <div className="bg-gradient-to-b from-aether-cyan/10 to-transparent border border-aether-cyan/30 rounded-2xl p-6 flex flex-col justify-between shadow-xl relative">
+            <span className="absolute -top-3 right-6 bg-aether-cyan text-black text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded-full">
               CORE PRODUCT
             </span>
             <div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#00F0FF]/10 text-[#00F0FF]">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-aether-cyan/10 text-aether-cyan">
                 RECOMMENDED
               </span>
               <h3 className="text-xl font-bold text-white mt-2 mb-1">Enterprise Pro</h3>
@@ -315,19 +316,19 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               </p>
               <ul className="space-y-2 text-xs text-zinc-300">
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> Unlimited Workloads &
+                  <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> Unlimited Workloads &
                   Volumes
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> Multi-Cloud Routing
+                  <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> Multi-Cloud Routing
                   (AWS/GCP/Azure)
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> eBPF Real-Time Chaos
+                  <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> eBPF Real-Time Chaos
                   Testing
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> 99.999% Failover RTO
+                  <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> 99.999% Failover RTO
                   Guarantee
                 </li>
               </ul>
@@ -349,15 +350,15 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               </p>
               <ul className="space-y-2 text-xs text-zinc-400">
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> Dedicated VPC & Air-Gapped
-                  Nodes
+                  <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> Dedicated VPC &
+                  Air-Gapped Nodes
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> mmWave / Carrier Direct
+                  <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> mmWave / Carrier Direct
                   Connect
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> Custom On-Premises BGP
+                  <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> Custom On-Premises BGP
                   Peering
                 </li>
               </ul>
@@ -380,12 +381,12 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
       content: (
         <div className="max-w-3xl mx-auto my-auto bg-white/[0.02] border border-white/10 rounded-3xl p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row items-center gap-6 mb-6">
-            <div className="w-24 h-24 rounded-2xl bg-gradient-to-tr from-[#00F0FF]/30 to-[#00FF9D]/30 border border-white/20 flex items-center justify-center text-2xl font-bold font-mono text-white shrink-0">
+            <div className="w-24 h-24 rounded-2xl bg-gradient-to-tr from-aether-cyan/30 to-aether-green/30 border border-white/20 flex items-center justify-center text-2xl font-bold font-mono text-white shrink-0">
               AN
             </div>
             <div className="text-center sm:text-left">
               <h3 className="text-2xl font-bold text-white">Antonio Nwozo</h3>
-              <p className="text-sm font-mono text-[#00F0FF]">
+              <p className="text-sm font-mono text-aether-cyan">
                 Founder & Lead Cloud Architect • Aegis Core Labs
               </p>
               <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
@@ -424,12 +425,12 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
       content: (
         <div className="max-w-4xl mx-auto my-auto flex flex-col justify-between">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white/[0.02] border border-[#00FF9D]/30 p-4 rounded-xl">
+            <div className="bg-white/[0.02] border border-aether-green/30 p-4 rounded-xl">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono text-[#00FF9D] font-bold">
+                <span className="text-[10px] font-mono text-aether-green font-bold">
                   PHASE 1 • COMPLETE
                 </span>
-                <CheckCircle2 className="w-4 h-4 text-[#00FF9D]" />
+                <CheckCircle2 className="w-4 h-4 text-aether-green" />
               </div>
               <h4 className="text-sm font-bold text-white mb-1">Interactive 3D HUD</h4>
               <p className="text-[11px] text-zinc-400">
@@ -438,12 +439,12 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               </p>
             </div>
 
-            <div className="bg-white/[0.02] border border-[#00F0FF]/30 p-4 rounded-xl">
+            <div className="bg-white/[0.02] border border-aether-cyan/30 p-4 rounded-xl">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono text-[#00F0FF] font-bold">
+                <span className="text-[10px] font-mono text-aether-cyan font-bold">
                   PHASE 2 • CURRENT
                 </span>
-                <Activity className="w-4 h-4 text-[#00F0FF]" />
+                <Activity className="w-4 h-4 text-aether-cyan" />
               </div>
               <h4 className="text-sm font-bold text-white mb-1">AWS DRS Telemetry</h4>
               <p className="text-[11px] text-zinc-400">
@@ -484,7 +485,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
           <div className="text-center">
             <button
               onClick={onLaunchDemo}
-              className="px-8 py-3.5 rounded-full bg-gradient-to-r from-[#00F0FF] to-[#00FF9D] text-black font-mono font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-opacity shadow-[0_0_30px_rgba(0,240,255,0.3)] inline-flex items-center gap-2"
+              className="px-8 py-3.5 rounded-full bg-gradient-to-r from-aether-cyan to-aether-green text-black font-mono font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-opacity shadow-[0_0_30px_rgba(0,240,255,0.3)] inline-flex items-center gap-2"
             >
               <span>Test Live 3D Command Center</span>
               <ArrowRight className="w-4 h-4" />
@@ -502,7 +503,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
       {/* Slide Header Indicator */}
       <div className="w-full flex items-center justify-between mb-4 border-b border-white/5 pb-3">
         <div className="flex items-center gap-3">
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00F0FF]/10 text-[#00F0FF] border border-[#00F0FF]/20">
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-aether-cyan/10 text-aether-cyan border border-aether-cyan/20">
             {current.badge}
           </span>
           <span className="text-xs font-mono text-zinc-500">
@@ -562,7 +563,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
             onClick={() => setCurrentSlide(idx)}
             className={`h-1.5 rounded-full transition-all ${
               idx === currentSlide
-                ? 'w-8 bg-gradient-to-r from-[#00F0FF] to-[#00FF9D]'
+                ? 'w-8 bg-gradient-to-r from-aether-cyan to-aether-green'
                 : 'w-2 bg-white/20 hover:bg-white/40'
             }`}
           />

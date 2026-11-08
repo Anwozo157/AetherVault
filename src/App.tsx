@@ -144,7 +144,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#05070B] text-white flex flex-col items-center justify-between p-3 sm:p-8 font-sans relative selection:bg-[#00F0FF]/30">
+    <div className="min-h-screen bg-[#05070B] text-white flex flex-col items-center justify-between p-3 sm:p-8 font-sans relative selection:bg-aether-cyan/30">
       {/* Dynamic Ambient Background Glows */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div
@@ -186,7 +186,7 @@ export default function App() {
               <span className="text-lg sm:text-xl font-bold tracking-tight text-white">
                 AetherVault
               </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[#00F0FF]">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-aether-cyan">
                 ENTERPRISE DR
               </span>
             </div>
@@ -200,7 +200,7 @@ export default function App() {
             onClick={() => setAppMode('command')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
               appMode === 'command'
-                ? 'bg-[#00F0FF]/15 text-[#00F0FF] font-semibold border border-[#00F0FF]/30 shadow-sm'
+                ? 'bg-aether-cyan/15 text-aether-cyan font-semibold border border-aether-cyan/30 shadow-sm'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -211,7 +211,7 @@ export default function App() {
             onClick={() => setAppMode('deck')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
               appMode === 'deck'
-                ? 'bg-gradient-to-r from-[#00F0FF]/20 to-[#00FF9D]/20 text-[#00FF9D] font-semibold border border-[#00FF9D]/30 shadow-sm'
+                ? 'bg-gradient-to-r from-aether-cyan/20 to-aether-green/20 text-aether-green font-semibold border border-aether-green/30 shadow-sm'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -230,7 +230,7 @@ export default function App() {
             {isMuted ? (
               <VolumeX className="w-4 h-4 text-red-400" />
             ) : (
-              <Volume2 className="w-4 h-4 text-[#00F0FF]" />
+              <Volume2 className="w-4 h-4 text-aether-cyan" />
             )}
           </button>
 
@@ -238,7 +238,7 @@ export default function App() {
             onClick={() => setShowShareModal(true)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 text-xs font-mono text-zinc-300 hover:text-white transition-colors"
           >
-            <Smartphone className="w-4 h-4 text-[#00FF9D]" />
+            <Smartphone className="w-4 h-4 text-aether-green" />
             <span className="hidden sm:inline">Share on Phone</span>
           </button>
         </div>
@@ -261,7 +261,7 @@ export default function App() {
                     : 'text-zinc-400 hover:text-zinc-200'
                 }`}
               >
-                <Layers className="w-3.5 h-3.5 text-[#00F0FF]" />
+                <Layers className="w-3.5 h-3.5 text-aether-cyan" />
                 <span>3D Global HUD</span>
               </button>
               <button
@@ -272,7 +272,7 @@ export default function App() {
                     : 'text-zinc-400 hover:text-zinc-200'
                 }`}
               >
-                <HardDrive className="w-3.5 h-3.5 text-[#00FF9D]" />
+                <HardDrive className="w-3.5 h-3.5 text-aether-green" />
                 <span>AWS DRS & Telemetry</span>
               </button>
             </div>
@@ -283,7 +283,7 @@ export default function App() {
                 value={targetRegion}
                 onChange={(e) => setTargetRegion(e.target.value)}
                 disabled={sysState !== SystemState.IDLE}
-                className="bg-[#0B0F17] border border-white/10 rounded-lg px-2.5 py-1.5 text-zinc-200 font-mono text-xs focus:outline-none focus:border-[#00F0FF]/50 disabled:opacity-50 cursor-pointer"
+                className="bg-aether-panel border border-white/10 rounded-lg px-2.5 py-1.5 text-zinc-200 font-mono text-xs focus:outline-none focus:border-aether-cyan/50 disabled:opacity-50 cursor-pointer"
               >
                 <option value="gcp-us-central1">GCP us-central1 (Iowa)</option>
                 <option value="aws-us-west-2">AWS us-west-2 (Oregon)</option>
@@ -329,23 +329,23 @@ export default function App() {
                   value={metrics.rpo}
                   color={
                     chaosActive
-                      ? 'text-[#FF3B30]'
+                      ? 'text-aether-red'
                       : metrics.sync === 100
-                        ? 'text-[#00FF9D]'
-                        : 'text-[#FFB800]'
+                        ? 'text-aether-green'
+                        : 'text-aether-amber'
                   }
                 />
                 <MetricCard
                   icon={<Server className="w-5 h-5 text-gray-400" />}
                   label="System State"
                   value={chaosActive ? 'DEGRADED_JITTER' : sysState.replace(/_/g, ' ')}
-                  color={chaosActive ? 'text-[#FF3B30]' : 'text-white'}
+                  color={chaosActive ? 'text-aether-red' : 'text-white'}
                 />
                 <MetricCard
                   icon={<CloudLightning className="w-5 h-5 text-gray-400" />}
                   label="Data Sync"
                   value={`${metrics.sync}%`}
-                  color={chaosActive ? 'text-[#FF9500]' : 'text-[#00F0FF]'}
+                  color={chaosActive ? 'text-aether-orange' : 'text-aether-cyan'}
                 />
 
                 {/* Real-Time Waveform Sparklines */}
@@ -381,9 +381,9 @@ export default function App() {
                           onTouchStart={handleHoldStart}
                           onTouchEnd={handleHoldEnd}
                           whileTap={{ scale: 0.96 }}
-                          className="relative group flex items-center justify-center w-72 h-16 rounded-full bg-white/[0.03] border border-white/10 hover:border-[#00F0FF]/50 transition-colors shadow-lg overflow-hidden cursor-pointer select-none"
+                          className="relative group flex items-center justify-center w-72 h-16 rounded-full bg-white/[0.03] border border-white/10 hover:border-aether-cyan/50 transition-colors shadow-lg overflow-hidden cursor-pointer select-none"
                         >
-                          <span className="relative z-10 text-xs font-mono tracking-widest text-[#00F0FF] font-semibold uppercase group-hover:text-white transition-colors">
+                          <span className="relative z-10 text-xs font-mono tracking-widest text-aether-cyan font-semibold uppercase group-hover:text-white transition-colors">
                             {isHolding ? 'HOLD TO INITIATE FAILOVER' : '1-CLICK FAILOVER'}
                           </span>
 
@@ -394,7 +394,7 @@ export default function App() {
                               animate={{ width: '100%' }}
                               transition={{ duration: 1.2, ease: 'linear' }}
                               onAnimationComplete={handleTriggerComplete}
-                              className="absolute left-0 top-0 h-full bg-[#00F0FF]/25 backdrop-blur-sm"
+                              className="absolute left-0 top-0 h-full bg-aether-cyan/25 backdrop-blur-sm"
                             />
                           )}
                         </motion.button>
@@ -415,10 +415,10 @@ export default function App() {
                           <motion.div
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className="flex flex-col items-center text-[#00FF9D]"
+                            className="flex flex-col items-center text-aether-green"
                           >
-                            <div className="w-16 h-16 rounded-full bg-[#00FF9D]/10 border border-[#00FF9D]/30 flex items-center justify-center mb-3 shadow-[0_0_25px_rgba(0,255,157,0.3)]">
-                              <CheckCircle className="w-8 h-8 text-[#00FF9D]" />
+                            <div className="w-16 h-16 rounded-full bg-aether-green/10 border border-aether-green/30 flex items-center justify-center mb-3 shadow-[0_0_25px_rgba(0,255,157,0.3)]">
+                              <CheckCircle className="w-8 h-8 text-aether-green" />
                             </div>
                             <p className="text-xl font-mono tracking-widest uppercase font-semibold">
                               TARGET SECURED
@@ -428,7 +428,7 @@ export default function App() {
                             </p>
                             <button
                               onClick={handleReset}
-                              className="mt-5 px-5 py-2 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-[#00FF9D]/40 text-xs font-mono tracking-widest uppercase text-zinc-300 hover:text-white transition-colors"
+                              className="mt-5 px-5 py-2 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-aether-green/40 text-xs font-mono tracking-widest uppercase text-zinc-300 hover:text-white transition-colors"
                             >
                               Reset to Standby
                             </button>
@@ -436,11 +436,11 @@ export default function App() {
                         ) : (
                           <div className="flex flex-col items-center">
                             <div className="relative flex items-center justify-center mb-5">
-                              <div className="w-16 h-16 border-4 border-t-[#FFB800] border-r-transparent border-b-transparent border-l-[#FFB800]/30 rounded-full animate-spin" />
-                              <div className="absolute w-12 h-12 border-4 border-t-transparent border-r-[#00F0FF] border-b-[#00F0FF]/30 border-l-transparent rounded-full animate-[spin_1.5s_reverse_infinite]" />
-                              <AlertTriangle className="w-5 h-5 text-[#FFB800]" />
+                              <div className="w-16 h-16 border-4 border-t-aether-amber border-r-transparent border-b-transparent border-l-aether-amber/30 rounded-full animate-spin" />
+                              <div className="absolute w-12 h-12 border-4 border-t-transparent border-r-aether-cyan border-b-aether-cyan/30 border-l-transparent rounded-full animate-[spin_1.5s_reverse_infinite]" />
+                              <AlertTriangle className="w-5 h-5 text-aether-amber" />
                             </div>
-                            <p className="text-sm font-mono text-[#FFB800] animate-pulse tracking-widest uppercase font-semibold">
+                            <p className="text-sm font-mono text-aether-amber animate-pulse tracking-widest uppercase font-semibold">
                               {sysState.replace(/_/g, ' ')}...
                             </p>
                             <p className="text-xs text-gray-500 mt-2 font-mono">
@@ -491,7 +491,7 @@ export default function App() {
                   href="https://anwozo157.github.io/AetherVault/"
                   target="_blank"
                   rel="noreferrer"
-                  className="text-xs font-mono text-[#00F0FF] underline hover:text-white"
+                  className="text-xs font-mono text-aether-cyan underline hover:text-white"
                 >
                   https://anwozo157.github.io/AetherVault/
                 </a>
