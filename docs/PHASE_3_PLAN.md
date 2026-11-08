@@ -101,6 +101,21 @@ cutover starts.
    Everything before that runs locally.
 3. **Install Docker Desktop** (free for personal use and small businesses) for the local database.
 
+## Costs once funded (founder decides when; stays $0 until then)
+
+Estimates checked 2026-11-08 against published pricing; re-check before purchase.
+
+| Item                                                    | Purpose                                | Est. monthly                                                                        |
+| ------------------------------------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------- |
+| Supabase Pro                                            | No pausing, daily backups, 100K MAU    | $25 (includes $10 compute credit)                                                   |
+| AWS Elastic Disaster Recovery, 1–2 small source servers | Real replication data for demos/pilots | ~$40–60 ($0.028/server-hour ≈ $20/server + staging EBS, replication EC2, snapshots) |
+| Custom domain                                           | Professional URL                       | ~$1 ($10–15/yr)                                                                     |
+| GitHub, Pages, Actions, CodeQL                          | Hosting + CI                           | $0 (public repo)                                                                    |
+| **Starting total**                                      |                                        | **~$65–90**                                                                         |
+
+Later: Supabase Team tier (much higher), SOC 2 tooling (thousands/yr) only when customers require it.
+**On day one of any AWS account: create an AWS Budgets alert (e.g. $50).**
+
 ## Risks
 
 - Free project pauses after 7 idle days: before demos, open the dashboard to wake it.

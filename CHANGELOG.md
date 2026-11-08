@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Phase 3 planning (2026-11-08)
+
+- `docs/PHASE_3_PLAN.md`: backend MVP on Supabase free tier (auth, roles, server-side failover, two-person approval, tamper-evident audit log), plus funded-cost estimates (~$65–90/mo to start).
+- ADRs 0001–0003 (`docs/adr/`): platform, auth/RBAC, failover + audit design. Status: Proposed.
+
 ### Founder slide from Cloud Architect resume (2026-11-08)
 
 - Bio now leads with the founder's hybrid-cloud DR design (AWS Elastic Disaster Recovery, Direct Connect, private BGP; modeled sub-15-minute RTO; projected DR cost $3,000+/mo → $436/mo), per `Antonio_Nwozo_Cloud_Architect_Resume.pdf`. Worded as designed/modeled, matching the resume.
