@@ -18,6 +18,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 #### Fixed
 
+- Chaos mode "System State" value (`DEGRADED_JITTER`) overflowed its card into the neighboring card. Now shows `DEGRADED JITTER`, and metric cards wrap long values instead of overflowing (verified at 800px and 390px widths).
 - Investor pitch deck slide crashed due to missing `Activity` / `Clock` icon imports.
 
 #### Changed
