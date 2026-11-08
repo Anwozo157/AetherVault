@@ -176,7 +176,9 @@ export default function GlobalTopologyCanvas({
         <span>Interactive Drag / Orbit</span>
       </div>
 
-      <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
+      {/* dpr cap: high-density phones (2.5-3x) render at most 1.5x, cutting GPU work
+          by up to 4x with no visible loss on a small, glowing wireframe. */}
+      <Canvas camera={{ position: [0, 0, 5], fov: 45 }} dpr={[1, 1.5]}>
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} intensity={1} color="#00F0FF" />
         <pointLight position={[-10, -10, -10]} intensity={0.6} color="#00FF9D" />
