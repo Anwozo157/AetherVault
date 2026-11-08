@@ -161,3 +161,78 @@ describe('MockDrProvider failover lifecycle', () => {
     expect(backend.getRecentLogs()).toHaveLength(50);
   });
 });
+
+describe('MockDrProvider telemetry and subscriptions', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    created.splice(0).forEach((p) => p.dispose());
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
+
+  test('streams nominal telemetry every second while idle', () => {
+    const backend = track(new MockDrProvider());
+    const metrics = vi.fn();
+    const telemetry = vi.fn();
+    backend.onMetricsUpdate(metrics);
+    backend.onDrTelemetryUpdate(telemetry);
+    expect(telemetry).toHaveBeenCalledTimes(1); // immediate initial snapshot
+
+    vi.advanceTimersByTime(1000);
+    expect(metrics).toHaveBeenLastCalledWith(expect.objectContaining({ rto: '--', sync: 100 }));
+    const latest = telemetry.mock.lastCall?.[0];
+    expect(latest.drsAgentStatus).toBe('HEALTHY');
+    expect(latest.continuousDataBacklogBytes).toBe(0);
+    expect(latest.historyRpoMs).toHaveLength(20);
+  });
+
+  test('chaos mode degrades telemetry and emits background audit events', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.9); // > 0.7 forces an audit event
+    const backend = track(new MockDrProvider());
+    const telemetry = vi.fn();
+    const logs = vi.fn();
+    backend.onDrTelemetryUpdate(telemetry);
+    backend.onLogEvent(logs);
+    backend.setChaosMode(true);
+
+    vi.advanceTimersByTime(1000);
+    const latest = telemetry.mock.lastCall?.[0];
+    expect(latest.drsAgentStatus).toBe('SYNCHRONIZING');
+    expect(latest.cloudWatchAlarmsTriggered).toBe(2);
+    expect(latest.stagingDisksInSync).toBe(10);
+    expect(backend.getMetrics().sync).toBe(88);
+    expect(logs).toHaveBeenCalledTimes(2); // chaos notice + background event
+  });
+
+  test('unsubscribe stops every listener type', async () => {
+    const backend = track(new MockDrProvider());
+    const state = vi.fn();
+    const metrics = vi.fn();
+    const telemetry = vi.fn();
+    const logs = vi.fn();
+    const offs = [
+      backend.onStateChange(state),
+      backend.onMetricsUpdate(metrics),
+      backend.onDrTelemetryUpdate(telemetry),
+      backend.onLogEvent(logs),
+    ];
+    offs.forEach((off) => off());
+    telemetry.mockClear();
+
+    void backend.triggerFailover('us-east-1', 'us-west-2');
+    await vi.advanceTimersByTimeAsync(6000);
+    expect(state).not.toHaveBeenCalled();
+    expect(metrics).not.toHaveBeenCalled();
+    expect(telemetry).not.toHaveBeenCalled();
+    expect(logs).not.toHaveBeenCalled();
+  });
+
+  test('dispose is safe to call twice', () => {
+    const backend = new MockDrProvider();
+    backend.dispose();
+    expect(() => backend.dispose()).not.toThrow();
+  });
+});
