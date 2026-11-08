@@ -17,18 +17,6 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-/** Visible marker for a claim that still needs a verified citation. */
-function SourceNeeded() {
-  return (
-    <span
-      title="This figure needs a verified source before external use."
-      className="ml-1 inline-block align-middle text-[9px] font-mono px-1.5 py-0.5 rounded bg-aether-amber/10 border border-aether-amber/30 text-aether-amber normal-case tracking-normal"
-    >
-      [source needed]
-    </span>
-  );
-}
-
 interface InvestorPitchDeckProps {
   onLaunchDemo: () => void;
 }
@@ -66,10 +54,8 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
           <div className="grid grid-cols-3 gap-4 w-full text-left bg-white/[0.02] border border-white/5 rounded-2xl p-4 sm:p-6 mb-8">
             <div>
               <p className="text-[10px] font-mono uppercase text-zinc-500">Market TAM</p>
-              <p className="text-xl sm:text-2xl font-bold text-white font-mono">$15.8B</p>
-              <p className="text-[11px] text-aether-green">
-                22.4% CAGR <SourceNeeded />
-              </p>
+              <p className="text-xl sm:text-2xl font-bold text-white font-mono">$16.1B</p>
+              <p className="text-[11px] text-aether-green">16.2% CAGR to 2032</p>
             </div>
             <div>
               <p className="text-[10px] font-mono uppercase text-zinc-500">Target RPO</p>
@@ -124,13 +110,14 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               <p className="text-xs text-zinc-400 leading-relaxed">
                 Traditional "Hot Standby" architectures force enterprises to duplicate 100% of their
                 idle compute infrastructure, paying for servers that sit unused until disaster
-                strikes.
+                strikes. Flexera's 2026 survey finds organizations estimate 29% of their cloud spend
+                is wasted.
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-white/10">
-              <span className="text-2xl font-bold font-mono text-amber-300">60% Waste</span>
+              <span className="text-2xl font-bold font-mono text-amber-300">29%</span>
               <p className="text-[10px] font-mono text-zinc-500">
-                Unused Idle Compute Spend <SourceNeeded />
+                Of Cloud Spend Wasted (Flexera 2026)
               </p>
             </div>
           </div>
@@ -231,7 +218,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
     {
       id: 'market',
       badge: 'MARKET SIZE & TIMING',
-      title: 'A $15.8B High-Growth Market',
+      title: 'A $16B Market Growing to $46B',
       subtitle:
         'Explosive cloud migration and tightening compliance standards are forcing modernization.',
       content: (
@@ -241,13 +228,14 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               <p className="text-xs font-mono uppercase text-aether-cyan tracking-widest mb-1">
                 Total Addressable
               </p>
-              <h3 className="text-4xl font-extrabold font-mono text-white mb-2">$15.8B</h3>
+              <h3 className="text-4xl font-extrabold font-mono text-white mb-2">$16.1B</h3>
               <p className="text-xs text-zinc-400">
-                Global Cloud Disaster Recovery & High-Availability Market by 2028. <SourceNeeded />
+                Global Disaster Recovery as a Service (DRaaS) market in 2025, projected to reach
+                $46.1B by 2032.
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-white/5 text-[11px] font-mono text-zinc-500">
-              22.4% Annual CAGR (MarketsandMarkets) <SourceNeeded />
+              16.2% CAGR 2025–2032 (MarketsandMarkets, Jan 2026)
             </div>
           </div>
 
@@ -259,7 +247,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               <h3 className="text-4xl font-extrabold font-mono text-white mb-2">$4.2B</h3>
               <p className="text-xs text-zinc-400">
                 Mid-market and Enterprise companies with strict multi-cloud compliance mandates
-                (Fintech, Healthtech, Carrier Telecom). <SourceNeeded />
+                (Fintech, Healthtech, Carrier Telecom). Internal estimate.
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-white/5 text-[11px] font-mono text-zinc-500">
@@ -396,9 +384,9 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
     {
       id: 'leadership',
       badge: 'FOUNDING LEADERSHIP',
-      title: 'Infrastructure & Carrier Engineering DNA',
+      title: 'Network Infrastructure Engineering DNA',
       subtitle:
-        'Built by engineers who have deployed mission-critical backhaul links under the highest pressure.',
+        'Built by an engineer who has deployed mission-critical backhaul links under the highest pressure.',
       content: (
         <div className="max-w-3xl mx-auto my-auto bg-white/[0.02] border border-white/10 rounded-3xl p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row items-center gap-6 mb-6">
@@ -411,10 +399,12 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
                 Founder & Lead Cloud Architect • Aegis Core Labs
               </p>
               <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
-                Carrier-grade telecommunications and enterprise cloud engineer with extensive
-                real-world experience designing mission-critical connectivity for the{' '}
-                <strong>2025 Presidential Inauguration</strong>, multi-gigabit mmWave wireless
-                backhauls, and enterprise data lake architectures.
+                RF and wireless network engineer with 100+ end-to-end high-capacity deployments.
+                Delivered broadcast connectivity for the{' '}
+                <strong>2025 Presidential Inauguration</strong> (Associated Press, Telemundo and
+                other global networks), multi-link 10 Gb networks for UFC 250 at the White House,
+                and a 6-mile, ~4 Gbps wireless backhaul between Virginia and DC. Now applying Linux,
+                AWS, Terraform and Kubernetes to cloud resilience.
               </p>
             </div>
           </div>
@@ -422,15 +412,17 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 border-t border-white/5 pt-4 text-left">
             <div className="bg-black/40 p-3 rounded-xl border border-white/5">
               <p className="text-[10px] font-mono text-zinc-500">Core Expertise</p>
-              <p className="text-xs font-semibold text-white mt-0.5">Carrier mmWave & BGP</p>
+              <p className="text-xs font-semibold text-white mt-0.5">mmWave & Fixed Wireless</p>
             </div>
             <div className="bg-black/40 p-3 rounded-xl border border-white/5">
-              <p className="text-[10px] font-mono text-zinc-500">Cloud Specialization</p>
-              <p className="text-xs font-semibold text-white mt-0.5">AWS DRS & Multi-Region</p>
+              <p className="text-[10px] font-mono text-zinc-500">Track Record</p>
+              <p className="text-xs font-semibold text-white mt-0.5">100+ High-Capacity Links</p>
             </div>
             <div className="bg-black/40 p-3 rounded-xl border border-white/5">
-              <p className="text-[10px] font-mono text-zinc-500">Design Philosophy</p>
-              <p className="text-xs font-semibold text-white mt-0.5">Zero-Idle Pilot Light</p>
+              <p className="text-[10px] font-mono text-zinc-500">Cloud & Automation</p>
+              <p className="text-xs font-semibold text-white mt-0.5">
+                AWS • Terraform • Kubernetes
+              </p>
             </div>
           </div>
         </div>
@@ -477,7 +469,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
             <div className="bg-white/[0.02] border border-white/10 p-4 rounded-xl">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-mono text-zinc-400 font-bold">
-                  PHASE 3 • NEXT [date TBD]
+                  PHASE 3 • TARGET MARCH 2027
                 </span>
                 <Clock className="w-4 h-4 text-zinc-500" />
               </div>

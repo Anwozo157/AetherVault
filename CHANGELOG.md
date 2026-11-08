@@ -5,6 +5,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Pitch deck sources, founder bio, roadmap date (2026-11-08)
+
+#### Changed
+
+- Market slide: replaced unverified "$15.8B by 2028 / 22.4% CAGR" with MarketsandMarkets (Jan 2026): global DRaaS $16.1B in 2025 → $46.1B by 2032, 16.2% CAGR. SAM ($4.2B) labeled as an internal estimate.
+- Problem slide: "60% idle waste" replaced with Flexera 2026 State of the Cloud: organizations estimate 29% of cloud spend is wasted.
+- Founder slide rewritten from the founder's master resume: 100+ high-capacity deployments, 2025 Presidential Inauguration broadcast connectivity, UFC 250 at the White House, 6-mile ~4 Gbps backhaul. Removed claims not on the resume (data lake architectures, BGP, AWS DRS specialization). Subtitle now singular ("an engineer").
+- Roadmap: design-partner pilots targeted for March 2027.
+- All "[source needed]" markers resolved; marker component removed. Test now asserts citations are present.
+
 ### Deploy tooling (2026-11-08)
 
 - `npm run deploy` publishes to GitHub Pages after `npm run verify`; `DRY_RUN=1` does everything except push.
