@@ -29,6 +29,10 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 
 ## Open decisions for the founder
 
+- Approve `docs/PHASE_3_PLAN.md` (Supabase recommended).
+- Move the repo out of iCloud-synced `~/Documents` (iCloud is creating " 2" conflict copies, including `.git/index 2`). Suggested: `~/Developer/AetherVault`.
+- Dependabot opened 9 PRs; majors (Vitest 5, plugin-react 6, framer-motion 14, jest-dom 7) need a planned upgrade; Vitest 5 and plugin-react 6 fail CI as expected (need Vite 6+).
+
 - Push local `main` to GitHub? (Backup only; does not change the live site.)
 - Delete `tsconfig 2.json` (identical duplicate of `tsconfig.json`, not created by an agent)?
 - `.claude/launch.json` (untracked, points at port 5173; the app runs on 5174): keep or remove?
