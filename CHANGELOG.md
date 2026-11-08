@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Deploy tooling (2026-11-08)
+
+- `npm run deploy` publishes to GitHub Pages after `npm run verify`; `DRY_RUN=1` does everything except push.
+- Fixed: first version failed copying the build (`cp: ././.git: Not a directory`) because it relied on `$OLDPWD`; now uses explicit paths. Nothing was published by the failed run.
+
 ### Pitch deck accuracy pass (2026-11-08)
 
 #### Changed
