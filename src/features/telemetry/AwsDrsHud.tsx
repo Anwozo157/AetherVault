@@ -1,5 +1,5 @@
 import { Database, Radio, Bell, Activity, HardDrive } from 'lucide-react';
-import { DrTelemetry, LogEvent } from './MockBackend';
+import type { DrTelemetry, LogEvent } from '../../domain/dr';
 
 interface AwsDrsHudProps {
   telemetry: DrTelemetry;

@@ -1,64 +1,33 @@
-// ==========================================
-// 1. BACKEND STATE MACHINE & ENTERPRISE TELEMETRY STREAM
-// ==========================================
+// Simulated disaster-recovery provider. Generates realistic-looking telemetry
+// in the browser for demos. Nothing here talks to real infrastructure.
 
-export enum SystemState {
-  IDLE = 'ACTIVE_SYNC',
-  REPLICATING = 'QUIESCE_AND_SNAPSHOT',
-  FAILOVER_TRIGGERED = 'HYDRATING_TARGET',
-  REROUTING_TRAFFIC = 'DNS_CUTOVER',
-  SECURED = 'TARGET_SECURED',
-  DEGRADED = 'DEGRADED_STATE',
-}
+import {
+  BasicMetrics,
+  DrProvider,
+  DrTelemetry,
+  LogEvent,
+  SystemState,
+  Unsubscribe,
+  canTransition,
+  isAbortable,
+} from '../domain/dr';
 
-export interface BasicMetrics {
-  rpo: string;
-  rto: string;
-  sync: number;
-}
+const MAX_LOGS = 50;
 
-export interface DrTelemetry {
-  // AWS DRS Subsystem
-  drsAgentStatus: 'HEALTHY' | 'SYNCHRONIZING' | 'THROTTLED';
-  stagingDisksInSync: number;
-  totalStagingDisks: number;
-  replicationLagMs: number;
-  continuousDataBacklogBytes: number;
-  lastSnapshotTimestamp: string;
-  pitLogRetentionHours: number;
+export class MockDrProvider implements DrProvider {
+  readonly name = 'Simulated Demo';
+  readonly isSimulated = true;
 
-  // AWS CloudWatch Synthetic & Metric Feed
-  cloudWatchCanarySla: number;
-  cloudWatchP99LatencyMs: number;
-  cloudWatchAlarmsOk: number;
-  cloudWatchAlarmsTriggered: number;
-  ingressThroughputGbps: number;
-  ebpfProbesAttached: number;
-
-  // Sparkline rolling data points (20 samples)
-  historyRpoMs: number[];
-  historyThroughput: number[];
-}
-
-export interface LogEvent {
-  id: string;
-  timestamp: string;
-  level: 'INFO' | 'SUCCESS' | 'WARN' | 'CRIT' | 'DRS';
-  service: 'DRS' | 'CLOUDWATCH' | 'EBPF' | 'ROUTE53' | 'CORE';
-  message: string;
-}
-
-export type StateListener = (state: SystemState) => void;
-export type MetricsListener = (metrics: BasicMetrics) => void;
-export type DrTelemetryListener = (telemetry: DrTelemetry) => void;
-export type LogListener = (log: LogEvent) => void;
-
-export class DisasterRecoveryBackend {
   private currentState: SystemState = SystemState.IDLE;
-  private stateListeners: Set<StateListener> = new Set();
-  private metricsListeners: Set<MetricsListener> = new Set();
-  private drTelemetryListeners: Set<DrTelemetryListener> = new Set();
-  private logListeners: Set<LogListener> = new Set();
+  private stateListeners = new Set<(state: SystemState) => void>();
+  private metricsListeners = new Set<(metrics: BasicMetrics) => void>();
+  private drTelemetryListeners = new Set<(telemetry: DrTelemetry) => void>();
+  private logListeners = new Set<(log: LogEvent) => void>();
+  private currentMetrics: BasicMetrics = { rpo: '0.0s', rto: '--', sync: 100 };
+  private recentLogs: LogEvent[] = [];
+  /** Incremented on abort so an in-flight failover knows to stop. */
+  private runId = 0;
+  private pendingDelay: { timer: ReturnType<typeof setTimeout>; resolve: () => void } | null = null;
   private metricsInterval: ReturnType<typeof setInterval> | null = null;
   private isChaos = false;
 
@@ -84,6 +53,9 @@ export class DisasterRecoveryBackend {
   };
 
   constructor() {
+    this.pushLog('INFO', 'DRS', 'Continuous replication journal attached to volume pool');
+    this.pushLog('INFO', 'CLOUDWATCH', 'Canary probe OK: 99.998% availability');
+    this.pushLog('SUCCESS', 'CORE', 'AetherVault ready for failover');
     this.startTelemetryStream();
   }
 
@@ -187,7 +159,7 @@ export class DisasterRecoveryBackend {
     this.pushLog(picked.level, picked.service, picked.msg);
   }
 
-  public pushLog(level: LogEvent['level'], service: LogEvent['service'], message: string) {
+  private pushLog(level: LogEvent['level'], service: LogEvent['service'], message: string) {
     const log: LogEvent = {
       id: Math.random().toString(36).substring(2, 9),
       timestamp: new Date().toLocaleTimeString(),
@@ -195,11 +167,13 @@ export class DisasterRecoveryBackend {
       service,
       message,
     };
+    this.recentLogs = [...this.recentLogs.slice(-(MAX_LOGS - 1)), log];
     this.logListeners.forEach((listener) => listener(log));
   }
 
-  public async triggerFailover(sourceRegion: string, targetRegion: string) {
+  public async triggerFailover(sourceRegion: string, targetRegion: string): Promise<void> {
     if (this.currentState !== SystemState.IDLE) return;
+    const run = ++this.runId;
 
     this.pushLog(
       'WARN',
@@ -209,40 +183,51 @@ export class DisasterRecoveryBackend {
     this.updateState(SystemState.REPLICATING);
 
     // T+1.2s: Quiesce & Snapshot
-    await this.delay(1200);
+    if (!(await this.step(1200, run))) return;
     this.pushLog(
       'INFO',
       'DRS',
-      `Quiesce signal acknowledged. Final continuous journal flush completed.`,
+      'Quiesce signal acknowledged. Final continuous journal flush completed.',
     );
     this.updateState(SystemState.FAILOVER_TRIGGERED);
     this.emitMetrics({ rpo: '0.0s', rto: '1.2s', sync: 85 });
 
     // T+3.5s: Target Storage Hydration
-    await this.delay(2300);
+    if (!(await this.step(2300, run))) return;
     this.pushLog(
       'INFO',
       'DRS',
-      `EBS staging volumes cloned into target VPC. EC2 launch template triggered.`,
+      'Staging volumes cloned into target network. Launch template triggered.',
     );
     this.emitMetrics({ rpo: '0.0s', rto: '3.5s', sync: 95 });
 
-    // T+5.5s: Traffic Cutover
+    // T+5.5s: Traffic Cutover (point of no return: abort no longer allowed)
     this.updateState(SystemState.REROUTING_TRAFFIC);
-    this.pushLog(
-      'WARN',
-      'ROUTE53',
-      `Rerouting BGP / DNS Anycast endpoints to target: ${targetRegion}`,
-    );
-    await this.delay(2000);
+    this.pushLog('WARN', 'ROUTE53', `Rerouting DNS endpoints to target: ${targetRegion}`);
+    if (!(await this.step(2000, run))) return;
 
     this.updateState(SystemState.SECURED);
     this.pushLog(
       'SUCCESS',
       'CORE',
-      `✅ FAILOVER COMPLETE: System nominal in target region ${targetRegion}. Zero data loss.`,
+      `✅ FAILOVER COMPLETE: System nominal in target region ${targetRegion}.`,
     );
     this.emitMetrics({ rpo: '< 0.01s', rto: 'COMPLETED', sync: 100 });
+  }
+
+  public abortFailover(): boolean {
+    if (!isAbortable(this.currentState) || this.currentState === SystemState.IDLE) return false;
+
+    this.runId++;
+    this.cancelPendingDelay();
+    this.updateState(SystemState.IDLE);
+    this.pushLog(
+      'WARN',
+      'CORE',
+      'Failover aborted by operator before traffic cutover. Primary region remains active.',
+    );
+    this.emitMetrics({ rpo: '0.0s', rto: '--', sync: 100 });
+    return true;
   }
 
   /** Return a secured system to standby so the failover can be demoed again. */
@@ -260,6 +245,8 @@ export class DisasterRecoveryBackend {
 
   /** Stop background telemetry timers. Call when the backend is no longer needed. */
   public dispose() {
+    this.runId++;
+    this.cancelPendingDelay();
     if (this.metricsInterval) {
       clearInterval(this.metricsInterval);
       this.metricsInterval = null;
@@ -270,34 +257,59 @@ export class DisasterRecoveryBackend {
     return this.currentState;
   }
 
-  public onStateChange(listener: StateListener) {
+  public getMetrics() {
+    return this.currentMetrics;
+  }
+
+  public getTelemetry() {
+    return this.currentTelemetry;
+  }
+
+  public getRecentLogs() {
+    return [...this.recentLogs];
+  }
+
+  public onStateChange(listener: (state: SystemState) => void): Unsubscribe {
     this.stateListeners.add(listener);
-    return () => this.stateListeners.delete(listener);
+    return () => {
+      this.stateListeners.delete(listener);
+    };
   }
 
-  public onMetricsUpdate(listener: MetricsListener) {
+  public onMetricsUpdate(listener: (metrics: BasicMetrics) => void): Unsubscribe {
     this.metricsListeners.add(listener);
-    return () => this.metricsListeners.delete(listener);
+    return () => {
+      this.metricsListeners.delete(listener);
+    };
   }
 
-  public onDrTelemetryUpdate(listener: DrTelemetryListener) {
+  public onDrTelemetryUpdate(listener: (telemetry: DrTelemetry) => void): Unsubscribe {
     this.drTelemetryListeners.add(listener);
     // Send immediate initial state
     listener(this.currentTelemetry);
-    return () => this.drTelemetryListeners.delete(listener);
+    return () => {
+      this.drTelemetryListeners.delete(listener);
+    };
   }
 
-  public onLogEvent(listener: LogListener) {
+  public onLogEvent(listener: (log: LogEvent) => void): Unsubscribe {
     this.logListeners.add(listener);
-    return () => this.logListeners.delete(listener);
+    return () => {
+      this.logListeners.delete(listener);
+    };
   }
 
   private updateState(newState: SystemState) {
+    if (!canTransition(this.currentState, newState)) {
+      console.error(`Rejected invalid transition ${this.currentState} -> ${newState}`);
+      return;
+    }
     this.currentState = newState;
     this.stateListeners.forEach((listener) => listener(newState));
   }
 
   private emitMetrics(metrics: BasicMetrics) {
+    this.currentMetrics = metrics;
     this.metricsListeners.forEach((listener) => listener(metrics));
   }
 
@@ -305,9 +317,23 @@ export class DisasterRecoveryBackend {
     this.drTelemetryListeners.forEach((listener) => listener(telemetry));
   }
 
-  private delay(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  /** Waits ms; resolves false if the run was aborted in the meantime. */
+  private async step(ms: number, run: number): Promise<boolean> {
+    await new Promise<void>((resolve) => {
+      const timer = setTimeout(() => {
+        this.pendingDelay = null;
+        resolve();
+      }, ms);
+      this.pendingDelay = { timer, resolve };
+    });
+    return run === this.runId;
+  }
+
+  private cancelPendingDelay() {
+    if (this.pendingDelay) {
+      clearTimeout(this.pendingDelay.timer);
+      this.pendingDelay.resolve();
+      this.pendingDelay = null;
+    }
   }
 }
-
-export const backend = new DisasterRecoveryBackend();
