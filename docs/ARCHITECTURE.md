@@ -13,6 +13,7 @@ src/
 │   ├── defaultProvider.ts       Chooses which provider the app runs with
 │   └── DrProviderContext.tsx    React context: <DrProviderRoot>, useDrProvider()
 ├── hooks/useDrSession.ts        Subscribes to the provider → state, metrics, telemetry, logs
+├── hooks/usePrefersReducedMotion.ts  OS reduce-motion preference
 ├── config/regions.ts            Source + target failover regions (single source of truth)
 ├── features/
 │   ├── CommandCenter.tsx        Mission Control view (composes the pieces below)
@@ -50,6 +51,13 @@ ACTIVE_SYNC → QUIESCE_AND_SNAPSHOT → HYDRATING_TARGET → DNS_CUTOVER → TA
 - The 3D globe (three.js), AWS DRS tab, and pitch deck are code-split with `React.lazy`.
 - Initial JS: ~293 kB (95 kB gzip), down from 1,250 kB (348 kB gzip) before Phase 1.
 - `ErrorBoundary` wraps lazy panels so a WebGL failure shows a placeholder instead of a blank page.
+
+## Accessibility
+
+- Failover hold works with mouse, touch, and keyboard (Space/Enter); hold timing is a timer, not the animation.
+- `prefers-reduced-motion` respected globally (Framer `MotionConfig reducedMotion="user"`, CSS media query, globe).
+- Sound off by default; preference stored in `localStorage` (`aethervault:sound-enabled`), failing safe if storage is blocked.
+- Live region announces failover status; icon buttons have accessible names.
 
 ## Testing
 
