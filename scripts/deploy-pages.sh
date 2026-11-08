@@ -27,7 +27,8 @@ trap cleanup EXIT
 git fetch -q origin gh-pages
 git worktree add -q -B gh-pages "$WORKTREE" origin/gh-pages
 git -C "$WORKTREE" rm -rq --ignore-unmatch .
-cp -R "$ROOT/dist/." "$WORKTREE/"
+# Exclude .git: an older manual deploy left a git repo inside dist/, which Vite preserves.
+rsync -a --exclude=".git" "$ROOT/dist/" "$WORKTREE/"
 touch "$WORKTREE/.nojekyll"
 git -C "$WORKTREE" add -A
 git -C "$WORKTREE" commit -q -m "deploy: $REV"
