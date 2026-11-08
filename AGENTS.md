@@ -22,7 +22,7 @@ Install with `npm install --legacy-peer-deps` (React Three Fiber peer ranges).
 
 1. **$0 spend until funded.** Only free/open-source tools and free tiers that cannot bill without a card. Never add a paid service or cloud account that can incur charges without the founder's explicit approval.
 2. **Honesty.** Simulated data must be labeled as simulated. Pitch/README copy must not claim metrics, customers, certifications, or integrations we don't have.
-3. **Before every commit:** `npm run lint && npm run typecheck && npm test && npm run build` all pass.
+3. **Before every commit:** `npm run verify` (lint, typecheck, tests, build) must pass. Chain it: `npm run verify && git commit ...` so a failure blocks the commit.
 4. **Small commits**, Conventional Commits format (`feat:`, `fix:`, `build:`, `docs:`, `test:`, `style:`, `refactor:`). One concern per commit.
 5. **Document everything:** update `CHANGELOG.md` (Unreleased section) with each change; update `docs/ARCHITECTURE.md` when structure changes.
 6. **No push/deploy** to GitHub without the founder's OK.
