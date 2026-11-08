@@ -101,6 +101,10 @@ export default function App() {
     sound.stopHoldCharge();
   };
 
+  const handleReset = () => {
+    backend.resetToStandby();
+  };
+
   const handleTriggerComplete = () => {
     sound.stopHoldCharge();
     sound.playFailoverTriggered();
@@ -353,6 +357,12 @@ export default function App() {
                             </div>
                             <p className="text-xl font-mono tracking-widest uppercase font-semibold">TARGET SECURED</p>
                             <p className="text-xs text-zinc-400 font-mono mt-1">Live Workloads Routed to {targetRegion}</p>
+                            <button
+                              onClick={handleReset}
+                              className="mt-5 px-5 py-2 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-[#00FF9D]/40 text-xs font-mono tracking-widest uppercase text-zinc-300 hover:text-white transition-colors"
+                            >
+                              Reset to Standby
+                            </button>
                           </motion.div>
                         ) : (
                           <div className="flex flex-col items-center">
