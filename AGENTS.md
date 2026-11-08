@@ -6,11 +6,11 @@
 > **Start every session by reading, in order:** this file → `docs/STATUS.md` (current phase, next steps) → `CHANGELOG.md` → `docs/ARCHITECTURE.md`.
 > **End every session by updating `docs/STATUS.md` and `CHANGELOG.md`, then committing.**
 
-Enterprise disaster-recovery command center by Aegis Core Labs. Currently a front-end demo; **all telemetry is simulated** by `src/MockBackend.ts`.
+Enterprise disaster-recovery command center by Aegis Core Labs. Currently a front-end demo; **all telemetry is simulated** by `src/providers/MockDrProvider.ts`.
 
 ## Commands
 
-- `npm run dev` — dev server on http://localhost:5174
+- `npm run dev`: dev server on http://localhost:5174 (Vite picks the next free port if taken; check the terminal output)
 - `npm test` — Vitest unit/component tests
 - `npm run typecheck` — strict TypeScript (`tsc --noEmit`)
 - `npm run lint` / `npm run format` — ESLint / Prettier
