@@ -11,7 +11,9 @@ class SoundEngine {
 
   private initContext() {
     if (!this.ctx) {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioCtx =
+        window.AudioContext ||
+        (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (AudioCtx) {
         this.ctx = new AudioCtx();
       }
@@ -66,8 +68,8 @@ class SoundEngine {
         const now = this.ctx.currentTime;
         this.chargeGain.gain.linearRampToValueAtTime(0.001, now + 0.1);
         this.chargeOsc.stop(now + 0.1);
-      } catch (e) {
-        // Ignored
+      } catch {
+        // Oscillator may already be stopped; safe to ignore.
       }
       this.chargeOsc = null;
       this.chargeGain = null;
@@ -108,7 +110,7 @@ class SoundEngine {
     this.initContext();
     if (!this.ctx) return;
 
-    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
     notes.forEach((freq, index) => {
       if (!this.ctx) return;
       const now = this.ctx.currentTime + index * 0.12;

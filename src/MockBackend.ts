@@ -8,7 +8,7 @@ export enum SystemState {
   FAILOVER_TRIGGERED = 'HYDRATING_TARGET',
   REROUTING_TRAFFIC = 'DNS_CUTOVER',
   SECURED = 'TARGET_SECURED',
-  DEGRADED = 'DEGRADED_STATE'
+  DEGRADED = 'DEGRADED_STATE',
 }
 
 export interface BasicMetrics {
@@ -77,7 +77,10 @@ export class DisasterRecoveryBackend {
     ingressThroughputGbps: 4.82,
     ebpfProbesAttached: 32,
     historyRpoMs: [22, 25, 21, 28, 24, 26, 23, 27, 25, 24, 22, 23, 25, 24, 21, 23, 26, 24, 22, 24],
-    historyThroughput: [4.7, 4.8, 4.9, 4.8, 4.85, 4.79, 4.82, 4.88, 4.81, 4.84, 4.78, 4.85, 4.9, 4.83, 4.82, 4.87, 4.81, 4.85, 4.82, 4.84]
+    historyThroughput: [
+      4.7, 4.8, 4.9, 4.8, 4.85, 4.79, 4.82, 4.88, 4.81, 4.84, 4.78, 4.85, 4.9, 4.83, 4.82, 4.87,
+      4.81, 4.85, 4.82, 4.84,
+    ],
   };
 
   constructor() {
@@ -87,9 +90,17 @@ export class DisasterRecoveryBackend {
   public setChaosMode(enabled: boolean) {
     this.isChaos = enabled;
     if (enabled) {
-      this.pushLog('WARN', 'DRS', 'Chaos injection active: artificial packet jitter & network delay simulated');
+      this.pushLog(
+        'WARN',
+        'DRS',
+        'Chaos injection active: artificial packet jitter & network delay simulated',
+      );
     } else {
-      this.pushLog('INFO', 'DRS', 'Chaos mode deactivated. Continuous replication returning to nominal baseline');
+      this.pushLog(
+        'INFO',
+        'DRS',
+        'Chaos mode deactivated. Continuous replication returning to nominal baseline',
+      );
     }
   }
 
@@ -102,9 +113,11 @@ export class DisasterRecoveryBackend {
   private tickTelemetry() {
     if (this.currentState === SystemState.IDLE) {
       // Simulate real-time replication lag fluctuations
-      let baseLag = this.isChaos ? Math.floor(Math.random() * 120 + 85) : Math.floor(Math.random() * 15 + 18);
-      let throughput = this.isChaos 
-        ? +(Math.random() * 1.5 + 2.1).toFixed(2) 
+      const baseLag = this.isChaos
+        ? Math.floor(Math.random() * 120 + 85)
+        : Math.floor(Math.random() * 15 + 18);
+      const throughput = this.isChaos
+        ? +(Math.random() * 1.5 + 2.1).toFixed(2)
         : +(Math.random() * 0.4 + 4.65).toFixed(2);
 
       const updatedRpoHistory = [...this.currentTelemetry.historyRpoMs.slice(1), baseLag];
@@ -116,19 +129,21 @@ export class DisasterRecoveryBackend {
         replicationLagMs: baseLag,
         continuousDataBacklogBytes: this.isChaos ? Math.floor(Math.random() * 520000 + 120000) : 0,
         cloudWatchCanarySla: this.isChaos ? 99.842 : 99.998,
-        cloudWatchP99LatencyMs: this.isChaos ? +(Math.random() * 45 + 50).toFixed(1) : +(Math.random() * 0.8 + 3.4).toFixed(1),
+        cloudWatchP99LatencyMs: this.isChaos
+          ? +(Math.random() * 45 + 50).toFixed(1)
+          : +(Math.random() * 0.8 + 3.4).toFixed(1),
         cloudWatchAlarmsTriggered: this.isChaos ? 2 : 0,
         ingressThroughputGbps: throughput,
         stagingDisksInSync: this.isChaos ? 10 : 12,
         historyRpoMs: updatedRpoHistory,
-        historyThroughput: updatedTputHistory
+        historyThroughput: updatedTputHistory,
       };
 
       // Emit standard basic metrics
       this.emitMetrics({
         rpo: this.isChaos ? `${(baseLag / 100).toFixed(2)}s` : `${(baseLag / 1000).toFixed(2)}s`,
         rto: '--',
-        sync: this.isChaos ? 88 : 100
+        sync: this.isChaos ? 88 : 100,
       });
 
       this.emitDrTelemetry(this.currentTelemetry);
@@ -142,11 +157,31 @@ export class DisasterRecoveryBackend {
 
   private emitRandomAuditEvent() {
     const events: Array<{ level: LogEvent['level']; service: LogEvent['service']; msg: string }> = [
-      { level: 'INFO', service: 'DRS', msg: 'Block-level continuous delta: 18.4 MB mirrored to staging EBS gp3 volume' },
-      { level: 'INFO', service: 'CLOUDWATCH', msg: 'Canary probe health check passed: us-east-1 -> target heartbeat 3.8ms' },
-      { level: 'INFO', service: 'EBPF', msg: 'eBPF TC egress filter re-balanced: 0 dropped packets across 32 stream pipelines' },
-      { level: 'SUCCESS', service: 'CORE', msg: 'Continuous Data Protection (CDP) checkpoint logged to journal index' },
-      { level: 'INFO', service: 'ROUTE53', msg: 'DNS health probe returned status ALIVE for primary ingress endpoint' }
+      {
+        level: 'INFO',
+        service: 'DRS',
+        msg: 'Block-level continuous delta: 18.4 MB mirrored to staging EBS gp3 volume',
+      },
+      {
+        level: 'INFO',
+        service: 'CLOUDWATCH',
+        msg: 'Canary probe health check passed: us-east-1 -> target heartbeat 3.8ms',
+      },
+      {
+        level: 'INFO',
+        service: 'EBPF',
+        msg: 'eBPF TC egress filter re-balanced: 0 dropped packets across 32 stream pipelines',
+      },
+      {
+        level: 'SUCCESS',
+        service: 'CORE',
+        msg: 'Continuous Data Protection (CDP) checkpoint logged to journal index',
+      },
+      {
+        level: 'INFO',
+        service: 'ROUTE53',
+        msg: 'DNS health probe returned status ALIVE for primary ingress endpoint',
+      },
     ];
     const picked = events[Math.floor(Math.random() * events.length)];
     this.pushLog(picked.level, picked.service, picked.msg);
@@ -158,35 +193,55 @@ export class DisasterRecoveryBackend {
       timestamp: new Date().toLocaleTimeString(),
       level,
       service,
-      message
+      message,
     };
-    this.logListeners.forEach(listener => listener(log));
+    this.logListeners.forEach((listener) => listener(log));
   }
 
   public async triggerFailover(sourceRegion: string, targetRegion: string) {
     if (this.currentState !== SystemState.IDLE) return;
 
-    this.pushLog('WARN', 'CORE', `🚨 MANUAL FAILOVER INITIATED: Route cutover requested to ${targetRegion}`);
+    this.pushLog(
+      'WARN',
+      'CORE',
+      `🚨 MANUAL FAILOVER INITIATED: Route cutover requested from ${sourceRegion} to ${targetRegion}`,
+    );
     this.updateState(SystemState.REPLICATING);
 
     // T+1.2s: Quiesce & Snapshot
     await this.delay(1200);
-    this.pushLog('INFO', 'DRS', `Quiesce signal acknowledged. Final continuous journal flush completed.`);
+    this.pushLog(
+      'INFO',
+      'DRS',
+      `Quiesce signal acknowledged. Final continuous journal flush completed.`,
+    );
     this.updateState(SystemState.FAILOVER_TRIGGERED);
     this.emitMetrics({ rpo: '0.0s', rto: '1.2s', sync: 85 });
 
     // T+3.5s: Target Storage Hydration
     await this.delay(2300);
-    this.pushLog('INFO', 'DRS', `EBS staging volumes cloned into target VPC. EC2 launch template triggered.`);
+    this.pushLog(
+      'INFO',
+      'DRS',
+      `EBS staging volumes cloned into target VPC. EC2 launch template triggered.`,
+    );
     this.emitMetrics({ rpo: '0.0s', rto: '3.5s', sync: 95 });
 
     // T+5.5s: Traffic Cutover
     this.updateState(SystemState.REROUTING_TRAFFIC);
-    this.pushLog('WARN', 'ROUTE53', `Rerouting BGP / DNS Anycast endpoints to target: ${targetRegion}`);
+    this.pushLog(
+      'WARN',
+      'ROUTE53',
+      `Rerouting BGP / DNS Anycast endpoints to target: ${targetRegion}`,
+    );
     await this.delay(2000);
 
     this.updateState(SystemState.SECURED);
-    this.pushLog('SUCCESS', 'CORE', `✅ FAILOVER COMPLETE: System nominal in target region ${targetRegion}. Zero data loss.`);
+    this.pushLog(
+      'SUCCESS',
+      'CORE',
+      `✅ FAILOVER COMPLETE: System nominal in target region ${targetRegion}. Zero data loss.`,
+    );
     this.emitMetrics({ rpo: '< 0.01s', rto: 'COMPLETED', sync: 100 });
   }
 
@@ -195,8 +250,20 @@ export class DisasterRecoveryBackend {
     if (this.currentState !== SystemState.SECURED) return;
 
     this.updateState(SystemState.IDLE);
-    this.pushLog('INFO', 'CORE', 'Failover drill reset. Continuous replication resumed from primary region.');
+    this.pushLog(
+      'INFO',
+      'CORE',
+      'Failover drill reset. Continuous replication resumed from primary region.',
+    );
     this.emitMetrics({ rpo: '0.0s', rto: '--', sync: 100 });
+  }
+
+  /** Stop background telemetry timers. Call when the backend is no longer needed. */
+  public dispose() {
+    if (this.metricsInterval) {
+      clearInterval(this.metricsInterval);
+      this.metricsInterval = null;
+    }
   }
 
   public getState() {
@@ -227,19 +294,19 @@ export class DisasterRecoveryBackend {
 
   private updateState(newState: SystemState) {
     this.currentState = newState;
-    this.stateListeners.forEach(listener => listener(newState));
+    this.stateListeners.forEach((listener) => listener(newState));
   }
 
   private emitMetrics(metrics: BasicMetrics) {
-    this.metricsListeners.forEach(listener => listener(metrics));
+    this.metricsListeners.forEach((listener) => listener(metrics));
   }
 
   private emitDrTelemetry(telemetry: DrTelemetry) {
-    this.drTelemetryListeners.forEach(listener => listener(telemetry));
+    this.drTelemetryListeners.forEach((listener) => listener(telemetry));
   }
 
   private delay(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 

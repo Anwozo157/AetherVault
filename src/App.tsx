@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  CloudLightning, Activity, Server, CheckCircle, AlertTriangle, 
-  Volume2, VolumeX, Smartphone, Flame, Presentation, ShieldCheck, 
-  Layers, HardDrive
+import {
+  CloudLightning,
+  Activity,
+  Server,
+  CheckCircle,
+  AlertTriangle,
+  Volume2,
+  VolumeX,
+  Smartphone,
+  Flame,
+  Presentation,
+  ShieldCheck,
+  Layers,
+  HardDrive,
 } from 'lucide-react';
 import { backend, SystemState, DrTelemetry, LogEvent } from './MockBackend';
 import GlobalTopologyCanvas from './GlobalTopologyCanvas';
@@ -39,13 +49,34 @@ export default function App() {
     ingressThroughputGbps: 4.82,
     ebpfProbesAttached: 32,
     historyRpoMs: [22, 25, 21, 28, 24, 26, 23, 27, 25, 24, 22, 23, 25, 24, 21, 23, 26, 24, 22, 24],
-    historyThroughput: [4.7, 4.8, 4.9, 4.8, 4.85, 4.79, 4.82, 4.88, 4.81, 4.84, 4.78, 4.85, 4.9, 4.83, 4.82, 4.87, 4.81, 4.85, 4.82, 4.84]
+    historyThroughput: [
+      4.7, 4.8, 4.9, 4.8, 4.85, 4.79, 4.82, 4.88, 4.81, 4.84, 4.78, 4.85, 4.9, 4.83, 4.82, 4.87,
+      4.81, 4.85, 4.82, 4.84,
+    ],
   });
 
   const [logs, setLogs] = useState<LogEvent[]>([
-    { id: '1', timestamp: new Date().toLocaleTimeString(), level: 'INFO', service: 'DRS', message: 'AWS DRS continuous journal attached to volume pool' },
-    { id: '2', timestamp: new Date().toLocaleTimeString(), level: 'INFO', service: 'CLOUDWATCH', message: 'Canary probe OK: 99.998% SLA confirmed' },
-    { id: '3', timestamp: new Date().toLocaleTimeString(), level: 'SUCCESS', service: 'CORE', message: 'AetherVault system ready for autonomous failover' }
+    {
+      id: '1',
+      timestamp: new Date().toLocaleTimeString(),
+      level: 'INFO',
+      service: 'DRS',
+      message: 'AWS DRS continuous journal attached to volume pool',
+    },
+    {
+      id: '2',
+      timestamp: new Date().toLocaleTimeString(),
+      level: 'INFO',
+      service: 'CLOUDWATCH',
+      message: 'Canary probe OK: 99.998% SLA confirmed',
+    },
+    {
+      id: '3',
+      timestamp: new Date().toLocaleTimeString(),
+      level: 'SUCCESS',
+      service: 'CORE',
+      message: 'AetherVault system ready for autonomous failover',
+    },
   ]);
 
   useEffect(() => {
@@ -113,19 +144,31 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#05070B] text-white flex flex-col items-center justify-between p-3 sm:p-8 font-sans relative selection:bg-[#00F0FF]/30">
+    <div className="min-h-screen bg-[#05070B] text-white flex flex-col items-center justify-between p-3 sm:p-8 font-sans relative selection:bg-aether-cyan/30">
       {/* Dynamic Ambient Background Glows */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div 
+        <div
           className="absolute top-[-20%] left-[-10%] w-[55vw] h-[55vw] rounded-full blur-[140px] transition-colors duration-1000 opacity-20"
           style={{
-            backgroundColor: chaosActive ? '#FF3B30' : sysState === SystemState.SECURED ? '#00FF9D' : sysState === SystemState.IDLE ? '#00F0FF' : '#FFB800'
+            backgroundColor: chaosActive
+              ? '#FF3B30'
+              : sysState === SystemState.SECURED
+                ? '#00FF9D'
+                : sysState === SystemState.IDLE
+                  ? '#00F0FF'
+                  : '#FFB800',
           }}
         />
-        <div 
+        <div
           className="absolute bottom-[-20%] right-[-10%] w-[55vw] h-[55vw] rounded-full blur-[140px] transition-colors duration-1000 opacity-15"
           style={{
-            backgroundColor: chaosActive ? '#FF9500' : sysState === SystemState.SECURED ? '#00FF9D' : sysState === SystemState.IDLE ? '#3B82F6' : '#FF3B30'
+            backgroundColor: chaosActive
+              ? '#FF9500'
+              : sysState === SystemState.SECURED
+                ? '#00FF9D'
+                : sysState === SystemState.IDLE
+                  ? '#3B82F6'
+                  : '#FF3B30',
           }}
         />
       </div>
@@ -133,15 +176,17 @@ export default function App() {
       {/* Top Navigation Bar with Titanium Brand Logo */}
       <header className="w-full max-w-5xl z-20 flex flex-wrap items-center justify-between gap-3 py-3 sm:py-4 mb-2 border-b border-white/5">
         <div className="flex items-center gap-3">
-          <img 
-            src="./aethervault-logo.jpeg" 
-            alt="AetherVault Logo" 
+          <img
+            src="./aethervault-logo.jpeg"
+            alt="AetherVault Logo"
             className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover shadow-2xl border border-white/20"
           />
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-lg sm:text-xl font-bold tracking-tight text-white">AetherVault</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[#00F0FF]">
+              <span className="text-lg sm:text-xl font-bold tracking-tight text-white">
+                AetherVault
+              </span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-aether-cyan">
                 ENTERPRISE DR
               </span>
             </div>
@@ -154,8 +199,8 @@ export default function App() {
           <button
             onClick={() => setAppMode('command')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
-              appMode === 'command' 
-                ? 'bg-[#00F0FF]/15 text-[#00F0FF] font-semibold border border-[#00F0FF]/30 shadow-sm' 
+              appMode === 'command'
+                ? 'bg-aether-cyan/15 text-aether-cyan font-semibold border border-aether-cyan/30 shadow-sm'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -165,8 +210,8 @@ export default function App() {
           <button
             onClick={() => setAppMode('deck')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
-              appMode === 'deck' 
-                ? 'bg-gradient-to-r from-[#00F0FF]/20 to-[#00FF9D]/20 text-[#00FF9D] font-semibold border border-[#00FF9D]/30 shadow-sm' 
+              appMode === 'deck'
+                ? 'bg-gradient-to-r from-aether-cyan/20 to-aether-green/20 text-aether-green font-semibold border border-aether-green/30 shadow-sm'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -177,19 +222,23 @@ export default function App() {
 
         {/* Actions: Audio Synthesizer & Share Modal */}
         <div className="flex items-center gap-2">
-          <button 
+          <button
             onClick={toggleSound}
-            title={isMuted ? "Unmute Synthesizer Audio" : "Mute Audio"}
+            title={isMuted ? 'Unmute Synthesizer Audio' : 'Mute Audio'}
             className="p-2 sm:p-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 text-zinc-400 hover:text-white transition-colors"
           >
-            {isMuted ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4 text-[#00F0FF]" />}
+            {isMuted ? (
+              <VolumeX className="w-4 h-4 text-red-400" />
+            ) : (
+              <Volume2 className="w-4 h-4 text-aether-cyan" />
+            )}
           </button>
 
-          <button 
+          <button
             onClick={() => setShowShareModal(true)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 text-xs font-mono text-zinc-300 hover:text-white transition-colors"
           >
-            <Smartphone className="w-4 h-4 text-[#00FF9D]" />
+            <Smartphone className="w-4 h-4 text-aether-green" />
             <span className="hidden sm:inline">Share on Phone</span>
           </button>
         </div>
@@ -207,30 +256,34 @@ export default function App() {
               <button
                 onClick={() => setActiveSubTab('hud')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
-                  activeSubTab === 'hud' ? 'bg-white/10 text-white font-semibold' : 'text-zinc-400 hover:text-zinc-200'
+                  activeSubTab === 'hud'
+                    ? 'bg-white/10 text-white font-semibold'
+                    : 'text-zinc-400 hover:text-zinc-200'
                 }`}
               >
-                <Layers className="w-3.5 h-3.5 text-[#00F0FF]" />
+                <Layers className="w-3.5 h-3.5 text-aether-cyan" />
                 <span>3D Global HUD</span>
               </button>
               <button
                 onClick={() => setActiveSubTab('drs')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
-                  activeSubTab === 'drs' ? 'bg-white/10 text-white font-semibold' : 'text-zinc-400 hover:text-zinc-200'
+                  activeSubTab === 'drs'
+                    ? 'bg-white/10 text-white font-semibold'
+                    : 'text-zinc-400 hover:text-zinc-200'
                 }`}
               >
-                <HardDrive className="w-3.5 h-3.5 text-[#00FF9D]" />
+                <HardDrive className="w-3.5 h-3.5 text-aether-green" />
                 <span>AWS DRS & Telemetry</span>
               </button>
             </div>
 
             {/* Target Cloud Switcher & SDET Chaos Mode */}
             <div className="flex items-center gap-2">
-              <select 
+              <select
                 value={targetRegion}
                 onChange={(e) => setTargetRegion(e.target.value)}
                 disabled={sysState !== SystemState.IDLE}
-                className="bg-[#0B0F17] border border-white/10 rounded-lg px-2.5 py-1.5 text-zinc-200 font-mono text-xs focus:outline-none focus:border-[#00F0FF]/50 disabled:opacity-50 cursor-pointer"
+                className="bg-aether-panel border border-white/10 rounded-lg px-2.5 py-1.5 text-zinc-200 font-mono text-xs focus:outline-none focus:border-aether-cyan/50 disabled:opacity-50 cursor-pointer"
               >
                 <option value="gcp-us-central1">GCP us-central1 (Iowa)</option>
                 <option value="aws-us-west-2">AWS us-west-2 (Oregon)</option>
@@ -240,13 +293,17 @@ export default function App() {
               <button
                 onClick={toggleChaos}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono border transition-all ${
-                  chaosActive 
-                    ? 'bg-red-500/20 border-red-500/50 text-red-300 shadow-[0_0_15px_rgba(255,59,48,0.3)] animate-pulse' 
+                  chaosActive
+                    ? 'bg-red-500/20 border-red-500/50 text-red-300 shadow-[0_0_15px_rgba(255,59,48,0.3)] animate-pulse'
                     : 'bg-white/[0.02] border-white/10 text-zinc-400 hover:text-zinc-200'
                 }`}
               >
-                <Flame className={`w-3.5 h-3.5 ${chaosActive ? 'text-red-400' : 'text-zinc-500'}`} />
-                <span className="hidden sm:inline">{chaosActive ? 'Chaos Active' : 'SDET Chaos Mode'}</span>
+                <Flame
+                  className={`w-3.5 h-3.5 ${chaosActive ? 'text-red-400' : 'text-zinc-500'}`}
+                />
+                <span className="hidden sm:inline">
+                  {chaosActive ? 'Chaos Active' : 'SDET Chaos Mode'}
+                </span>
                 <span className="sm:hidden">{chaosActive ? 'Chaos On' : 'Chaos'}</span>
               </button>
             </div>
@@ -255,39 +312,45 @@ export default function App() {
           {/* Sub-Tab 1: 3D Global HUD & Instant Cutover */}
           {activeSubTab === 'hud' ? (
             <>
-              <GlobalTopologyCanvas 
-                status={sysState} 
-                targetRegion={targetRegion} 
-                chaosActive={chaosActive} 
+              <GlobalTopologyCanvas
+                status={sysState}
+                targetRegion={targetRegion}
+                chaosActive={chaosActive}
               />
 
               {/* Glassmorphic Telemetry Grid */}
-              <motion.div 
+              <motion.div
                 className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 p-5 sm:p-6 rounded-[2rem] border border-white/10 bg-[#121826]/40 backdrop-blur-3xl shadow-2xl mt-4"
                 layout
               >
-                <MetricCard 
+                <MetricCard
                   icon={<Activity className="w-5 h-5 text-gray-400" />}
-                  label="RPO (Lag)" 
-                  value={metrics.rpo} 
-                  color={chaosActive ? 'text-[#FF3B30]' : metrics.sync === 100 ? 'text-[#00FF9D]' : 'text-[#FFB800]'} 
+                  label="RPO (Lag)"
+                  value={metrics.rpo}
+                  color={
+                    chaosActive
+                      ? 'text-aether-red'
+                      : metrics.sync === 100
+                        ? 'text-aether-green'
+                        : 'text-aether-amber'
+                  }
                 />
-                <MetricCard 
+                <MetricCard
                   icon={<Server className="w-5 h-5 text-gray-400" />}
-                  label="System State" 
-                  value={chaosActive ? 'DEGRADED_JITTER' : sysState.replace(/_/g, ' ')} 
-                  color={chaosActive ? 'text-[#FF3B30]' : 'text-white'} 
+                  label="System State"
+                  value={chaosActive ? 'DEGRADED_JITTER' : sysState.replace(/_/g, ' ')}
+                  color={chaosActive ? 'text-aether-red' : 'text-white'}
                 />
-                <MetricCard 
+                <MetricCard
                   icon={<CloudLightning className="w-5 h-5 text-gray-400" />}
-                  label="Data Sync" 
-                  value={`${metrics.sync}%`} 
-                  color={chaosActive ? 'text-[#FF9500]' : 'text-[#00F0FF]'} 
+                  label="Data Sync"
+                  value={`${metrics.sync}%`}
+                  color={chaosActive ? 'text-aether-orange' : 'text-aether-cyan'}
                 />
 
                 {/* Real-Time Waveform Sparklines */}
                 <div className="col-span-1 md:col-span-3 flex flex-wrap gap-3 pt-2">
-                  <TelemetrySparkline 
+                  <TelemetrySparkline
                     data={drTelemetry.historyRpoMs}
                     color={chaosActive ? '#FF3B30' : '#00FF9D'}
                     fillId="rpoGrad"
@@ -295,7 +358,7 @@ export default function App() {
                     currentValue={`${drTelemetry.replicationLagMs}`}
                     unit="ms lag"
                   />
-                  <TelemetrySparkline 
+                  <TelemetrySparkline
                     data={drTelemetry.historyThroughput}
                     color="#00F0FF"
                     fillId="tputGrad"
@@ -318,25 +381,27 @@ export default function App() {
                           onTouchStart={handleHoldStart}
                           onTouchEnd={handleHoldEnd}
                           whileTap={{ scale: 0.96 }}
-                          className="relative group flex items-center justify-center w-72 h-16 rounded-full bg-white/[0.03] border border-white/10 hover:border-[#00F0FF]/50 transition-colors shadow-lg overflow-hidden cursor-pointer select-none"
+                          className="relative group flex items-center justify-center w-72 h-16 rounded-full bg-white/[0.03] border border-white/10 hover:border-aether-cyan/50 transition-colors shadow-lg overflow-hidden cursor-pointer select-none"
                         >
-                          <span className="relative z-10 text-xs font-mono tracking-widest text-[#00F0FF] font-semibold uppercase group-hover:text-white transition-colors">
+                          <span className="relative z-10 text-xs font-mono tracking-widest text-aether-cyan font-semibold uppercase group-hover:text-white transition-colors">
                             {isHolding ? 'HOLD TO INITIATE FAILOVER' : '1-CLICK FAILOVER'}
                           </span>
-                          
+
                           {/* Hold Progress Ring Fill */}
                           {isHolding && (
-                            <motion.div 
+                            <motion.div
                               initial={{ width: '0%' }}
                               animate={{ width: '100%' }}
-                              transition={{ duration: 1.2, ease: "linear" }}
+                              transition={{ duration: 1.2, ease: 'linear' }}
                               onAnimationComplete={handleTriggerComplete}
-                              className="absolute left-0 top-0 h-full bg-[#00F0FF]/25 backdrop-blur-sm"
+                              className="absolute left-0 top-0 h-full bg-aether-cyan/25 backdrop-blur-sm"
                             />
                           )}
                         </motion.button>
                         <p className="text-[11px] font-mono text-zinc-500 mt-3 tracking-wider">
-                          {isHolding ? 'Hold 1.2s to confirm failover...' : 'Press and hold for 1.2s to prevent accidental execution'}
+                          {isHolding
+                            ? 'Hold 1.2s to confirm failover...'
+                            : 'Press and hold for 1.2s to prevent accidental execution'}
                         </p>
                       </div>
                     ) : (
@@ -347,19 +412,23 @@ export default function App() {
                         className="flex flex-col items-center"
                       >
                         {sysState === SystemState.SECURED ? (
-                          <motion.div 
-                            initial={{ scale: 0.9, opacity: 0 }} 
+                          <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className="flex flex-col items-center text-[#00FF9D]"
+                            className="flex flex-col items-center text-aether-green"
                           >
-                            <div className="w-16 h-16 rounded-full bg-[#00FF9D]/10 border border-[#00FF9D]/30 flex items-center justify-center mb-3 shadow-[0_0_25px_rgba(0,255,157,0.3)]">
-                              <CheckCircle className="w-8 h-8 text-[#00FF9D]" />
+                            <div className="w-16 h-16 rounded-full bg-aether-green/10 border border-aether-green/30 flex items-center justify-center mb-3 shadow-[0_0_25px_rgba(0,255,157,0.3)]">
+                              <CheckCircle className="w-8 h-8 text-aether-green" />
                             </div>
-                            <p className="text-xl font-mono tracking-widest uppercase font-semibold">TARGET SECURED</p>
-                            <p className="text-xs text-zinc-400 font-mono mt-1">Live Workloads Routed to {targetRegion}</p>
+                            <p className="text-xl font-mono tracking-widest uppercase font-semibold">
+                              TARGET SECURED
+                            </p>
+                            <p className="text-xs text-zinc-400 font-mono mt-1">
+                              Live Workloads Routed to {targetRegion}
+                            </p>
                             <button
                               onClick={handleReset}
-                              className="mt-5 px-5 py-2 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-[#00FF9D]/40 text-xs font-mono tracking-widest uppercase text-zinc-300 hover:text-white transition-colors"
+                              className="mt-5 px-5 py-2 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-aether-green/40 text-xs font-mono tracking-widest uppercase text-zinc-300 hover:text-white transition-colors"
                             >
                               Reset to Standby
                             </button>
@@ -367,14 +436,16 @@ export default function App() {
                         ) : (
                           <div className="flex flex-col items-center">
                             <div className="relative flex items-center justify-center mb-5">
-                              <div className="w-16 h-16 border-4 border-t-[#FFB800] border-r-transparent border-b-transparent border-l-[#FFB800]/30 rounded-full animate-spin" />
-                              <div className="absolute w-12 h-12 border-4 border-t-transparent border-r-[#00F0FF] border-b-[#00F0FF]/30 border-l-transparent rounded-full animate-[spin_1.5s_reverse_infinite]" />
-                              <AlertTriangle className="w-5 h-5 text-[#FFB800]" />
+                              <div className="w-16 h-16 border-4 border-t-aether-amber border-r-transparent border-b-transparent border-l-aether-amber/30 rounded-full animate-spin" />
+                              <div className="absolute w-12 h-12 border-4 border-t-transparent border-r-aether-cyan border-b-aether-cyan/30 border-l-transparent rounded-full animate-[spin_1.5s_reverse_infinite]" />
+                              <AlertTriangle className="w-5 h-5 text-aether-amber" />
                             </div>
-                            <p className="text-sm font-mono text-[#FFB800] animate-pulse tracking-widest uppercase font-semibold">
+                            <p className="text-sm font-mono text-aether-amber animate-pulse tracking-widest uppercase font-semibold">
                               {sysState.replace(/_/g, ' ')}...
                             </p>
-                            <p className="text-xs text-gray-500 mt-2 font-mono">ESTIMATED RTO ELAPSED: {metrics.rto}</p>
+                            <p className="text-xs text-gray-500 mt-2 font-mono">
+                              ESTIMATED RTO ELAPSED: {metrics.rto}
+                            </p>
                           </div>
                         )}
                       </motion.div>
@@ -394,7 +465,7 @@ export default function App() {
       <AnimatePresence>
         {showShareModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
@@ -402,24 +473,25 @@ export default function App() {
             >
               <h3 className="text-xl font-bold text-white mb-2">Share With Shareholders</h3>
               <p className="text-xs text-zinc-400 mb-4">
-                AetherVault is fully mobile-optimized. Scan this QR code with any smartphone camera to launch the live 3D failover command center and executive pitch deck.
+                AetherVault is fully mobile-optimized. Scan this QR code with any smartphone camera
+                to launch the live 3D failover command center and executive pitch deck.
               </p>
 
               {/* QR Code Graphic pointing to GitHub Pages Live Site */}
               <div className="w-52 h-52 mx-auto bg-white p-3 rounded-2xl flex flex-col items-center justify-center mb-4 shadow-xl">
-                <img 
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://anwozo157.github.io/AetherVault/" 
+                <img
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://anwozo157.github.io/AetherVault/"
                   alt="AetherVault Live Mobile QR Code"
                   className="w-44 h-44 object-contain"
                 />
               </div>
 
               <div className="mb-5 text-center">
-                <a 
-                  href="https://anwozo157.github.io/AetherVault/" 
-                  target="_blank" 
+                <a
+                  href="https://anwozo157.github.io/AetherVault/"
+                  target="_blank"
                   rel="noreferrer"
-                  className="text-xs font-mono text-[#00F0FF] underline hover:text-white"
+                  className="text-xs font-mono text-aether-cyan underline hover:text-white"
                 >
                   https://anwozo157.github.io/AetherVault/
                 </a>
@@ -447,15 +519,27 @@ export default function App() {
   );
 }
 
-function MetricCard({ label, value, color, icon }: { label: string; value: string | number; color: string; icon: React.ReactNode }) {
+function MetricCard({
+  label,
+  value,
+  color,
+  icon,
+}: {
+  label: string;
+  value: string | number;
+  color: string;
+  icon: React.ReactNode;
+}) {
   return (
-    <motion.div 
+    <motion.div
       layout
       className="flex flex-col items-start p-5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors rounded-2xl border border-white/5"
     >
       <div className="flex items-center gap-2 mb-2">
         {icon}
-        <span className="text-[11px] text-gray-500 uppercase tracking-widest font-mono">{label}</span>
+        <span className="text-[11px] text-gray-500 uppercase tracking-widest font-mono">
+          {label}
+        </span>
       </div>
       <span className={`text-2xl sm:text-3xl font-mono font-medium tracking-tight ${color}`}>
         {value}
