@@ -12,6 +12,8 @@ Enterprise disaster-recovery command center by Aegis Core Labs. Currently a fron
 
 - `npm run dev`: dev server on http://localhost:5174 (Vite picks the next free port if taken; check the terminal output)
 - `npm test` — Vitest unit/component tests
+- `npm run coverage`: tests with coverage thresholds
+- `npm run e2e`: Playwright browser tests (desktop + mobile; locally uses installed Google Chrome)
 - `npm run typecheck` — strict TypeScript (`tsc --noEmit`)
 - `npm run lint` / `npm run format` — ESLint / Prettier
 - `npm run build` — production build to `dist/`

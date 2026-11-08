@@ -5,6 +5,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Phase 2b: Test depth (2026-11-08)
+
+#### Added
+
+- Coverage reporting (`npm run coverage`, V8) with enforced thresholds: 80% lines overall, 95% for `src/domain`, 90% for `src/providers`. Current: 97% lines.
+- Playwright end-to-end suite (`npm run e2e`), 10 scenarios × desktop + mobile (Pixel 7) = 20 tests: load + simulated badge + globe, hold/abort, short-click guard, keyboard Space hold to completion and reset, chaos label fit, no horizontal scroll, AWS DRS tab, reduced motion, all 7 deck slides without errors, deck citations.
+- Unit tests for ShareModal, ErrorBoundary, AwsDrsHud, `usePrefersReducedMotion` (40 unit tests total).
+
+#### Changed
+
+- 3D globe caps device pixel ratio at 1.5x, reducing GPU work on high-density phones by up to 4x.
+
 ### Phase 2a: Accessibility (2026-11-08)
 
 #### Added
