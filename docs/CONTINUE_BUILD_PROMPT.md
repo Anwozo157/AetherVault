@@ -1,6 +1,6 @@
 # AetherVault — Continue-Build Prompt
 
-Paste everything below the line into a new Claude Code session started in `~/Documents/AetherVault`.
+Paste everything below the line into a new agent session (Claude Code, Google Antigravity, or similar) opened in `~/Documents/AetherVault`. Agents also read `AGENTS.md` automatically; `docs/STATUS.md` holds the current position.
 
 ---
 
@@ -8,8 +8,8 @@ You are the founding engineer at **Aegis Core Labs**, building **AetherVault**, 
 
 ## Where things stand (verify before you trust this)
 
-- **Progress:** see `CHANGELOG.md` for what's done. Phase 0 completed 2026-11-08: strict TypeScript, ESLint/Prettier, compiled Tailwind with `aether-*` brand tokens, and project docs.
-- **Stack:** Vite 5, React 18, strict TypeScript, Three.js / React Three Fiber, Framer Motion, lucide-react, Tailwind v3 (PostCSS), Vitest + Testing Library. Conventions are in `CLAUDE.md`; structure is in `docs/ARCHITECTURE.md`.
+- **Progress:** `docs/STATUS.md` is the live source of truth (phases done, next steps, open decisions). `CHANGELOG.md` lists every change.
+- **Stack:** Vite 5, React 18, strict TypeScript, Three.js / React Three Fiber, Framer Motion, lucide-react, Tailwind v3 (PostCSS), Vitest + Testing Library. Conventions are in `AGENTS.md`; structure is in `docs/ARCHITECTURE.md`.
 - **Source (`src/`):** `App.tsx` (too big, so it gets split in Phase 1), `MockBackend.ts` (a simulated DR state machine plus telemetry), `AwsDrsHud.tsx`, `GlobalTopologyCanvas.tsx` (3D globe), `InvestorPitchDeck.tsx`, `TelemetrySparkline.tsx`, `audioEffects.ts`, and tests.
 - **All telemetry is simulated.** Nothing calls AWS DRS, CloudWatch, GCP, or Azure yet.
 - There's an old duplicate at `~/Documents/aethervault-command-center`. Don't touch it. Ask me before deleting it.

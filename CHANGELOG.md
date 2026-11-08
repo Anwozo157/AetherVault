@@ -5,6 +5,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Multi-agent handoff (2026-11-08)
+
+#### Added
+
+- `AGENTS.md`: single source of project rules for all AI agents (Google Antigravity reads it natively); `CLAUDE.md` now imports it.
+- `docs/STATUS.md`: living handoff doc covering phase status, health, next steps, open decisions, known issues.
+- Rules for branches, secrets, browser verification, and asking before deletes.
+
 ### Phase 1 — Architecture (2026-11-08)
 
 #### Added
