@@ -1,7 +1,6 @@
-import React from 'react';
 import { 
-  ShieldCheck, Database, Radio, Cpu, Bell, CheckCircle2, 
-  AlertCircle, Activity, Server, Clock, HardDrive 
+  Database, Radio, Bell,
+  Activity, HardDrive
 } from 'lucide-react';
 import { DrTelemetry, LogEvent } from './MockBackend';
 

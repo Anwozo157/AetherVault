@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ShieldCheck, TrendingUp, DollarSign, Award, ChevronRight, ChevronLeft, 
-  ExternalLink, Play, Layers, Cpu, Database, CheckCircle2, AlertOctagon,
+  ShieldCheck, TrendingUp, ChevronRight, ChevronLeft, Activity, Clock,
+  Layers, Cpu, Database, CheckCircle2, AlertOctagon,
   ArrowRight, Users, Sparkles
 } from 'lucide-react';
 

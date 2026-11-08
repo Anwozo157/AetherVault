@@ -166,7 +166,7 @@ export class DisasterRecoveryBackend {
   public async triggerFailover(sourceRegion: string, targetRegion: string) {
     if (this.currentState !== SystemState.IDLE) return;
 
-    this.pushLog('WARN', 'CORE', `🚨 MANUAL FAILOVER INITIATED: Route cutover requested to ${targetRegion}`);
+    this.pushLog('WARN', 'CORE', `🚨 MANUAL FAILOVER INITIATED: Route cutover requested from ${sourceRegion} to ${targetRegion}`);
     this.updateState(SystemState.REPLICATING);
 
     // T+1.2s: Quiesce & Snapshot
@@ -197,6 +197,14 @@ export class DisasterRecoveryBackend {
     this.updateState(SystemState.IDLE);
     this.pushLog('INFO', 'CORE', 'Failover drill reset. Continuous replication resumed from primary region.');
     this.emitMetrics({ rpo: '0.0s', rto: '--', sync: 100 });
+  }
+
+  /** Stop background telemetry timers. Call when the backend is no longer needed. */
+  public dispose() {
+    if (this.metricsInterval) {
+      clearInterval(this.metricsInterval);
+      this.metricsInterval = null;
+    }
   }
 
   public getState() {
