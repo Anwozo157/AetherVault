@@ -37,9 +37,14 @@ npm install --legacy-peer-deps
 # 3. Launch Command Center
 npm run dev
 
-# 4. Run the test suite (Vitest + Testing Library)
-npm test
+# 4. Quality checks
+npm test            # Vitest + Testing Library
+npm run typecheck   # strict TypeScript
+npm run lint        # ESLint
+npm run build       # production build
 ```
+
+> **Note:** All telemetry in this demo is simulated in the browser. See `docs/ARCHITECTURE.md` and `CHANGELOG.md`.
 
 Open `http://localhost:5174` in your browser.
 
