@@ -3,11 +3,30 @@
 // Generates procedural cybernetic SFX (No external audio assets required)
 // ==========================================
 
+const SOUND_PREF_KEY = 'aethervault:sound-enabled';
+
+/** Sound is off by default (accessibility); a viewer's choice is remembered per browser. */
+function readSoundEnabled(): boolean {
+  try {
+    return localStorage.getItem(SOUND_PREF_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+export function saveSoundEnabled(enabled: boolean) {
+  try {
+    localStorage.setItem(SOUND_PREF_KEY, String(enabled));
+  } catch {
+    // Storage unavailable (private mode, blocked); preference just won't persist.
+  }
+}
+
 class SoundEngine {
   private ctx: AudioContext | null = null;
   private chargeOsc: OscillatorNode | null = null;
   private chargeGain: GainNode | null = null;
-  public isMuted: boolean = false;
+  public isMuted: boolean = !readSoundEnabled();
 
   private initContext() {
     if (!this.ctx) {

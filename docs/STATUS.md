@@ -37,6 +37,4 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 ## Known issues
 
 - `DEGRADED_STATE` exists in the state machine but is never entered; chaos mode only changes telemetry.
-- Hold-to-confirm button is mouse/touch only (no keyboard). Planned for Phase 2.
-- Audio is on by default. Planned to default off in Phase 2.
 - Share modal QR code uses the free `api.qrserver.com` service (external request).

@@ -5,6 +5,25 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Phase 2a: Accessibility (2026-11-08)
+
+#### Added
+
+- Keyboard-operable failover: hold Space or Enter for 1.2s; releasing early or moving focus away cancels.
+- Reduced-motion support: honors the OS setting (Framer Motion `MotionConfig`, CSS animations, globe auto-rotation and packet animation).
+- `usePrefersReducedMotion` hook.
+- 8 new tests (33 total): keyboard hold/cancel/blur, sound default and persistence, storage unavailable.
+
+#### Changed
+
+- Sound is **off by default**; turning it on is remembered per browser.
+- Hold-to-confirm is timed independently of the progress animation, so the guard can't be shortened by reduced-motion settings.
+- Touch-cancel also cancels a hold.
+
+#### Fixed
+
+- React "not wrapped in act(...)" test warning (tests now wait for the lazily loaded globe).
+
 ### Pitch deck sources, founder bio, roadmap date (2026-11-08)
 
 #### Changed

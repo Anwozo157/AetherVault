@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { SystemState, isAbortable } from '../../domain/dr';
 import { sound } from '../../lib/audioEffects';
 
@@ -25,22 +25,52 @@ export default function FailoverControl({
   onReset,
 }: FailoverControlProps) {
   const [isHolding, setIsHolding] = useState(false);
+  // The hold is timed independently of the progress animation, so the guard
+  // still holds when animations are shortened (e.g. reduced-motion settings).
+  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleHoldStart = () => {
-    setIsHolding(true);
-    sound.startHoldCharge(HOLD_SECONDS);
+  const clearHoldTimer = () => {
+    if (holdTimer.current) {
+      clearTimeout(holdTimer.current);
+      holdTimer.current = null;
+    }
   };
 
-  const handleHoldEnd = () => {
-    setIsHolding(false);
-    sound.stopHoldCharge();
-  };
+  useEffect(() => clearHoldTimer, []);
 
   const handleHoldComplete = () => {
+    holdTimer.current = null;
     sound.stopHoldCharge();
     sound.playFailoverTriggered();
     setIsHolding(false);
     onTrigger();
+  };
+
+  const handleHoldStart = () => {
+    if (holdTimer.current) return;
+    setIsHolding(true);
+    sound.startHoldCharge(HOLD_SECONDS);
+    holdTimer.current = setTimeout(handleHoldComplete, HOLD_SECONDS * 1000);
+  };
+
+  const handleHoldEnd = () => {
+    if (!holdTimer.current) return;
+    clearHoldTimer();
+    setIsHolding(false);
+    sound.stopHoldCharge();
+  };
+
+  // Keyboard users hold Space or Enter, mirroring press-and-hold.
+  const isHoldKey = (e: KeyboardEvent) => e.key === ' ' || e.key === 'Enter';
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (!isHoldKey(e)) return;
+    e.preventDefault();
+    if (!e.repeat) handleHoldStart();
+  };
+  const handleKeyUp = (e: KeyboardEvent) => {
+    if (!isHoldKey(e)) return;
+    e.preventDefault();
+    handleHoldEnd();
   };
 
   return (
@@ -58,6 +88,11 @@ export default function FailoverControl({
               onMouseLeave={handleHoldEnd}
               onTouchStart={handleHoldStart}
               onTouchEnd={handleHoldEnd}
+              onTouchCancel={handleHoldEnd}
+              onKeyDown={handleKeyDown}
+              onKeyUp={handleKeyUp}
+              onBlur={handleHoldEnd}
+              aria-describedby="failover-hold-hint"
               whileTap={{ scale: 0.96 }}
               className="relative group flex items-center justify-center w-72 h-16 rounded-full bg-white/[0.03] border border-white/10 hover:border-aether-cyan/50 transition-colors shadow-lg overflow-hidden cursor-pointer select-none"
             >
@@ -69,15 +104,17 @@ export default function FailoverControl({
                   initial={{ width: '0%' }}
                   animate={{ width: '100%' }}
                   transition={{ duration: HOLD_SECONDS, ease: 'linear' }}
-                  onAnimationComplete={handleHoldComplete}
                   className="absolute left-0 top-0 h-full bg-aether-cyan/25 backdrop-blur-sm"
                 />
               )}
             </motion.button>
-            <p className="text-[11px] font-mono text-zinc-500 mt-3 tracking-wider">
+            <p
+              id="failover-hold-hint"
+              className="text-[11px] font-mono text-zinc-500 mt-3 tracking-wider"
+            >
               {isHolding
                 ? `Hold ${HOLD_SECONDS}s to confirm failover...`
-                : `Press and hold for ${HOLD_SECONDS}s to prevent accidental execution`}
+                : `Press and hold (or hold Space/Enter) for ${HOLD_SECONDS}s to prevent accidental execution`}
             </p>
           </div>
         ) : (
