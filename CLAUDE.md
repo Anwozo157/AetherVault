@@ -21,6 +21,10 @@ Install with `npm install --legacy-peer-deps` (React Three Fiber peer ranges).
 5. **Document everything:** update `CHANGELOG.md` (Unreleased section) with each change; update `docs/ARCHITECTURE.md` when structure changes.
 6. **No push/deploy** to GitHub without the founder's OK.
 
+## Architecture
+
+UI talks only to the `DrProvider` interface (`src/domain/dr.ts`) via `useDrProvider()` / `useDrSession()`; never import a concrete provider in UI code. Details: `docs/ARCHITECTURE.md`.
+
 ## Styling
 
 - Tailwind v3 (compiled, not CDN). Use the `aether-*` brand tokens from `tailwind.config.js` (`aether-green`, `aether-cyan`, `aether-amber`, `aether-red`, `aether-panel`, …) — no new raw hex classes.

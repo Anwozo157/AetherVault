@@ -1,45 +1,67 @@
 # Architecture
 
-> Status: front-end prototype. No real backend; all data is simulated in the browser.
+> Status: front-end prototype. No real backend; all data is simulated in the browser
+> by `MockDrProvider` and labeled **SIMULATED DATA** in the UI.
 
-## Overview
+## Layers
 
 ```
-index.html → src/main.tsx → App.tsx
-                              ├── GlobalTopologyCanvas.tsx   3D globe (Three.js / R3F)
-                              ├── AwsDrsHud.tsx              telemetry dashboard tab
-                              │     └── TelemetrySparkline.tsx
-                              ├── InvestorPitchDeck.tsx      pitch slides
-                              └── audioEffects.ts            Web Audio synth (no asset files)
-
-MockBackend.ts  ── DisasterRecoveryBackend (simulated)
-                   state machine + telemetry/log streams via listener callbacks
+src/
+├── domain/dr.ts                 Types, SystemState, transition rules, DrProvider interface
+├── providers/
+│   ├── MockDrProvider.ts        Simulated implementation of DrProvider
+│   ├── defaultProvider.ts       Chooses which provider the app runs with
+│   └── DrProviderContext.tsx    React context: <DrProviderRoot>, useDrProvider()
+├── hooks/useDrSession.ts        Subscribes to the provider → state, metrics, telemetry, logs
+├── config/regions.ts            Source + target failover regions (single source of truth)
+├── features/
+│   ├── CommandCenter.tsx        Mission Control view (composes the pieces below)
+│   ├── failover/                ControlBar (tabs, region, chaos), FailoverControl (hold/abort/reset)
+│   ├── telemetry/               MetricCard, MetricsOverview, TelemetrySparkline, AwsDrsHud
+│   ├── topology/                GlobalTopologyCanvas (Three.js globe, lazy-loaded)
+│   └── pitch/                   InvestorPitchDeck (lazy-loaded)
+├── components/                  AppHeader, AppFooter, AmbientBackground, ShareModal, ErrorBoundary
+├── lib/audioEffects.ts          Web Audio synth (no audio files)
+├── App.tsx                      App shell: header, mode switch, chaos + sound state
+└── main.tsx                     Creates the provider and mounts <DrProviderRoot><App/></DrProviderRoot>
 ```
 
-## Failover state machine (`SystemState`)
+**Dependency rule:** UI code depends on `domain/dr.ts` and `useDrProvider()`, never on a concrete
+provider. To add a real data source, implement `DrProvider` (e.g. `AwsDrsProvider`) and return it
+from `createDefaultProvider()`. No UI changes needed.
+
+## Failover state machine
 
 ```
 ACTIVE_SYNC → QUIESCE_AND_SNAPSHOT → HYDRATING_TARGET → DNS_CUTOVER → TARGET_SECURED
-     ↑                                                                    │
-     └──────────────────── resetToStandby() ──────────────────────────────┘
-DEGRADED_STATE: defined but not yet used. Chaos mode (setChaosMode) only perturbs telemetry and shows a DEGRADED_JITTER label.
+     ↑               │                      │                              │
+     └──── abort ────┴────── abort ─────────┘                              │
+     └──────────────────────── resetToStandby() ───────────────────────────┘
 ```
 
-The UI subscribes with `onStateChange`, `onMetricsUpdate`, `onDrTelemetryUpdate`, `onLogEvent` (each returns an unsubscribe function). `dispose()` stops the telemetry timer.
+- Allowed transitions live in `ALLOWED_TRANSITIONS` (`domain/dr.ts`); providers reject anything else.
+- **Abort** is allowed only before `DNS_CUTOVER`. Once traffic is moving, rolling back is a
+  failback operation, not an abort. The UI hides the Abort button at that point.
+- `DEGRADED_STATE` is defined but not yet used. Chaos mode only perturbs telemetry and shows a
+  `DEGRADED JITTER` label.
+
+## Performance
+
+- The 3D globe (three.js), AWS DRS tab, and pitch deck are code-split with `React.lazy`.
+- Initial JS: ~293 kB (95 kB gzip), down from 1,250 kB (348 kB gzip) before Phase 1.
+- `ErrorBoundary` wraps lazy panels so a WebGL failure shows a placeholder instead of a blank page.
+
+## Testing
+
+- `domain/dr.test.ts`: transition rules.
+- `providers/MockDrProvider.test.ts`: lifecycle, abort windows, log buffer (fake timers).
+- `App.test.tsx`: UI behavior against a `FakeProvider` injected via `<DrProviderRoot>`.
 
 ## Tooling
 
-- Vite 5 build, base `./` for GitHub Pages.
-- Tailwind v3 compiled via PostCSS; brand tokens in `tailwind.config.js`.
-- Vitest + jsdom + Testing Library (`src/setupTests.ts`).
-- ESLint flat config (`eslint.config.js`), Prettier (`.prettierrc.json`).
+Vite 5 (base `./` for GitHub Pages), Tailwind v3 via PostCSS with `aether-*` tokens, Vitest +
+jsdom + Testing Library, ESLint flat config, Prettier.
 
 ## Hosting
 
-GitHub Pages (free). No servers, no paid services.
-
-## Planned (Phase 1)
-
-- Split `App.tsx` into feature folders.
-- `DrProvider` interface so `MockDrProvider` can later be swapped for a real provider without UI changes.
-- Lazy-load the globe and pitch deck (current JS bundle exceeds 500 kB).
+GitHub Pages (free), served from the `gh-pages` branch. No servers, no paid services.
