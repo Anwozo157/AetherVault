@@ -7,14 +7,15 @@ import ShareModal from './components/ShareModal';
 import { SystemState } from './domain/dr';
 import CommandCenter from './features/CommandCenter';
 import { useDrSession } from './hooks/useDrSession';
-import { sound } from './lib/audioEffects';
+import { MotionConfig } from 'framer-motion';
+import { saveSoundEnabled, sound } from './lib/audioEffects';
 
 const InvestorPitchDeck = lazy(() => import('./features/pitch/InvestorPitchDeck'));
 
 export default function App() {
   const { provider, state } = useDrSession();
   const [mode, setMode] = useState<AppMode>('command');
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(() => sound.isMuted);
   const [chaosActive, setChaosActive] = useState(false);
   const [showShare, setShowShare] = useState(false);
 
@@ -23,8 +24,10 @@ export default function App() {
   }, [state]);
 
   const toggleSound = () => {
-    sound.isMuted = !isMuted;
-    setIsMuted(!isMuted);
+    const nextMuted = !isMuted;
+    sound.isMuted = nextMuted;
+    saveSoundEnabled(!nextMuted);
+    setIsMuted(nextMuted);
   };
 
   const toggleChaos = () => {
@@ -35,32 +38,35 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#05070B] text-white flex flex-col items-center justify-between p-3 sm:p-8 font-sans relative selection:bg-aether-cyan/30">
-      <AmbientBackground state={state} chaosActive={chaosActive} />
+    // reducedMotion="user": Framer Motion honors the OS "reduce motion" setting.
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-screen bg-[#05070B] text-white flex flex-col items-center justify-between p-3 sm:p-8 font-sans relative selection:bg-aether-cyan/30">
+        <AmbientBackground state={state} chaosActive={chaosActive} />
 
-      <AppHeader
-        mode={mode}
-        onModeChange={setMode}
-        isMuted={isMuted}
-        onToggleSound={toggleSound}
-        onShare={() => setShowShare(true)}
-        isSimulated={provider.isSimulated}
-      />
+        <AppHeader
+          mode={mode}
+          onModeChange={setMode}
+          isMuted={isMuted}
+          onToggleSound={toggleSound}
+          onShare={() => setShowShare(true)}
+          isSimulated={provider.isSimulated}
+        />
 
-      {mode === 'deck' ? (
-        <ErrorBoundary
-          fallback={<p className="text-sm text-zinc-400">Pitch deck failed to load.</p>}
-        >
-          <Suspense fallback={<p className="text-xs font-mono text-zinc-500">Loading deck…</p>}>
-            <InvestorPitchDeck onLaunchDemo={() => setMode('command')} />
-          </Suspense>
-        </ErrorBoundary>
-      ) : (
-        <CommandCenter chaosActive={chaosActive} onToggleChaos={toggleChaos} />
-      )}
+        {mode === 'deck' ? (
+          <ErrorBoundary
+            fallback={<p className="text-sm text-zinc-400">Pitch deck failed to load.</p>}
+          >
+            <Suspense fallback={<p className="text-xs font-mono text-zinc-500">Loading deck…</p>}>
+              <InvestorPitchDeck onLaunchDemo={() => setMode('command')} />
+            </Suspense>
+          </ErrorBoundary>
+        ) : (
+          <CommandCenter chaosActive={chaosActive} onToggleChaos={toggleChaos} />
+        )}
 
-      <ShareModal open={showShare} onClose={() => setShowShare(false)} />
-      <AppFooter />
-    </div>
+        <ShareModal open={showShare} onClose={() => setShowShare(false)} />
+        <AppFooter />
+      </div>
+    </MotionConfig>
   );
 }

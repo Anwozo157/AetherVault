@@ -2,6 +2,7 @@ import { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Sphere, Line, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 
 // 1. The Core Infrastructure Globe
 // Cyan wireframe (brand accent) over a dark solid core. The core hides the back
@@ -36,12 +37,15 @@ const DataConduit = ({
   color,
   speed = 0.6,
   jitter = false,
+  still = false,
 }: {
   start: THREE.Vector3;
   end: THREE.Vector3;
   color: string;
   speed?: number;
   jitter?: boolean;
+  /** Reduced motion: park the packet mid-arc instead of animating it. */
+  still?: boolean;
 }) => {
   // Generate a smooth arc between the two cloud regions
   const curve = useMemo(() => {
@@ -55,10 +59,10 @@ const DataConduit = ({
   // Animate a telemetry packet along the arc at 60fps
   useFrame(({ clock }) => {
     if (!particleRef.current) return;
-    const time = (clock.getElapsedTime() * speed) % 1;
+    const time = still ? 0.5 : (clock.getElapsedTime() * speed) % 1;
     const position = curve.getPoint(time);
 
-    if (jitter) {
+    if (jitter && !still) {
       // Simulate packet turbulence / jitter
       position.x += (Math.random() - 0.5) * 0.08;
       position.y += (Math.random() - 0.5) * 0.08;
@@ -88,6 +92,8 @@ export default function GlobalTopologyCanvas({
   targetRegion?: string;
   chaosActive?: boolean;
 }) {
+  const reducedMotion = usePrefersReducedMotion();
+
   // Geographically mapped coordinates for AWS us-east-1 and variable targets
   const awsNode = useMemo(() => onSurface(1.2, 1.0, 1.2), []);
 
@@ -198,13 +204,14 @@ export default function GlobalTopologyCanvas({
           color={conduitColor}
           speed={conduitSpeed}
           jitter={chaosActive}
+          still={reducedMotion}
         />
 
         {/* Smooth Orbit Controls */}
         <OrbitControls
           enableZoom={false}
           enablePan={false}
-          autoRotate
+          autoRotate={!reducedMotion}
           autoRotateSpeed={0.5}
           maxPolarAngle={Math.PI / 1.5}
           minPolarAngle={Math.PI / 3}
