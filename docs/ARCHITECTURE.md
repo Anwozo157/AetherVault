@@ -1,35 +1,48 @@
 # Architecture
 
-> Status: front-end prototype. No real backend; all data is simulated in the browser
-> by `MockDrProvider` and labeled **SIMULATED DATA** in the UI.
+> Status: two entry points.
+>
+> - **Public demo** (`/`, GitHub Pages): everything simulated in the browser by `MockDrProvider`,
+>   labeled **SIMULATED DATA**.
+> - **Signed-in console** (`#/console`, local Supabase only until Phase 3.6): real sign-in, roles,
+>   two-person approval and audit log via `SupabaseDrProvider`. Replication telemetry is still
+>   simulated and labeled **SIMULATED TELEMETRY**.
 
 ## Layers
 
 ```
 src/
-├── domain/dr.ts                 Types, SystemState, transition rules, DrProvider interface
+├── domain/dr.ts                 Types, SystemState, transition rules, DrProvider + ApprovalCapability
+├── domain/failoverStage.ts      Stage from approval timestamp (mirrors SQL run_stage)
 ├── providers/
 │   ├── MockDrProvider.ts        Simulated implementation of DrProvider
-│   ├── defaultProvider.ts       Chooses which provider the app runs with
+│   ├── supabase/consoleApi.ts   Narrow RPC/Realtime layer over supabase-js (fakeable in tests)
+│   ├── supabase/SupabaseDrProvider.ts  Server-backed provider (approvals, audit feed)
+│   ├── defaultProvider.ts       Chooses the public demo provider
 │   └── DrProviderContext.tsx    React context: <DrProviderRoot>, useDrProvider()
+├── console/ConsoleRoot.tsx      Composition root for #/console: auth, org, SupabaseDrProvider (lazy)
+├── config/backend.ts            Build-time Supabase env; hasBackend; console route
 ├── hooks/useDrSession.ts        Subscribes to the provider → state, metrics, telemetry, logs
+├── hooks/useFailoverRun.ts      The org's open run (providers with approvals)
 ├── hooks/usePrefersReducedMotion.ts  OS reduce-motion preference
 ├── config/regions.ts            Source + target failover regions (single source of truth)
 ├── features/
 │   ├── CommandCenter.tsx        Mission Control view (composes the pieces below)
-│   ├── failover/                ControlBar (tabs, region, chaos), FailoverControl (hold/abort/reset)
+│   ├── failover/                ControlBar, FailoverControl (hold/abort/reset), ApprovalPanel
+│   ├── console/SignInForm.tsx   Email + password / magic-link sign-in
 │   ├── telemetry/               MetricCard, MetricsOverview, TelemetrySparkline, AwsDrsHud
 │   ├── topology/                GlobalTopologyCanvas (Three.js globe, lazy-loaded)
 │   └── pitch/                   InvestorPitchDeck (lazy-loaded)
 ├── components/                  AppHeader, AppFooter, AmbientBackground, ShareModal, ErrorBoundary
 ├── lib/audioEffects.ts          Web Audio synth (no audio files)
 ├── App.tsx                      App shell: header, mode switch, chaos + sound state
-└── main.tsx                     Creates the provider and mounts <DrProviderRoot><App/></DrProviderRoot>
+└── main.tsx                     Routes: public demo (MockDrProvider) or lazy ConsoleRoot
 ```
 
 **Dependency rule:** UI code depends on `domain/dr.ts` and `useDrProvider()`, never on a concrete
-provider. To add a real data source, implement `DrProvider` (e.g. `AwsDrsProvider`) and return it
-from `createDefaultProvider()`. No UI changes needed.
+provider. Concrete providers are constructed only in composition roots (`main.tsx`,
+`console/ConsoleRoot.tsx`). Adding `SupabaseDrProvider` needed no changes to the failover UI beyond
+the optional approval panel.
 
 ## Failover state machine
 
@@ -64,6 +77,11 @@ ACTIVE_SYNC → QUIESCE_AND_SNAPSHOT → HYDRATING_TARGET → DNS_CUTOVER → TA
 - `domain/dr.test.ts`: transition rules.
 - `providers/MockDrProvider.test.ts`: lifecycle, abort windows, log buffer (fake timers).
 - `App.test.tsx`: UI behavior against a `FakeProvider` injected via `<DrProviderRoot>`.
+- `providers/supabase/SupabaseDrProvider.test.ts`: two-person flow, clock skew, roles, abort window,
+  errors, against an in-memory fake server.
+- `e2e/app.spec.ts` (`npm run e2e`): public demo, desktop + mobile.
+- `e2e/console.spec.ts` (`npm run e2e:console`): two real browsers against local Supabase complete
+  an approved failover live; withdraw; viewer read-only; sign-out.
 
 ## Database (Phase 3, local only)
 
@@ -79,11 +97,35 @@ into the UI and not hosted.
   Two-person approval and one open run per org are enforced by constraints.
 - `audit_log` is append-only (triggers) and SHA-256 hash-chained per org; `verify_audit_chain()`
   returns the first broken row.
-- `tests/database/core_schema.test.sql`: pgTAP suite (`npm run db:test`).
+- `migrations/20261108000002_console_reads.sql`: `get_failover_status()` (open run + server
+  `now()`) and `org_audit_feed()` (entries with actor email; members only).
+- `seed.sql`: **local only** demo org and one user per role (password `aether-demo-local`).
+- `tests/database/*.test.sql`: pgTAP suites (`npm run db:test`), 50 tests.
+
+## Signed-in console (Phase 3.4)
+
+```
+Browser A (operator)            Supabase (Postgres + Auth + Realtime)          Browser B (approver)
+ hold button ──request_failover──▶ failover_runs (pending) ──Realtime──▶ ApprovalPanel
+                                   audit_log += requested
+ ApprovalPanel ◀──Realtime────── failover_runs.approved_at ◀─approve_failover── Approve
+ stage = f(server now − approved_at), recomputed locally every 200 ms in both browsers
+```
+
+- **Server-authoritative timing:** each sync reads `server_now`; the browser keeps a clock offset,
+  so all viewers derive the same stage even with skewed clocks.
+- **Sync:** Realtime `postgres_changes` on `failover_runs` and `audit_log`, plus a 5 s poll fallback.
+  Stale responses are discarded by sequence number.
+- **Roles in the UI:** viewers get a read-only notice; requesters cannot approve (also enforced by
+  the database); RPC errors appear as `CRIT` lines in the audit stream.
+- **Bundle:** supabase-js loads only on `#/console`; the public demo's initial JS is unchanged
+  (budget 120 kB gzip).
+- **Public build:** no `VITE_SUPABASE_*` env, so no sign-in link and `#/console` explains that the
+  console isn't deployed.
 
 ## Tooling
 
-Vite 5 (base `./` for GitHub Pages), Tailwind v3 via PostCSS with `aether-*` tokens, Vitest +
+Vite 8 (base `./` for GitHub Pages), Tailwind v3 via PostCSS with `aether-*` tokens, Vitest +
 jsdom + Testing Library, ESLint flat config, Prettier.
 
 ## Hosting

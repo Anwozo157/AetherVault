@@ -4,6 +4,8 @@ const isCI = !!process.env.CI;
 
 export default defineConfig({
   testDir: './e2e',
+  // The signed-in console needs local Supabase; it has its own config (playwright.console.config.ts).
+  testIgnore: 'console.spec.ts',
   fullyParallel: true,
   // Each page renders WebGL in software (no GPU in headless/CI); more workers starve the CPU.
   workers: 2,

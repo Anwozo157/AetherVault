@@ -5,6 +5,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Phase 3.4: Signed-in console with two-person approval (2026-11-08)
+
+- `SupabaseDrProvider`: second `DrProvider` implementation. Failover workflow, approvals and audit log are real and shared live across browsers (Realtime + 5 s poll fallback); stage derived from server time with clock-skew correction. Telemetry stays simulated; header shows **SIMULATED TELEMETRY**.
+- Console at `#/console`: email + password or magic-link sign-in, org bootstrap (create org), approval panel (approve / withdraw / reject), view-only notice for viewers, org + role + sign-out in the header. Loaded lazily; public demo bundle unchanged.
+- Database: `get_failover_status()` and `org_audit_feed()` RPCs (11 new pgTAP tests, 50 total); local-only `seed.sql` demo org with one user per role.
+- Tests: `SupabaseDrProvider` unit tests against a fake server; `npm run e2e:console` runs two real browsers through request → approve → secured → reset against local Supabase.
+- Security: `.env.*` git-ignored (only `.env.example` tracked); only the public anon key is used in the browser.
+
+### Toolchain upgrade (2026-11-08)
+
+- Vite 5 → 8, Vitest 2 → 5, @vitejs/plugin-react 4 → 6, framer-motion 11 → 14, jest-dom 6 → 7, plus minor/patch updates; GitHub Actions checkout/setup-node/upload-artifact v7, codeql-action v4. Supersedes Dependabot PRs #1–#9.
+- `npm audit`: 0 vulnerabilities (minimatch override for typescript-estree, GHSA-g3hv-75wg-m249). Clears the Vite 5 / Vitest 2 dev-server advisories.
+- New provider tests keep coverage thresholds under Vitest 5's stricter counting.
+
 ### Phase 3.2–3.3: Database schema verified (2026-11-08)
 
 - Ran the pgTAP suite against local Supabase (Postgres 17): all 39 tests pass with no schema changes. Covers each role's allowed and denied actions, signed-out and non-member access, the two-person rule, one open run per org, abort refused from DNS cutover on, reset only after the target is secured, append-only audit log, and hash-chain tamper detection.

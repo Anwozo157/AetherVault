@@ -1,6 +1,23 @@
-import { Presentation, ShieldCheck, Smartphone, Volume2, VolumeX } from 'lucide-react';
+import {
+  LogIn,
+  LogOut,
+  Presentation,
+  ShieldCheck,
+  Smartphone,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
+import type { MemberRole } from '../domain/dr';
 
 export type AppMode = 'command' | 'deck';
+
+/** Signed-in console session shown in the header. */
+export interface HeaderSession {
+  orgName: string;
+  role: MemberRole;
+  email: string;
+  onSignOut: () => void;
+}
 
 interface AppHeaderProps {
   mode: AppMode;
@@ -9,6 +26,10 @@ interface AppHeaderProps {
   onToggleSound: () => void;
   onShare: () => void;
   isSimulated: boolean;
+  telemetryIsSimulated?: boolean;
+  session?: HeaderSession;
+  /** Link to the signed-in console; shown only when a backend is configured. */
+  signInHref?: string;
 }
 
 export default function AppHeader({
@@ -18,6 +39,9 @@ export default function AppHeader({
   onToggleSound,
   onShare,
   isSimulated,
+  telemetryIsSimulated = isSimulated,
+  session,
+  signInHref,
 }: AppHeaderProps) {
   return (
     <header className="w-full max-w-5xl z-20 flex flex-wrap items-center justify-between gap-3 py-3 sm:py-4 mb-2 border-b border-white/5">
@@ -41,6 +65,14 @@ export default function AppHeader({
                 className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-aether-amber/10 border border-aether-amber/30 text-aether-amber"
               >
                 SIMULATED DATA
+              </span>
+            )}
+            {!isSimulated && telemetryIsSimulated && (
+              <span
+                title="Failover workflow, approvals and audit log are real and shared by your organization. Replication telemetry is simulated until a cloud account is connected."
+                className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-aether-amber/10 border border-aether-amber/30 text-aether-amber"
+              >
+                SIMULATED TELEMETRY
               </span>
             )}
           </div>
@@ -78,6 +110,34 @@ export default function AppHeader({
 
       {/* Actions: Audio & Share */}
       <div className="flex items-center gap-2">
+        {session ? (
+          <div className="flex items-center gap-2 pl-3 pr-1 py-1 rounded-xl bg-white/[0.03] border border-white/10">
+            <span className="text-[11px] font-mono leading-tight text-right">
+              <span className="block text-white">{session.orgName}</span>
+              <span className="block text-zinc-400" title={session.email}>
+                {session.role}
+              </span>
+            </span>
+            <button
+              onClick={session.onSignOut}
+              aria-label="Sign out"
+              title={`Sign out ${session.email}`}
+              className="p-2 rounded-lg hover:bg-white/[0.08] text-zinc-400 hover:text-white transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          signInHref && (
+            <a
+              href={signInHref}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-aether-cyan/10 hover:bg-aether-cyan/20 border border-aether-cyan/30 text-xs font-mono text-aether-cyan hover:text-white transition-colors"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>Sign in</span>
+            </a>
+          )
+        )}
         <button
           onClick={onToggleSound}
           title={isMuted ? 'Unmute Synthesizer Audio' : 'Mute Audio'}

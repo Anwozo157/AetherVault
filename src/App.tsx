@@ -1,7 +1,7 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
 import AmbientBackground from './components/AmbientBackground';
 import AppFooter from './components/AppFooter';
-import AppHeader, { type AppMode } from './components/AppHeader';
+import AppHeader, { type AppMode, type HeaderSession } from './components/AppHeader';
 import ErrorBoundary from './components/ErrorBoundary';
 import ShareModal from './components/ShareModal';
 import { SystemState } from './domain/dr';
@@ -12,7 +12,13 @@ import { saveSoundEnabled, sound } from './lib/audioEffects';
 
 const InvestorPitchDeck = lazy(() => import('./features/pitch/InvestorPitchDeck'));
 
-export default function App() {
+interface AppProps {
+  /** Signed-in console session (absent on the public simulated demo). */
+  session?: HeaderSession;
+  signInHref?: string;
+}
+
+export default function App({ session, signInHref }: AppProps = {}) {
   const { provider, state } = useDrSession();
   const [mode, setMode] = useState<AppMode>('command');
   const [isMuted, setIsMuted] = useState(() => sound.isMuted);
@@ -50,6 +56,9 @@ export default function App() {
           onToggleSound={toggleSound}
           onShare={() => setShowShare(true)}
           isSimulated={provider.isSimulated}
+          telemetryIsSimulated={provider.telemetryIsSimulated}
+          session={session}
+          signInHref={signInHref}
         />
 
         {mode === 'deck' ? (

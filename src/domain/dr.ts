@@ -74,12 +74,49 @@ export interface LogEvent {
 
 export type Unsubscribe = () => void;
 
+export type MemberRole = 'viewer' | 'operator' | 'approver' | 'admin';
+
+/** A failover run as seen by a server-backed provider (two-person approval). */
+export interface FailoverRun {
+  id: string;
+  sourceRegion: string;
+  targetRegion: string;
+  requestedByEmail: string | null;
+  requestedByMe: boolean;
+  requestedAt: string;
+  approvedByEmail: string | null;
+  approvedAt: string | null;
+  /** True until a second person (approver or admin) approves the request. */
+  pendingApproval: boolean;
+}
+
+/**
+ * Optional capability for providers that enforce two-person approval
+ * (e.g. the Supabase backend). The simulated demo does not implement it.
+ */
+export interface ApprovalCapability {
+  readonly role: MemberRole;
+  /** The organization's open run, or null when none is open. */
+  getRun(): FailoverRun | null;
+  onRunChange(listener: (run: FailoverRun | null) => void): Unsubscribe;
+  canRequest(): boolean;
+  /** True when this user may approve the current pending run (role and not the requester). */
+  canApprove(): boolean;
+  approve(): Promise<void>;
+  /** Withdraws a pending request (or aborts before cutover). */
+  cancel(): Promise<void>;
+}
+
 /** Contract every disaster-recovery data source must implement. */
 export interface DrProvider {
   /** Human-readable provider name, shown in the UI. */
   readonly name: string;
-  /** True when data is generated rather than read from real infrastructure. */
+  /** True when ALL data is generated rather than read from real infrastructure. */
   readonly isSimulated: boolean;
+  /** True when replication telemetry (lag, throughput, alarms) is generated. */
+  readonly telemetryIsSimulated: boolean;
+  /** Present when failovers need a second person's approval. */
+  readonly approvals?: ApprovalCapability;
 
   getState(): SystemState;
   getMetrics(): BasicMetrics;

@@ -17,6 +17,7 @@ const MAX_LOGS = 50;
 export class MockDrProvider implements DrProvider {
   readonly name = 'Simulated Demo';
   readonly isSimulated = true;
+  readonly telemetryIsSimulated = true;
 
   private currentState: SystemState = SystemState.IDLE;
   private stateListeners = new Set<(state: SystemState) => void>();

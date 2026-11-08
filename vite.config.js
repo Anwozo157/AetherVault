@@ -21,6 +21,9 @@ export default defineConfig({
         'src/**/*.test.{ts,tsx}',
         'src/setupTests.ts',
         'src/main.tsx',
+        // Composition root for #/console (auth + Supabase wiring); covered by e2e/console.spec.ts.
+        'src/console/ConsoleRoot.tsx',
+        'src/vite-env.d.ts',
         // Need WebGL / Web Audio, which jsdom lacks; covered by Playwright E2E instead.
         'src/features/topology/GlobalTopologyCanvas.tsx',
         'src/lib/audioEffects.ts',

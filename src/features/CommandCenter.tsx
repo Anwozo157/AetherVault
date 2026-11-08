@@ -3,8 +3,10 @@ import { Suspense, lazy, useState } from 'react';
 import { DEFAULT_TARGET_REGION, SOURCE_REGION } from '../config/regions';
 import { SystemState } from '../domain/dr';
 import { useDrSession } from '../hooks/useDrSession';
+import { useFailoverRun } from '../hooks/useFailoverRun';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { sound } from '../lib/audioEffects';
+import ApprovalPanel from './failover/ApprovalPanel';
 import ControlBar, { type CommandTab } from './failover/ControlBar';
 import FailoverControl from './failover/FailoverControl';
 import MetricsOverview from './telemetry/MetricsOverview';
@@ -33,7 +35,12 @@ export default function CommandCenter({
 }) {
   const { provider, state, metrics, telemetry, logs } = useDrSession();
   const [tab, setTab] = useState<CommandTab>('hud');
-  const [targetRegion, setTargetRegion] = useState(DEFAULT_TARGET_REGION);
+  const [selectedTarget, setSelectedTarget] = useState(DEFAULT_TARGET_REGION);
+  const run = useFailoverRun();
+  const approvals = provider.approvals;
+  // With a server backend, everyone sees the open run's target, not their own selection.
+  const targetRegion = run?.targetRegion ?? selectedTarget;
+  const viewOnly = !!approvals && !approvals.canRequest() && state === SystemState.IDLE;
 
   const handleAbort = () => {
     if (provider.abortFailover()) sound.stopHoldCharge();
@@ -45,8 +52,8 @@ export default function CommandCenter({
         tab={tab}
         onTabChange={setTab}
         targetRegion={targetRegion}
-        onTargetRegionChange={setTargetRegion}
-        regionLocked={state !== SystemState.IDLE}
+        onTargetRegionChange={setSelectedTarget}
+        regionLocked={state !== SystemState.IDLE || !!run}
         chaosActive={chaosActive}
         onToggleChaos={onToggleChaos}
       />
@@ -75,14 +82,23 @@ export default function CommandCenter({
               telemetry={telemetry}
               chaosActive={chaosActive}
             />
-            <FailoverControl
-              state={state}
-              targetRegion={targetRegion}
-              rto={metrics.rto}
-              onTrigger={() => provider.triggerFailover(SOURCE_REGION, targetRegion)}
-              onAbort={handleAbort}
-              onReset={() => provider.resetToStandby()}
-            />
+            {approvals && run?.pendingApproval ? (
+              <ApprovalPanel run={run} approvals={approvals} />
+            ) : viewOnly ? (
+              <p className="col-span-1 md:col-span-3 mt-4 py-6 border-t border-white/5 text-center text-xs font-mono text-zinc-400">
+                View-only access ({approvals.role}). Operators can request failovers; approvers
+                approve them.
+              </p>
+            ) : (
+              <FailoverControl
+                state={state}
+                targetRegion={targetRegion}
+                rto={metrics.rto}
+                onTrigger={() => provider.triggerFailover(SOURCE_REGION, targetRegion)}
+                onAbort={handleAbort}
+                onReset={() => provider.resetToStandby()}
+              />
+            )}
           </motion.div>
         </>
       ) : (

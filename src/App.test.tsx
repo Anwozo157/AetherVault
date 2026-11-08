@@ -30,6 +30,7 @@ vi.mock('./lib/audioEffects', () => ({
 class FakeProvider implements DrProvider {
   readonly name = 'Fake';
   readonly isSimulated = true;
+  readonly telemetryIsSimulated = true;
   private snapshot = new MockDrProvider();
   private state = SystemState.IDLE;
   private stateListeners = new Set<(s: SystemState) => void>();

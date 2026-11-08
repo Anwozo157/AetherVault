@@ -8,7 +8,7 @@
 
 Repo location: `~/Developer/AetherVault` (keep it out of iCloud-synced folders).
 
-Enterprise disaster-recovery command center by Aegis Core Labs. Currently a front-end demo; **all telemetry is simulated** by `src/providers/MockDrProvider.ts`.
+Enterprise disaster-recovery command center by Aegis Core Labs. The public demo is fully simulated (`src/providers/MockDrProvider.ts`). The signed-in console (`#/console`, local Supabase until Phase 3.6) has real auth, roles, two-person approval and an audit log; **replication telemetry is still simulated** everywhere.
 
 ## Commands
 
@@ -16,6 +16,8 @@ Enterprise disaster-recovery command center by Aegis Core Labs. Currently a fron
 - `npm test` — Vitest unit/component tests
 - `npm run coverage`: tests with coverage thresholds
 - `npm run e2e`: Playwright browser tests (desktop + mobile; locally uses installed Google Chrome)
+- `npm run e2e:console`: signed-in console E2E (two browsers) against local Supabase; resets the local DB first
+- Console dev: copy `.env.example` to `.env.local`, fill values from `npx supabase status -o env`, then `npm run dev` and open `#/console`
 - `npm run typecheck` — strict TypeScript (`tsc --noEmit`)
 - `npm run lint` / `npm run format` — ESLint / Prettier
 - `npm run build` — production build to `dist/`
