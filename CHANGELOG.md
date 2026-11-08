@@ -5,6 +5,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Founder slide from Cloud Architect resume (2026-11-08)
+
+- Bio now leads with the founder's hybrid-cloud DR design (AWS Elastic Disaster Recovery, Direct Connect, private BGP; modeled sub-15-minute RTO; projected DR cost $3,000+/mo → $436/mo), per `Antonio_Nwozo_Cloud_Architect_Resume.pdf`. Worded as designed/modeled, matching the resume.
+- UFC event described as the UFC event at the White House marking America's 250th (resume's "UFC 250" label refers to a different 2020 event).
+- Inauguration year kept as 2025 (inaugurations occur in January after the election; both resumes say 2025).
+- Chips: Core Expertise "DevOps Engineer", Cloud DR Design "AWS DRS • Direct Connect • BGP", Track Record "100+ Deployments".
+
 ### Phase 2c: Continuous integration (2026-11-08)
 
 #### Added

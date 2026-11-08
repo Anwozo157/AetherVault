@@ -384,9 +384,9 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
     {
       id: 'leadership',
       badge: 'FOUNDING LEADERSHIP',
-      title: 'Network Infrastructure Engineering DNA',
+      title: 'Hybrid Cloud & Network Engineering DNA',
       subtitle:
-        'Built by an engineer who has deployed mission-critical backhaul links under the highest pressure.',
+        'Built by an engineer who has designed cloud disaster recovery and deployed mission-critical networks under pressure.',
       content: (
         <div className="max-w-3xl mx-auto my-auto bg-white/[0.02] border border-white/10 rounded-3xl p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row items-center gap-6 mb-6">
@@ -399,12 +399,15 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
                 Founder & Lead Cloud Architect • Aegis Core Labs
               </p>
               <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
-                RF and wireless network engineer with 100+ end-to-end high-capacity deployments.
-                Delivered broadcast connectivity for the{' '}
+                Hybrid infrastructure and cloud engineer bridging Layer 1/2 telecom, fixed-wireless
+                backhaul and AWS. Designed a{' '}
+                <strong>pilot-light disaster recovery architecture</strong> (AWS Elastic Disaster
+                Recovery, Direct Connect, private BGP peering) modeled at a sub-15-minute RTO,
+                cutting projected DR cost from $3,000+/month to $436/month. 100+ high-capacity
+                deployments, including broadcast connectivity for the{' '}
                 <strong>2025 Presidential Inauguration</strong> (Associated Press, Telemundo and
-                other global networks), multi-link 10 Gb networks for UFC 250 at the White House,
-                and a 6-mile, ~4 Gbps wireless backhaul between Virginia and DC. Now applying Linux,
-                AWS, Terraform and Kubernetes to cloud resilience.
+                other global networks), a 6-mile ~4 Gbps backhaul, and 10 Gbps networks for the UFC
+                event at the White House marking America&apos;s 250th.
               </p>
             </div>
           </div>
@@ -415,14 +418,14 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               <p className="text-xs font-semibold text-white mt-0.5">DevOps Engineer</p>
             </div>
             <div className="bg-black/40 p-3 rounded-xl border border-white/5">
-              <p className="text-[10px] font-mono text-zinc-500">Track Record</p>
-              <p className="text-xs font-semibold text-white mt-0.5">100+ High-Capacity Links</p>
+              <p className="text-[10px] font-mono text-zinc-500">Cloud DR Design</p>
+              <p className="text-xs font-semibold text-white mt-0.5">
+                AWS DRS • Direct Connect • BGP
+              </p>
             </div>
             <div className="bg-black/40 p-3 rounded-xl border border-white/5">
-              <p className="text-[10px] font-mono text-zinc-500">Cloud & Automation</p>
-              <p className="text-xs font-semibold text-white mt-0.5">
-                AWS • Terraform • Kubernetes
-              </p>
+              <p className="text-[10px] font-mono text-zinc-500">Track Record</p>
+              <p className="text-xs font-semibold text-white mt-0.5">100+ Deployments</p>
             </div>
           </div>
         </div>

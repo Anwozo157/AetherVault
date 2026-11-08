@@ -37,7 +37,6 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 ## Known issues
 
 - Dev-only dependency advisories (Vite 5, Vitest 2) need major upgrades: do as a dedicated, tested task.
-- Founder to confirm inauguration wording (resume says 2025; founder mentioned 2024).
 
 - `DEGRADED_STATE` exists in the state machine but is never entered; chaos mode only changes telemetry.
 - Share modal QR code uses the free `api.qrserver.com` service (external request).
