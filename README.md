@@ -36,6 +36,9 @@ npm install --legacy-peer-deps
 
 # 3. Launch Command Center
 npm run dev
+
+# 4. Run the test suite (Vitest + Testing Library)
+npm test
 ```
 
 Open `http://localhost:5174` in your browser.

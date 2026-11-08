@@ -190,6 +190,19 @@ export class DisasterRecoveryBackend {
     this.emitMetrics({ rpo: '< 0.01s', rto: 'COMPLETED', sync: 100 });
   }
 
+  /** Return a secured system to standby so the failover can be demoed again. */
+  public resetToStandby() {
+    if (this.currentState !== SystemState.SECURED) return;
+
+    this.updateState(SystemState.IDLE);
+    this.pushLog('INFO', 'CORE', 'Failover drill reset. Continuous replication resumed from primary region.');
+    this.emitMetrics({ rpo: '0.0s', rto: '--', sync: 100 });
+  }
+
+  public getState() {
+    return this.currentState;
+  }
+
   public onStateChange(listener: StateListener) {
     this.stateListeners.add(listener);
     return () => this.stateListeners.delete(listener);
