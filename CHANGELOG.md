@@ -5,6 +5,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Globe visibility (2026-11-08)
+
+#### Changed
+
+- 3D globe wireframe now uses the brand cyan (22% opacity) instead of near-black, over a dark solid core that hides the back half so the grid reads cleanly.
+- Region markers are placed on the globe surface so the core never hides them.
+
 ### Multi-agent handoff (2026-11-08)
 
 #### Added

@@ -4,17 +4,29 @@ import { Sphere, Line, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 
 // 1. The Core Infrastructure Globe
+// Cyan wireframe (brand accent) over a dark solid core. The core hides the back
+// half of the wireframe so the front grid reads cleanly instead of a dense mesh.
+const GLOBE_WIREFRAME_COLOR = '#00F0FF';
+const GLOBE_WIREFRAME_OPACITY = 0.22;
+/** Region markers sit just above the surface so the solid core never hides them. */
+const NODE_RADIUS = 2.03;
+const onSurface = (x: number, y: number, z: number) =>
+  new THREE.Vector3(x, y, z).normalize().multiplyScalar(NODE_RADIUS);
+
 const Globe = () => (
-  <Sphere args={[2, 48, 48]}>
-    <meshStandardMaterial
-      color="#0B0F17"
-      roughness={0.7}
-      metalness={0.9}
-      wireframe={true}
-      transparent
-      opacity={0.25}
-    />
-  </Sphere>
+  <group>
+    <Sphere args={[1.98, 48, 48]}>
+      <meshBasicMaterial color="#070B12" />
+    </Sphere>
+    <Sphere args={[2, 36, 24]}>
+      <meshBasicMaterial
+        color={GLOBE_WIREFRAME_COLOR}
+        wireframe
+        transparent
+        opacity={GLOBE_WIREFRAME_OPACITY}
+      />
+    </Sphere>
+  </group>
 );
 
 // 2. Animated Replication Stream (eBPF Block Transfer)
@@ -77,17 +89,17 @@ export default function GlobalTopologyCanvas({
   chaosActive?: boolean;
 }) {
   // Geographically mapped coordinates for AWS us-east-1 and variable targets
-  const awsNode = useMemo(() => new THREE.Vector3(1.2, 1.0, 1.2), []);
+  const awsNode = useMemo(() => onSurface(1.2, 1.0, 1.2), []);
 
   const targetNode = useMemo(() => {
     switch (targetRegion) {
       case 'aws-us-west-2':
-        return new THREE.Vector3(-1.8, 0.8, -0.6);
+        return onSurface(-1.8, 0.8, -0.6);
       case 'azure-eastus2':
-        return new THREE.Vector3(1.1, 0.8, 1.4);
+        return onSurface(1.1, 0.8, 1.4);
       case 'gcp-us-central1':
       default:
-        return new THREE.Vector3(-1.0, 1.2, 1.4);
+        return onSurface(-1.0, 1.2, 1.4);
     }
   }, [targetRegion]);
 
