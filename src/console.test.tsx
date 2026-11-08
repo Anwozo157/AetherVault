@@ -208,6 +208,17 @@ describe('SignInForm', () => {
     expect(onMagicLink).toHaveBeenCalledWith('a@b.co');
   });
 
+  test('local mode points to the local inbox instead of claiming an email was sent', async () => {
+    render(
+      <SignInForm onMagicLink={vi.fn(async () => {})} localInboxUrl="http://127.0.0.1:54324" />,
+    );
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'a@b.co' } });
+    fireEvent.click(screen.getByRole('button', { name: /Email me a sign-in link/ }));
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Local mode: no real email is sent. Open the local inbox at http://127.0.0.1:54324',
+    );
+  });
+
   test('demo account shortcuts fill the form (local only)', () => {
     render(
       <SignInForm

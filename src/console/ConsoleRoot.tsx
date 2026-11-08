@@ -177,6 +177,8 @@ export default function ConsoleRoot() {
       <Screen>
         <SignInForm
           demoAccounts={isLocalBackend ? DEMO_ACCOUNTS : undefined}
+          // Local Supabase captures auth emails in Mailpit ([inbucket] port in supabase/config.toml).
+          localInboxUrl={isLocalBackend ? 'http://127.0.0.1:54324' : undefined}
           onPasswordSignIn={
             isLocalBackend
               ? async (email, password) => {

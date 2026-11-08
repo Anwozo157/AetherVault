@@ -10,12 +10,15 @@ export interface SignInFormProps {
   onMagicLink: (email: string) => Promise<void>;
   /** Seeded local accounts to show as a hint (local Docker database only). */
   demoAccounts?: readonly string[];
+  /** Where sign-in emails actually land (local mode: the Mailpit inbox, not real email). */
+  localInboxUrl?: string;
 }
 
 export default function SignInForm({
   onPasswordSignIn,
   onMagicLink,
   demoAccounts,
+  localInboxUrl,
 }: SignInFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -49,7 +52,11 @@ export default function SignInForm({
     }
     void run(async () => {
       await onMagicLink(email.trim());
-      setNotice(`Sign-in link sent to ${email.trim()}.`);
+      setNotice(
+        localInboxUrl
+          ? `Local mode: no real email is sent. Open the local inbox at ${localInboxUrl} and click the link for ${email.trim()}.`
+          : `Sign-in link sent to ${email.trim()}.`,
+      );
     });
   };
 
