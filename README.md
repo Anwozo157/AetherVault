@@ -42,9 +42,16 @@ Open `http://localhost:5174` in your browser.
 
 ---
 
-## 📱 Mobile Viewing for Stakeholders
+## 📱 Live Production Mobile & Web Demo for Stakeholders
 
-AetherVault is fully responsive for iPhone, iPad, and Android displays, featuring native touch events (`onTouchStart` / `onTouchEnd`) for hold-to-confirm failovers and touch-based 3D globe orbit controls.
+- **Live URL:** [https://anwozo157.github.io/AetherVault/](https://anwozo157.github.io/AetherVault/)
+- **Zero Infrastructure Cost:** Hosted permanently via GitHub Pages ($0.00/mo).
+- **Mobile Optimized:** Full touch support on iOS & Android browsers for 3D globe gesture rotation and hold-to-failover haptics.
+
+<div align="center">
+  <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://anwozo157.github.io/AetherVault/" alt="Scan for Mobile Live Demo" width="160" />
+  <p><em>Scan with iPhone or Android camera for instant live demo</em></p>
+</div>
 
 ---
 

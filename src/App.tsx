@@ -97,7 +97,7 @@ export default function App() {
       <header className="w-full max-w-4xl z-20 flex items-center justify-between py-4 mb-4 border-b border-white/5">
         <div className="flex items-center gap-3.5">
           <img 
-            src="/aethervault-logo.jpeg" 
+            src="./aethervault-logo.jpeg" 
             alt="AetherVault Logo" 
             className="w-10 h-10 rounded-xl object-cover shadow-2xl border border-white/20"
           />
@@ -282,17 +282,28 @@ export default function App() {
               className="bg-[#0D121F] border border-white/10 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative text-center"
             >
               <h3 className="text-xl font-bold text-white mb-2">Share With Shareholders</h3>
-              <p className="text-xs text-zinc-400 mb-6">
-                AetherVault is fully mobile-responsive. When deployed to Vercel/Web, shareholders can interact with the live 3D globe and failover simulation right on their phones.
+              <p className="text-xs text-zinc-400 mb-4">
+                AetherVault is fully mobile-optimized. Scan this QR code with any smartphone camera to launch the live 3D failover command center.
               </p>
 
-              {/* QR Code Placeholder Graphic */}
-              <div className="w-48 h-48 mx-auto bg-white p-3 rounded-2xl flex items-center justify-center mb-6 shadow-xl">
+              {/* QR Code Graphic pointing to GitHub Pages Live Site */}
+              <div className="w-52 h-52 mx-auto bg-white p-3 rounded-2xl flex flex-col items-center justify-center mb-4 shadow-xl">
                 <img 
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://github.com/Anwozo157/AetherVault" 
-                  alt="AetherVault QR Code"
-                  className="w-full h-full object-contain"
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://anwozo157.github.io/AetherVault/" 
+                  alt="AetherVault Live Mobile QR Code"
+                  className="w-44 h-44 object-contain"
                 />
+              </div>
+
+              <div className="mb-5 text-center">
+                <a 
+                  href="https://anwozo157.github.io/AetherVault/" 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="text-xs font-mono text-[#00F0FF] underline hover:text-white"
+                >
+                  https://anwozo157.github.io/AetherVault/
+                </a>
               </div>
 
               <div className="flex gap-3 justify-center">
