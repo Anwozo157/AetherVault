@@ -65,6 +65,22 @@ ACTIVE_SYNC → QUIESCE_AND_SNAPSHOT → HYDRATING_TARGET → DNS_CUTOVER → TA
 - `providers/MockDrProvider.test.ts`: lifecycle, abort windows, log buffer (fake timers).
 - `App.test.tsx`: UI behavior against a `FakeProvider` injected via `<DrProviderRoot>`.
 
+## Database (Phase 3, local only)
+
+`supabase/` holds the backend that will replace `MockDrProvider` (ADRs 0002, 0003). Not yet wired
+into the UI and not hosted.
+
+- `migrations/20261108000001_core_schema.sql`: `orgs`, `memberships` (roles `viewer` < `operator` <
+  `approver` < `admin`), `failover_runs`, `audit_log`.
+- Clients only read (RLS: members of the org). All writes go through `SECURITY DEFINER` RPCs
+  (`create_org`, `set_member_role`, `request_failover`, `approve_failover`, `abort_failover`,
+  `reset_failover`) that check the role and append to the audit log in the same transaction.
+- Failover stage is derived from timestamps by `run_stage()`, mirroring the mock's timings.
+  Two-person approval and one open run per org are enforced by constraints.
+- `audit_log` is append-only (triggers) and SHA-256 hash-chained per org; `verify_audit_chain()`
+  returns the first broken row.
+- `tests/database/core_schema.test.sql`: pgTAP suite (`npm run db:test`).
+
 ## Tooling
 
 Vite 5 (base `./` for GitHub Pages), Tailwind v3 via PostCSS with `aether-*` tokens, Vitest +

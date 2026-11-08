@@ -9,19 +9,22 @@
 | --------------- | ----------------------------------------------------------------------------- | -------------------- |
 | 0. Foundation   | Strict TS, ESLint/Prettier, compiled Tailwind + brand tokens, docs            | ✅ Done (2026-11-08) |
 | 1. Architecture | `DrProvider` interface, feature folders, abort, lazy loading, simulated badge | ✅ Done (2026-11-08) |
-| 2. Quality bar  | Playwright E2E, WCAG 2.2 AA, Lighthouse 90+, GitHub Actions CI                | ⏭️ Next              |
-| 3. Backend MVP  | Free-tier only until funded (see `AGENTS.md` rule 1)                          | Not started          |
+| 2. Quality bar  | Playwright E2E, WCAG 2.2 AA, Lighthouse 90+, GitHub Actions CI                | ✅ 2a–2c done        |
+| 3. Backend MVP  | Free-tier only until funded (see `AGENTS.md` rule 1)                          | 🚧 3.1–3.3 done      |
 | 4. Productize   | Multi-tenant, DR drills, compliance reports                                   | Not started          |
 
 Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.md`.
 
 ## Health (as of last update)
 
+- `npm run db:test`: 39 pgTAP tests passing (local Supabase, Postgres 17).
 - `npm run lint`, `npm run typecheck`, `npm test` (25 tests), `npm run build`: all passing.
 - Initial JS bundle 293 kB (95 kB gzip); 3D globe chunk loads lazily.
 - Verified in headless Chrome: home, hold-to-failover, abort, AWS DRS tab, investor deck.
 
 ## Next steps (in order)
+
+0. **Phase 3.4:** `SupabaseDrProvider` + sign-in + approval UI against local Supabase (`npm run db:start`). Schema, RPCs and pgTAP suite (39 tests) are done and passing on branch `feat/phase-3.2-database`; merge it into `main` first. Plan: `docs/PHASE_3_PLAN.md`.
 
 1. ✅ Pitch deck accuracy pass done (2026-11-08): all statistics cited (EMA 2024, ITIC 2024, Uptime 2025, Flexera 2026, MarketsandMarkets Jan 2026); founder bio grounded in master resume; pilots targeted March 2027. Open: seed-round date still TBD; $4.2B SAM is an internal estimate (document the methodology).
 2. **Redeploy live site** (`gh-pages` branch). Live site is still the pre-Phase-0 build: it lacks the pitch-deck crash fix, chaos overflow fix, abort, and simulated badge. Needs founder OK.

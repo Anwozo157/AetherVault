@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Phase 3.2–3.3: Database schema verified (2026-11-08)
+
+- Ran the pgTAP suite against local Supabase (Postgres 17): all 39 tests pass with no schema changes. Covers each role's allowed and denied actions, signed-out and non-member access, the two-person rule, one open run per org, abort refused from DNS cutover on, reset only after the target is secured, append-only audit log, and hash-chain tamper detection.
+- `docs/ARCHITECTURE.md`: new Database section.
+
 ### Housekeeping (2026-11-08)
 
 - Repo moved to `~/Developer/AetherVault` via fresh clone; old iCloud-synced copy (with " 2" conflict duplicates, including inside `.git`) moved to Trash.
