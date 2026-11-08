@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "verify": "npm run lint && npm run typecheck && npm test && npm run build"
+    "verify": "npm run lint && npm run typecheck && npm test && npm run build",
+    "deploy": "bash scripts/deploy-pages.sh"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",

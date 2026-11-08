@@ -15,6 +15,7 @@ Enterprise disaster-recovery command center by Aegis Core Labs. Currently a fron
 - `npm run typecheck` — strict TypeScript (`tsc --noEmit`)
 - `npm run lint` / `npm run format` — ESLint / Prettier
 - `npm run build` — production build to `dist/`
+- `npm run deploy`: verify, build, publish to GitHub Pages (`gh-pages` branch). **Founder runs this or explicitly approves it.**
 
 Install with `npm install --legacy-peer-deps` (React Three Fiber peer ranges).
 
