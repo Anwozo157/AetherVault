@@ -537,6 +537,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
           <button
             onClick={() => setCurrentSlide((prev) => Math.max(prev - 1, 0))}
             disabled={currentSlide === 0}
+            aria-label="Previous slide"
             className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-zinc-300 transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -544,6 +545,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
           <button
             onClick={() => setCurrentSlide((prev) => Math.min(prev + 1, slides.length - 1))}
             disabled={currentSlide === slides.length - 1}
+            aria-label="Next slide"
             className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-zinc-300 transition-colors"
           >
             <ChevronRight className="w-4 h-4" />
@@ -581,6 +583,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
         {slides.map((slide, idx) => (
           <button
             key={slide.id}
+            aria-label={`Go to slide ${idx + 1}`}
             onClick={() => setCurrentSlide(idx)}
             className={`h-1.5 rounded-full transition-all ${
               idx === currentSlide

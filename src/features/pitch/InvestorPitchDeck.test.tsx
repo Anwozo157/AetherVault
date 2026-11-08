@@ -7,8 +7,7 @@ describe('InvestorPitchDeck', () => {
     render(<InvestorPitchDeck onLaunchDemo={vi.fn()} />);
     expect(screen.getByText('Slide 1 of 7')).toBeInTheDocument();
 
-    const buttons = screen.getAllByRole('button');
-    const next = buttons[buttons.length - 1];
+    const next = screen.getByRole('button', { name: 'Next slide' });
     for (let slide = 2; slide <= 7; slide++) {
       fireEvent.click(next);
       expect(screen.getByText(`Slide ${slide} of 7`)).toBeInTheDocument();
