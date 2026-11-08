@@ -1,9 +1,20 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ShieldCheck, TrendingUp, ChevronRight, ChevronLeft, Activity, Clock,
-  Layers, Cpu, Database, CheckCircle2, AlertOctagon,
-  ArrowRight, Users, Sparkles
+import {
+  ShieldCheck,
+  TrendingUp,
+  ChevronRight,
+  ChevronLeft,
+  Activity,
+  Clock,
+  Layers,
+  Cpu,
+  Database,
+  CheckCircle2,
+  AlertOctagon,
+  ArrowRight,
+  Users,
+  Sparkles,
 } from 'lucide-react';
 
 interface InvestorPitchDeckProps {
@@ -23,9 +34,9 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
       content: (
         <div className="flex flex-col items-center text-center max-w-2xl mx-auto">
           <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-[#00F0FF]/20 to-[#00FF9D]/20 border border-white/20 p-2 shadow-2xl mb-6">
-            <img 
-              src="./aethervault-logo.jpeg" 
-              alt="AetherVault Logo" 
+            <img
+              src="./aethervault-logo.jpeg"
+              alt="AetherVault Logo"
               className="w-full h-full object-cover rounded-2xl"
             />
           </div>
@@ -36,7 +47,8 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
             </span>
           </h2>
           <p className="text-sm sm:text-base text-zinc-400 mb-8 leading-relaxed">
-            Eliminating multi-million dollar outage risks with sub-second RPO, pilot-light zero-idle cloud storage, and single-click autonomous cross-cloud failover.
+            Eliminating multi-million dollar outage risks with sub-second RPO, pilot-light zero-idle
+            cloud storage, and single-click autonomous cross-cloud failover.
           </p>
 
           <div className="grid grid-cols-3 gap-4 w-full text-left bg-white/[0.02] border border-white/5 rounded-2xl p-4 sm:p-6 mb-8">
@@ -57,7 +69,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
             </div>
           </div>
         </div>
-      )
+      ),
     },
 
     // Slide 2: The Problem
@@ -75,7 +87,9 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Astronomical Losses</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Gartner reports the average enterprise downtime cost is <strong>$540,000 per hour</strong> ($9,000/min), risking SEC penalties, SLA fines, and brand destruction.
+                Gartner reports the average enterprise downtime cost is{' '}
+                <strong>$540,000 per hour</strong> ($9,000/min), risking SEC penalties, SLA fines,
+                and brand destruction.
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-red-500/10">
@@ -91,7 +105,8 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Wasteful Standby Costs</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Traditional "Hot Standby" architectures force enterprises to duplicate 100% of their idle compute infrastructure, burning tens of thousands per month on unused servers.
+                Traditional "Hot Standby" architectures force enterprises to duplicate 100% of their
+                idle compute infrastructure, burning tens of thousands per month on unused servers.
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-white/10">
@@ -107,7 +122,8 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Human Error in Outages</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                74% of disaster recovery failures stem from manual runbooks, DNS misconfigurations, and panicking SRE teams during live cutovers.
+                74% of disaster recovery failures stem from manual runbooks, DNS misconfigurations,
+                and panicking SRE teams during live cutovers.
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-white/10">
@@ -116,7 +132,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
             </div>
           </div>
         </div>
-      )
+      ),
     },
 
     // Slide 3: The Solution
@@ -135,7 +151,8 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               <div>
                 <h4 className="text-sm font-bold text-white">Continuous Sub-Second Replication</h4>
                 <p className="text-xs text-zinc-400 mt-1">
-                  Block-level journal mirroring (AWS DRS integration) captures delta changes continuously with RPO under 0.1s and zero compute running costs.
+                  Block-level journal mirroring (AWS DRS integration) captures delta changes
+                  continuously with RPO under 0.1s and zero compute running costs.
                 </p>
               </div>
             </div>
@@ -147,7 +164,8 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               <div>
                 <h4 className="text-sm font-bold text-white">Dynamic Multi-Cloud Hydration</h4>
                 <p className="text-xs text-zinc-400 mt-1">
-                  Failover seamlessly across clouds: route from primary nodes to GCP us-central1, AWS us-west-2, or Azure East US 2 on demand.
+                  Failover seamlessly across clouds: route from primary nodes to GCP us-central1,
+                  AWS us-west-2, or Azure East US 2 on demand.
                 </p>
               </div>
             </div>
@@ -159,7 +177,8 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               <div>
                 <h4 className="text-sm font-bold text-white">Apple-Grade Command Center HUD</h4>
                 <p className="text-xs text-zinc-400 mt-1">
-                  Three.js 3D global telemetry, procedural audio feedback, and accidental-click prevention provide C-suite confidence during live incidents.
+                  Three.js 3D global telemetry, procedural audio feedback, and accidental-click
+                  prevention provide C-suite confidence during live incidents.
                 </p>
               </div>
             </div>
@@ -182,7 +201,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
             </button>
           </div>
         </div>
-      )
+      ),
     },
 
     // Slide 4: Market Opportunity
@@ -190,12 +209,15 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
       id: 'market',
       badge: 'MARKET SIZE & TIMING',
       title: 'A $15.8B High-Growth Market',
-      subtitle: 'Explosive cloud migration and tightening compliance standards are forcing modernization.',
+      subtitle:
+        'Explosive cloud migration and tightening compliance standards are forcing modernization.',
       content: (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto my-auto">
           <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6 text-center flex flex-col justify-between">
             <div>
-              <p className="text-xs font-mono uppercase text-[#00F0FF] tracking-widest mb-1">Total Addressable</p>
+              <p className="text-xs font-mono uppercase text-[#00F0FF] tracking-widest mb-1">
+                Total Addressable
+              </p>
               <h3 className="text-4xl font-extrabold font-mono text-white mb-2">$15.8B</h3>
               <p className="text-xs text-zinc-400">
                 Global Cloud Disaster Recovery & High-Availability Market by 2028.
@@ -208,10 +230,13 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
 
           <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6 text-center flex flex-col justify-between">
             <div>
-              <p className="text-xs font-mono uppercase text-[#00FF9D] tracking-widest mb-1">Serviceable Addressable</p>
+              <p className="text-xs font-mono uppercase text-[#00FF9D] tracking-widest mb-1">
+                Serviceable Addressable
+              </p>
               <h3 className="text-4xl font-extrabold font-mono text-white mb-2">$4.2B</h3>
               <p className="text-xs text-zinc-400">
-                Mid-market and Enterprise companies with strict multi-cloud compliance mandates (Fintech, Healthtech, Carrier Telecom).
+                Mid-market and Enterprise companies with strict multi-cloud compliance mandates
+                (Fintech, Healthtech, Carrier Telecom).
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-white/5 text-[11px] font-mono text-zinc-500">
@@ -221,10 +246,13 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
 
           <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6 text-center flex flex-col justify-between">
             <div>
-              <p className="text-xs font-mono uppercase text-purple-400 tracking-widest mb-1">Target Initial SOM</p>
+              <p className="text-xs font-mono uppercase text-purple-400 tracking-widest mb-1">
+                Target Initial SOM
+              </p>
               <h3 className="text-4xl font-extrabold font-mono text-white mb-2">$120M</h3>
               <p className="text-xs text-zinc-400">
-                Initial wedge targeting cloud-native AWS & GCP enterprises seeking automated DR without costly secondary cold clusters.
+                Initial wedge targeting cloud-native AWS & GCP enterprises seeking automated DR
+                without costly secondary cold clusters.
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-white/5 text-[11px] font-mono text-zinc-500">
@@ -232,7 +260,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
             </div>
           </div>
         </div>
-      )
+      ),
     },
 
     // Slide 5: Business Model
@@ -246,16 +274,30 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
           {/* Foundation Tier */}
           <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 flex flex-col justify-between">
             <div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-zinc-400">STANDARD</span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-zinc-400">
+                STANDARD
+              </span>
               <h3 className="text-xl font-bold text-white mt-2 mb-1">Foundation</h3>
-              <p className="text-2xl font-mono font-bold text-[#00F0FF] mb-4">$2,500 <span className="text-xs font-normal text-zinc-500">/ mo</span></p>
+              <p className="text-2xl font-mono font-bold text-[#00F0FF] mb-4">
+                $2,500 <span className="text-xs font-normal text-zinc-500">/ mo</span>
+              </p>
               <ul className="space-y-2 text-xs text-zinc-400">
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> Up to 25 Protected Workloads</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> AWS DRS Staging Integration</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> 3D HUD & Mobile Controls</li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> Up to 25 Protected
+                  Workloads
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> AWS DRS Staging
+                  Integration
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> 3D HUD & Mobile Controls
+                </li>
               </ul>
             </div>
-            <p className="text-[10px] font-mono text-zinc-500 mt-6 pt-3 border-t border-white/5">Target: Mid-Market SaaS</p>
+            <p className="text-[10px] font-mono text-zinc-500 mt-6 pt-3 border-t border-white/5">
+              Target: Mid-Market SaaS
+            </p>
           </div>
 
           {/* Enterprise Pro Tier */}
@@ -264,35 +306,68 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               CORE PRODUCT
             </span>
             <div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#00F0FF]/10 text-[#00F0FF]">RECOMMENDED</span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#00F0FF]/10 text-[#00F0FF]">
+                RECOMMENDED
+              </span>
               <h3 className="text-xl font-bold text-white mt-2 mb-1">Enterprise Pro</h3>
-              <p className="text-2xl font-mono font-bold text-white mb-4">$7,500 <span className="text-xs font-normal text-zinc-500">/ mo</span></p>
+              <p className="text-2xl font-mono font-bold text-white mb-4">
+                $7,500 <span className="text-xs font-normal text-zinc-500">/ mo</span>
+              </p>
               <ul className="space-y-2 text-xs text-zinc-300">
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> Unlimited Workloads & Volumes</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> Multi-Cloud Routing (AWS/GCP/Azure)</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> eBPF Real-Time Chaos Testing</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> 99.999% Failover RTO Guarantee</li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> Unlimited Workloads &
+                  Volumes
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> Multi-Cloud Routing
+                  (AWS/GCP/Azure)
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> eBPF Real-Time Chaos
+                  Testing
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> 99.999% Failover RTO
+                  Guarantee
+                </li>
               </ul>
             </div>
-            <p className="text-[10px] font-mono text-zinc-400 mt-6 pt-3 border-t border-white/10">Target: Series B+ to Fortune 500</p>
+            <p className="text-[10px] font-mono text-zinc-400 mt-6 pt-3 border-t border-white/10">
+              Target: Series B+ to Fortune 500
+            </p>
           </div>
 
           {/* Sovereign Tier */}
           <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 flex flex-col justify-between">
             <div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-300">CUSTOM</span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-300">
+                CUSTOM
+              </span>
               <h3 className="text-xl font-bold text-white mt-2 mb-1">Sovereign Cloud</h3>
-              <p className="text-2xl font-mono font-bold text-purple-300 mb-4">$25,000+ <span className="text-xs font-normal text-zinc-500">/ mo</span></p>
+              <p className="text-2xl font-mono font-bold text-purple-300 mb-4">
+                $25,000+ <span className="text-xs font-normal text-zinc-500">/ mo</span>
+              </p>
               <ul className="space-y-2 text-xs text-zinc-400">
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> Dedicated VPC & Air-Gapped Nodes</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> mmWave / Carrier Direct Connect</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> Custom On-Premises BGP Peering</li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> Dedicated VPC & Air-Gapped
+                  Nodes
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> mmWave / Carrier Direct
+                  Connect
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF9D]" /> Custom On-Premises BGP
+                  Peering
+                </li>
               </ul>
             </div>
-            <p className="text-[10px] font-mono text-zinc-500 mt-6 pt-3 border-t border-white/5">Target: Telcos, Defense, Banks</p>
+            <p className="text-[10px] font-mono text-zinc-500 mt-6 pt-3 border-t border-white/5">
+              Target: Telcos, Defense, Banks
+            </p>
           </div>
         </div>
-      )
+      ),
     },
 
     // Slide 6: Founder & Execution Edge
@@ -300,7 +375,8 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
       id: 'leadership',
       badge: 'FOUNDING LEADERSHIP',
       title: 'Infrastructure & Carrier Engineering DNA',
-      subtitle: 'Built by engineers who have deployed mission-critical backhaul links under the highest pressure.',
+      subtitle:
+        'Built by engineers who have deployed mission-critical backhaul links under the highest pressure.',
       content: (
         <div className="max-w-3xl mx-auto my-auto bg-white/[0.02] border border-white/10 rounded-3xl p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row items-center gap-6 mb-6">
@@ -309,9 +385,14 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
             </div>
             <div className="text-center sm:text-left">
               <h3 className="text-2xl font-bold text-white">Antonio Nwozo</h3>
-              <p className="text-sm font-mono text-[#00F0FF]">Founder & Lead Cloud Architect • Aegis Core Labs</p>
+              <p className="text-sm font-mono text-[#00F0FF]">
+                Founder & Lead Cloud Architect • Aegis Core Labs
+              </p>
               <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
-                Carrier-grade telecommunications and enterprise cloud engineer with extensive real-world experience designing mission-critical connectivity for the <strong>2025 Presidential Inauguration</strong>, multi-gigabit mmWave wireless backhauls, and enterprise data lake architectures.
+                Carrier-grade telecommunications and enterprise cloud engineer with extensive
+                real-world experience designing mission-critical connectivity for the{' '}
+                <strong>2025 Presidential Inauguration</strong>, multi-gigabit mmWave wireless
+                backhauls, and enterprise data lake architectures.
               </p>
             </div>
           </div>
@@ -331,7 +412,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
             </div>
           </div>
         </div>
-      )
+      ),
     },
 
     // Slide 7: Roadmap & Next Steps
@@ -345,45 +426,57 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <div className="bg-white/[0.02] border border-[#00FF9D]/30 p-4 rounded-xl">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono text-[#00FF9D] font-bold">PHASE 1 • COMPLETE</span>
+                <span className="text-[10px] font-mono text-[#00FF9D] font-bold">
+                  PHASE 1 • COMPLETE
+                </span>
                 <CheckCircle2 className="w-4 h-4 text-[#00FF9D]" />
               </div>
               <h4 className="text-sm font-bold text-white mb-1">Interactive 3D HUD</h4>
               <p className="text-[11px] text-zinc-400">
-                Three.js orbital globe, procedural audio synthesizer, and zero-cost GitHub Pages mobile deployment.
+                Three.js orbital globe, procedural audio synthesizer, and zero-cost GitHub Pages
+                mobile deployment.
               </p>
             </div>
 
             <div className="bg-white/[0.02] border border-[#00F0FF]/30 p-4 rounded-xl">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono text-[#00F0FF] font-bold">PHASE 2 • CURRENT</span>
+                <span className="text-[10px] font-mono text-[#00F0FF] font-bold">
+                  PHASE 2 • CURRENT
+                </span>
                 <Activity className="w-4 h-4 text-[#00F0FF]" />
               </div>
               <h4 className="text-sm font-bold text-white mb-1">AWS DRS Telemetry</h4>
               <p className="text-[11px] text-zinc-400">
-                CloudWatch synthetic canary monitoring, EBS block replication matrix, and live audit event log streaming.
+                CloudWatch synthetic canary monitoring, EBS block replication matrix, and live audit
+                event log streaming.
               </p>
             </div>
 
             <div className="bg-white/[0.02] border border-white/10 p-4 rounded-xl">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono text-zinc-400 font-bold">PHASE 3 • Q3 2026</span>
+                <span className="text-[10px] font-mono text-zinc-400 font-bold">
+                  PHASE 3 • Q3 2026
+                </span>
                 <Clock className="w-4 h-4 text-zinc-500" />
               </div>
               <h4 className="text-sm font-bold text-white mb-1">Design Partner Pilots</h4>
               <p className="text-[11px] text-zinc-400">
-                Deployment with 3 anchor fintech/carrier design partners under pilot SLAs and AWS Marketplace listing.
+                Deployment with 3 anchor fintech/carrier design partners under pilot SLAs and AWS
+                Marketplace listing.
               </p>
             </div>
 
             <div className="bg-white/[0.02] border border-white/10 p-4 rounded-xl">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono text-purple-400 font-bold">PHASE 4 • Q4 2026</span>
+                <span className="text-[10px] font-mono text-purple-400 font-bold">
+                  PHASE 4 • Q4 2026
+                </span>
                 <TrendingUp className="w-4 h-4 text-purple-400" />
               </div>
               <h4 className="text-sm font-bold text-white mb-1">Pre-Seed / Seed Round</h4>
               <p className="text-[11px] text-zinc-400">
-                Institutional seed financing to expand core engineering, enterprise sales, and multi-cloud certifications.
+                Institutional seed financing to expand core engineering, enterprise sales, and
+                multi-cloud certifications.
               </p>
             </div>
           </div>
@@ -398,8 +491,8 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
             </button>
           </div>
         </div>
-      )
-    }
+      ),
+    },
   ];
 
   const current = slides[currentSlide];
@@ -449,7 +542,9 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
           >
             {/* Title & Subtitle */}
             <div className="text-center mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">{current.title}</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                {current.title}
+              </h2>
               <p className="text-xs sm:text-sm text-zinc-400 mt-1">{current.subtitle}</p>
             </div>
 
@@ -466,8 +561,8 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
             key={slide.id}
             onClick={() => setCurrentSlide(idx)}
             className={`h-1.5 rounded-full transition-all ${
-              idx === currentSlide 
-                ? 'w-8 bg-gradient-to-r from-[#00F0FF] to-[#00FF9D]' 
+              idx === currentSlide
+                ? 'w-8 bg-gradient-to-r from-[#00F0FF] to-[#00FF9D]'
                 : 'w-2 bg-white/20 hover:bg-white/40'
             }`}
           />

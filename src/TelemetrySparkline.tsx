@@ -1,4 +1,3 @@
-
 interface TelemetrySparklineProps {
   data: number[];
   color: string;
@@ -14,7 +13,7 @@ export default function TelemetrySparkline({
   fillId,
   label,
   currentValue,
-  unit
+  unit,
 }: TelemetrySparklineProps) {
   const width = 280;
   const height = 54;
@@ -36,14 +35,16 @@ export default function TelemetrySparkline({
   return (
     <div className="flex flex-col bg-white/[0.02] border border-white/5 rounded-xl p-3 flex-1 min-w-[200px]">
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">{label}</span>
+        <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">
+          {label}
+        </span>
         <span className="text-xs font-mono font-semibold" style={{ color }}>
           {currentValue} <span className="text-[10px] font-normal text-zinc-500">{unit}</span>
         </span>
       </div>
       <div className="relative w-full h-[54px] overflow-hidden">
-        <svg 
-          viewBox={`0 0 ${width} ${height}`} 
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
           className="w-full h-full overflow-visible"
           preserveAspectRatio="none"
         >
@@ -54,13 +55,13 @@ export default function TelemetrySparkline({
             </linearGradient>
           </defs>
           <path d={areaD} fill={`url(#${fillId})`} />
-          <path 
-            d={pathD} 
-            fill="none" 
-            stroke={color} 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
+          <path
+            d={pathD}
+            fill="none"
+            stroke={color}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
         </svg>
       </div>
