@@ -29,8 +29,6 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 
 ## Open decisions for the founder
 
-- Approve `docs/PHASE_3_PLAN.md` (Supabase recommended).
-- Move the repo out of iCloud-synced `~/Documents` (iCloud is creating " 2" conflict copies, including `.git/index 2`). Suggested: `~/Developer/AetherVault`.
 - Dependabot opened 9 PRs; majors (Vitest 5, plugin-react 6, framer-motion 14, jest-dom 7) need a planned upgrade; Vitest 5 and plugin-react 6 fail CI as expected (need Vite 6+).
 
 - Push local `main` to GitHub? (Backup only; does not change the live site.)
@@ -39,6 +37,8 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 - Old duplicate project at `~/Documents/aethervault-command-center`: archive or delete?
 
 ## Known issues
+
+- Repo lives at `~/Developer/AetherVault` (moved 2026-11-08 out of iCloud-synced `~/Documents`, which created " 2" conflict copies). Do not move it back into iCloud.
 
 - Dev-only dependency advisories (Vite 5, Vitest 2) need major upgrades: do as a dedicated, tested task.
 

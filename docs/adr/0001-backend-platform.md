@@ -1,6 +1,6 @@
 # 0001. Backend platform: Supabase free tier
 
-- Status: Proposed (2026-11-08)
+- Status: Accepted (2026-11-08, approved by founder)
 - Deciders: Founder; Claude Code (drafted)
 
 ## Context

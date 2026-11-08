@@ -1,6 +1,6 @@
 # 0003. Server-authoritative failover and tamper-evident audit log
 
-- Status: Proposed (2026-11-08)
+- Status: Accepted (2026-11-08, approved by founder)
 
 ## Context
 

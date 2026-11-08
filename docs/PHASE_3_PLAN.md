@@ -1,6 +1,6 @@
 # Phase 3 Plan: Backend MVP ($0, free tier)
 
-> Status: **Proposed, awaiting founder approval** (2026-11-08).
+> Status: **Approved by founder** (2026-11-08). Build everything possible on free tiers before any spend.
 > Constraint: `AGENTS.md` rule 1, no spend and nothing that can bill without a card.
 
 ## Goal

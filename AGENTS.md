@@ -6,6 +6,8 @@
 > **Start every session by reading, in order:** this file → `docs/STATUS.md` (current phase, next steps) → `CHANGELOG.md` → `docs/ARCHITECTURE.md`.
 > **End every session by updating `docs/STATUS.md` and `CHANGELOG.md`, then committing.**
 
+Repo location: `~/Developer/AetherVault` (keep it out of iCloud-synced folders).
+
 Enterprise disaster-recovery command center by Aegis Core Labs. Currently a front-end demo; **all telemetry is simulated** by `src/providers/MockDrProvider.ts`.
 
 ## Commands

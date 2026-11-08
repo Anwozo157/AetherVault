@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Housekeeping (2026-11-08)
+
+- Repo moved to `~/Developer/AetherVault` via fresh clone; old iCloud-synced copy (with " 2" conflict duplicates, including inside `.git`) moved to Trash.
+- Phase 3 plan and ADRs 0001–0003 accepted by the founder.
+
 ### Phase 3 planning (2026-11-08)
 
 - `docs/PHASE_3_PLAN.md`: backend MVP on Supabase free tier (auth, roles, server-side failover, two-person approval, tamper-evident audit log), plus funded-cost estimates (~$65–90/mo to start).
