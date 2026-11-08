@@ -5,6 +5,35 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Multi-agent handoff (2026-11-08)
+
+#### Added
+
+- `AGENTS.md`: single source of project rules for all AI agents (Google Antigravity reads it natively); `CLAUDE.md` now imports it.
+- `docs/STATUS.md`: living handoff doc covering phase status, health, next steps, open decisions, known issues.
+- Rules for branches, secrets, browser verification, and asking before deletes.
+
+### Phase 1 — Architecture (2026-11-08)
+
+#### Added
+
+- `DrProvider` interface (`src/domain/dr.ts`) so real cloud providers can replace the simulator without UI changes. The simulator is now `MockDrProvider`.
+- Explicit failover transition rules (`ALLOWED_TRANSITIONS`); invalid transitions are rejected.
+- **Abort Failover** button, available until traffic cutover begins.
+- **SIMULATED DATA** badge in the header whenever the active provider is simulated.
+- Error boundaries around lazy panels (e.g. a WebGL failure shows a placeholder).
+- Browser tab icon (fixes a favicon 404).
+- 15 new tests (25 total): transition rules, abort windows, log buffer, UI abort/badge/lazy load.
+
+#### Changed
+
+- Split the 550-line `App.tsx` into `domain/`, `providers/`, `hooks/`, `config/`, `features/`, `components/`, `lib/`.
+- Code-split the 3D globe, AWS DRS tab, and pitch deck: initial JS 1,250 kB → 293 kB (348 → 95 kB gzip).
+- Target regions defined once in `config/regions.ts`.
+- Log stream history now lives in the provider, so it survives tab switches.
+- Removed the unverifiable "Zero data loss" claim from the simulated completion log.
+- Accessibility: ARIA labels on icon buttons, `aria-pressed` on toggles, dialog semantics on the share modal, live region announcing failover status.
+
 ### Phase 0 — Foundation (2026-11-08)
 
 #### Added
