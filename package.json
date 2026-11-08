@@ -15,7 +15,11 @@
     "verify": "npm run lint && npm run typecheck && npm test && npm run build && node scripts/check-bundle-size.mjs",
     "deploy": "bash scripts/deploy-pages.sh",
     "coverage": "vitest run --coverage",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:test": "supabase test db"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
@@ -46,6 +50,7 @@
     "jsdom": "^25.0.1",
     "postcss": "^8.4.47",
     "prettier": "^3.3.3",
+    "supabase": "2.122.0",
     "tailwindcss": "^3.4.14",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.13.0",
