@@ -96,6 +96,15 @@ describe('AetherVault Command Center - Chaos & Resilience Suite', () => {
     expect(await screen.findByText('1-CLICK FAILOVER')).toBeInTheDocument();
   });
 
+  test('chaos mode shows a wrappable DEGRADED JITTER system state', () => {
+    render(<App />);
+    fireEvent.click(screen.getByText('SDET Chaos Mode'));
+
+    const state = screen.getByText('DEGRADED JITTER');
+    expect(state).toHaveClass('break-words');
+    expect(screen.queryByText('DEGRADED_JITTER')).not.toBeInTheDocument();
+  });
+
   test('renders safely with no telemetry received', () => {
     render(<App />);
     expect(screen.getByText('RPO (Lag)')).toBeInTheDocument();
