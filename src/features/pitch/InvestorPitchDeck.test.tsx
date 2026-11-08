@@ -14,9 +14,18 @@ describe('InvestorPitchDeck', () => {
     }
   });
 
-  test('cites sources for downtime statistics and flags unverified ones', () => {
+  test('statistics carry citations and the misattributed Gartner claim is gone', async () => {
     render(<InvestorPitchDeck onLaunchDemo={vi.fn()} />);
-    expect(screen.getAllByText('[source needed]').length).toBeGreaterThan(0);
-    expect(screen.queryByText(/Gartner reports/)).not.toBeInTheDocument();
+    const next = screen.getByRole('button', { name: 'Next slide' });
+
+    fireEvent.click(next); // slide 2: problem
+    expect(await screen.findByText(/EMA 2024/)).toBeInTheDocument();
+    expect(screen.getByText(/Uptime 2025/)).toBeInTheDocument();
+    expect(screen.getByText(/Flexera 2026/)).toBeInTheDocument();
+    expect(screen.queryByText(/Gartner/)).not.toBeInTheDocument();
+
+    fireEvent.click(next);
+    fireEvent.click(next); // slide 4: market
+    expect(await screen.findByText(/MarketsandMarkets, Jan 2026/)).toBeInTheDocument();
   });
 });
