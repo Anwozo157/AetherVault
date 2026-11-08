@@ -17,6 +17,18 @@ import {
   Sparkles,
 } from 'lucide-react';
 
+/** Visible marker for a claim that still needs a verified citation. */
+function SourceNeeded() {
+  return (
+    <span
+      title="This figure needs a verified source before external use."
+      className="ml-1 inline-block align-middle text-[9px] font-mono px-1.5 py-0.5 rounded bg-aether-amber/10 border border-aether-amber/30 text-aether-amber normal-case tracking-normal"
+    >
+      [source needed]
+    </span>
+  );
+}
+
 interface InvestorPitchDeckProps {
   onLaunchDemo: () => void;
 }
@@ -41,30 +53,32 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
             />
           </div>
           <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white mb-4">
-            Zero-Downtime Resilience. <br />
+            Near-Zero-Downtime Resilience. <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-aether-cyan to-aether-green">
               Engineered for Enterprise.
             </span>
           </h2>
           <p className="text-sm sm:text-base text-zinc-400 mb-8 leading-relaxed">
-            Eliminating multi-million dollar outage risks with sub-second RPO, pilot-light zero-idle
-            cloud storage, and single-click autonomous cross-cloud failover.
+            Built to cut multi-million-dollar outage risk, targeting an RPO measured in seconds,
+            low-cost pilot-light standby, and one-click cross-cloud failover.
           </p>
 
           <div className="grid grid-cols-3 gap-4 w-full text-left bg-white/[0.02] border border-white/5 rounded-2xl p-4 sm:p-6 mb-8">
             <div>
               <p className="text-[10px] font-mono uppercase text-zinc-500">Market TAM</p>
               <p className="text-xl sm:text-2xl font-bold text-white font-mono">$15.8B</p>
-              <p className="text-[11px] text-aether-green">22.4% CAGR</p>
+              <p className="text-[11px] text-aether-green">
+                22.4% CAGR <SourceNeeded />
+              </p>
             </div>
             <div>
               <p className="text-[10px] font-mono uppercase text-zinc-500">Target RPO</p>
-              <p className="text-xl sm:text-2xl font-bold text-white font-mono">&lt; 0.1s</p>
+              <p className="text-xl sm:text-2xl font-bold text-white font-mono">Seconds</p>
               <p className="text-[11px] text-aether-cyan">Continuous Mirror</p>
             </div>
             <div>
               <p className="text-[10px] font-mono uppercase text-zinc-500">Idle Cost</p>
-              <p className="text-xl sm:text-2xl font-bold text-white font-mono">~$0.00</p>
+              <p className="text-xl sm:text-2xl font-bold text-white font-mono">Storage-only</p>
               <p className="text-[11px] text-purple-400">Pilot-Light Arch</p>
             </div>
           </div>
@@ -76,7 +90,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
     {
       id: 'problem',
       badge: 'THE ENTERPRISE CRISIS',
-      title: 'The $9,000/Minute Downtime Crisis',
+      title: 'The $14,000/Minute Downtime Crisis',
       subtitle: 'Legacy Disaster Recovery is slow, expensive, and fails when needed most.',
       content: (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto my-auto">
@@ -87,14 +101,17 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Astronomical Losses</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Gartner reports the average enterprise downtime cost is{' '}
-                <strong>$540,000 per hour</strong> ($9,000/min), risking SEC penalties, SLA fines,
-                and brand destruction.
+                EMA's 2024 field research (415 IT leaders) puts the average cost of unplanned IT
+                downtime at <strong>$14,056 per minute</strong>. ITIC's 2024 survey of 1,000+ firms
+                found one hour costs over $300,000 for more than 90% of mid-size and large
+                enterprises.
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-red-500/10">
-              <span className="text-2xl font-bold font-mono text-red-400">$783,000</span>
-              <p className="text-[10px] font-mono text-zinc-500">Avg Outage Incident Cost</p>
+              <span className="text-2xl font-bold font-mono text-red-400">$14,056/min</span>
+              <p className="text-[10px] font-mono text-zinc-500">
+                Avg Unplanned Downtime (EMA 2024)
+              </p>
             </div>
           </div>
 
@@ -106,12 +123,15 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               <h3 className="text-lg font-bold text-white mb-2">Wasteful Standby Costs</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
                 Traditional "Hot Standby" architectures force enterprises to duplicate 100% of their
-                idle compute infrastructure, burning tens of thousands per month on unused servers.
+                idle compute infrastructure, paying for servers that sit unused until disaster
+                strikes.
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-white/10">
               <span className="text-2xl font-bold font-mono text-amber-300">60% Waste</span>
-              <p className="text-[10px] font-mono text-zinc-500">Unused Idle Compute Spend</p>
+              <p className="text-[10px] font-mono text-zinc-500">
+                Unused Idle Compute Spend <SourceNeeded />
+              </p>
             </div>
           </div>
 
@@ -122,13 +142,16 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Human Error in Outages</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                74% of disaster recovery failures stem from manual runbooks, DNS misconfigurations,
-                and panicking SRE teams during live cutovers.
+                Uptime Institute's 2025 outage analysis found 85% of human-error outages stem from
+                procedures not being followed or being flawed: exactly where manual runbooks break
+                down under pressure.
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-white/10">
-              <span className="text-2xl font-bold font-mono text-aether-cyan">74% Failure</span>
-              <p className="text-[10px] font-mono text-zinc-500">Caused by Manual Runbooks</p>
+              <span className="text-2xl font-bold font-mono text-aether-cyan">85%</span>
+              <p className="text-[10px] font-mono text-zinc-500">
+                Human-Error Outages Tied to Procedures (Uptime 2025)
+              </p>
             </div>
           </div>
         </div>
@@ -149,10 +172,10 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
                 <Database className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-white">Continuous Sub-Second Replication</h4>
+                <h4 className="text-sm font-bold text-white">Continuous Block-Level Replication</h4>
                 <p className="text-xs text-zinc-400 mt-1">
-                  Block-level journal mirroring (AWS DRS integration) captures delta changes
-                  continuously with RPO under 0.1s and zero compute running costs.
+                  Planned AWS Elastic Disaster Recovery integration: continuous block-level
+                  replication with a target RPO of seconds and minimal standby compute.
                 </p>
               </div>
             </div>
@@ -164,8 +187,8 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               <div>
                 <h4 className="text-sm font-bold text-white">Dynamic Multi-Cloud Hydration</h4>
                 <p className="text-xs text-zinc-400 mt-1">
-                  Failover seamlessly across clouds: route from primary nodes to GCP us-central1,
-                  AWS us-west-2, or Azure East US 2 on demand.
+                  Designed for failover across clouds: route from primary nodes to GCP us-central1,
+                  AWS us-west-2, or Azure East US 2. The demo shows the simulated flow.
                 </p>
               </div>
             </div>
@@ -175,7 +198,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-white">Apple-Grade Command Center HUD</h4>
+                <h4 className="text-sm font-bold text-white">Consumer-Grade Command Center HUD</h4>
                 <p className="text-xs text-zinc-400 mt-1">
                   Three.js 3D global telemetry, procedural audio feedback, and accidental-click
                   prevention provide C-suite confidence during live incidents.
@@ -188,15 +211,15 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-aether-cyan/20 to-aether-green/20 border border-aether-green/30 flex items-center justify-center mb-4">
               <Sparkles className="w-8 h-8 text-aether-green" />
             </div>
-            <h4 className="text-lg font-bold text-white mb-2">Live Demo Available Now</h4>
+            <h4 className="text-lg font-bold text-white mb-2">Interactive Demo Available Now</h4>
             <p className="text-xs text-zinc-400 mb-6">
-              You can test the actual live engine on this device or any phone right now.
+              Try the interactive demo (simulated data) on this device or any phone right now.
             </p>
             <button
               onClick={onLaunchDemo}
               className="w-full py-3 rounded-xl bg-gradient-to-r from-aether-cyan to-aether-green text-black font-mono font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
             >
-              <span>Launch Live Command Center</span>
+              <span>Launch Interactive Demo</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -220,11 +243,11 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               </p>
               <h3 className="text-4xl font-extrabold font-mono text-white mb-2">$15.8B</h3>
               <p className="text-xs text-zinc-400">
-                Global Cloud Disaster Recovery & High-Availability Market by 2028.
+                Global Cloud Disaster Recovery & High-Availability Market by 2028. <SourceNeeded />
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-white/5 text-[11px] font-mono text-zinc-500">
-              22.4% Annual CAGR (MarketsandMarkets)
+              22.4% Annual CAGR (MarketsandMarkets) <SourceNeeded />
             </div>
           </div>
 
@@ -236,7 +259,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               <h3 className="text-4xl font-extrabold font-mono text-white mb-2">$4.2B</h3>
               <p className="text-xs text-zinc-400">
                 Mid-market and Enterprise companies with strict multi-cloud compliance mandates
-                (Fintech, Healthtech, Carrier Telecom).
+                (Fintech, Healthtech, Carrier Telecom). <SourceNeeded />
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-white/5 text-[11px] font-mono text-zinc-500">
@@ -256,7 +279,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-white/5 text-[11px] font-mono text-zinc-500">
-              1,500 enterprise accounts @ $80k ARR
+              Assumption: 1,500 accounts × $80k ARR
             </div>
           </div>
         </div>
@@ -268,7 +291,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
       id: 'business-model',
       badge: 'COMMERCIAL STRATEGY',
       title: 'Predictable Enterprise SaaS + Usage',
-      subtitle: 'Clear, high-margin unit economics aligned with customer savings.',
+      subtitle: 'Proposed pricing and packaging. Features marked roadmap are not yet built.',
       content: (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto my-auto">
           {/* Foundation Tier */}
@@ -288,7 +311,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> AWS DRS Staging
-                  Integration
+                  Integration (roadmap)
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> 3D HUD & Mobile
@@ -321,15 +344,13 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> Multi-Cloud Routing
-                  (AWS/GCP/Azure)
+                  (AWS/GCP/Azure, roadmap)
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> eBPF Real-Time Chaos
-                  Testing
+                  <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> Chaos Testing (roadmap)
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> 99.999% Failover RTO
-                  Guarantee
+                  <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> Contractual RTO SLA
                 </li>
               </ul>
             </div>
@@ -355,11 +376,11 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> mmWave / Carrier Direct
-                  Connect
+                  Connect (roadmap)
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> Custom On-Premises BGP
-                  Peering
+                  Peering (roadmap)
                 </li>
               </ul>
             </div>
@@ -421,7 +442,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
       id: 'roadmap',
       badge: 'ROADMAP & EXECUTION',
       title: 'Milestones & Investment Horizon',
-      subtitle: 'Clear technical milestones executing across 2026.',
+      subtitle: 'Clear technical milestones from prototype to pilot.',
       content: (
         <div className="max-w-4xl mx-auto my-auto flex flex-col justify-between">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -442,35 +463,35 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
             <div className="bg-white/[0.02] border border-aether-cyan/30 p-4 rounded-xl">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-mono text-aether-cyan font-bold">
-                  PHASE 2 • CURRENT
+                  PHASE 2 • COMPLETE
                 </span>
                 <Activity className="w-4 h-4 text-aether-cyan" />
               </div>
-              <h4 className="text-sm font-bold text-white mb-1">AWS DRS Telemetry</h4>
+              <h4 className="text-sm font-bold text-white mb-1">Simulated DR Telemetry</h4>
               <p className="text-[11px] text-zinc-400">
-                CloudWatch synthetic canary monitoring, EBS block replication matrix, and live audit
-                event log streaming.
+                Simulated AWS DRS and CloudWatch-style dashboard, block replication matrix, audit
+                log stream, and abortable failover workflow.
               </p>
             </div>
 
             <div className="bg-white/[0.02] border border-white/10 p-4 rounded-xl">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-mono text-zinc-400 font-bold">
-                  PHASE 3 • Q3 2026
+                  PHASE 3 • NEXT [date TBD]
                 </span>
                 <Clock className="w-4 h-4 text-zinc-500" />
               </div>
               <h4 className="text-sm font-bold text-white mb-1">Design Partner Pilots</h4>
               <p className="text-[11px] text-zinc-400">
-                Deployment with 3 anchor fintech/carrier design partners under pilot SLAs and AWS
-                Marketplace listing.
+                Recruiting 3 anchor fintech/carrier design partners; live AWS Elastic Disaster
+                Recovery integration for pilots, then AWS Marketplace listing.
               </p>
             </div>
 
             <div className="bg-white/[0.02] border border-white/10 p-4 rounded-xl">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-mono text-purple-400 font-bold">
-                  PHASE 4 • Q4 2026
+                  PHASE 4 • [date TBD]
                 </span>
                 <TrendingUp className="w-4 h-4 text-purple-400" />
               </div>
@@ -516,6 +537,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
           <button
             onClick={() => setCurrentSlide((prev) => Math.max(prev - 1, 0))}
             disabled={currentSlide === 0}
+            aria-label="Previous slide"
             className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-zinc-300 transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -523,6 +545,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
           <button
             onClick={() => setCurrentSlide((prev) => Math.min(prev + 1, slides.length - 1))}
             disabled={currentSlide === slides.length - 1}
+            aria-label="Next slide"
             className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-zinc-300 transition-colors"
           >
             <ChevronRight className="w-4 h-4" />
@@ -560,6 +583,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
         {slides.map((slide, idx) => (
           <button
             key={slide.id}
+            aria-label={`Go to slide ${idx + 1}`}
             onClick={() => setCurrentSlide(idx)}
             className={`h-1.5 rounded-full transition-all ${
               idx === currentSlide

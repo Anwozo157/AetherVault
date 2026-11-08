@@ -9,15 +9,16 @@
 
 ## 🛡️ Executive Overview
 
-**AetherVault** bridges enterprise-grade, zero-trust cloud disaster recovery with a flawless, Apple-inspired consumer aesthetic. Designed for mission-critical multi-cloud resilience, AetherVault delivers real-time sub-second RPO streaming, 3D global network topology visualization, and 1-click automated failover between primary on-premises/cloud nodes and remote targets.
+**AetherVault** is building enterprise cloud disaster recovery with a consumer-grade design. This repository is the **interactive prototype**: a command center that visualizes multi-cloud replication and walks through a guarded, abortable failover. **All telemetry in the demo is simulated**; live cloud integrations (starting with AWS Elastic Disaster Recovery) are on the roadmap.
 
 ---
 
 ## ⚡ Core Platform Capabilities
 
-- **3D Global Topology HUD:** 60FPS interactive Three.js globe visualizing active eBPF encrypted data conduits between source regions (`us-east-1`) and dynamic targets (GCP, AWS, Azure).
-- **Sub-Second RPO Telemetry:** Real-time stream tracking continuous replication lag, sync health, and automated state transitions.
-- **Accidental-Click Guard (Hold-to-Initiate):** Requires an intentional 1.2s confirmation hold with procedural cybernetic audio ramping and mobile haptic feedback.
+- **3D Global Topology HUD:** Interactive Three.js globe visualizing simulated replication links between source regions (`us-east-1`) and dynamic targets (GCP, AWS, Azure).
+- **Replication Telemetry (simulated):** Live-updating replication lag, sync health, and failover state transitions.
+- **Abortable Failover:** Operators can abort until traffic cutover begins, matching real DR tooling.
+- **Accidental-Click Guard (Hold-to-Initiate):** Requires an intentional 1.2s confirmation hold with procedural cybernetic audio ramping and haptic feedback on Android.
 - **Multi-Cloud Target Selection:** Real-time routing flexibility targeting **GCP us-central1 (Iowa)**, **AWS us-west-2 (Oregon)**, and **Azure East US 2 (Virginia)**.
 - **SDET Chaos Simulation:** Integrated fault injection simulating network jitter, packet turbulence, and dropped frames to prove platform resilience.
 - **Zero-Cost Synthesizer Engine:** Native HTML5 Web Audio API synthesizing ascending charge sweeps, cutover bass drops, and harmonic resolution chimes without paid assets.
@@ -54,7 +55,7 @@ Open `http://localhost:5174` in your browser.
 
 - **Live URL:** [https://anwozo157.github.io/AetherVault/](https://anwozo157.github.io/AetherVault/)
 - **Zero Infrastructure Cost:** Hosted permanently via GitHub Pages ($0.00/mo).
-- **Mobile Optimized:** Full touch support on iOS & Android browsers for 3D globe gesture rotation and hold-to-failover haptics.
+- **Mobile Optimized:** Full touch support on iOS & Android browsers for 3D globe gesture rotation and hold-to-failover haptics (Android; iOS browsers do not support vibration).
 
 <div align="center">
   <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://anwozo157.github.io/AetherVault/" alt="Scan for Mobile Live Demo" width="160" />
