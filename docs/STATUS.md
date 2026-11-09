@@ -1,7 +1,7 @@
 # Project Status
 
 > Living handoff document. **Every agent or contributor updates this at the end of a session.**
-> Last updated: 2026-11-09 (team invites + onboarding) by Claude Code (Opus 5.5).
+> Last updated: 2026-11-09 (Phase 4.1 drill evidence reports) by Claude Code (Opus 5.5).
 
 ## Where we are
 
@@ -11,7 +11,7 @@
 | 1. Architecture | `DrProvider` interface, feature folders, abort, lazy loading, simulated badge | ✅ Done (2026-11-08)                                        |
 | 2. Quality bar  | Playwright E2E, WCAG 2.2 AA, Lighthouse 90+, GitHub Actions CI                | ✅ Done (2026-11-08)                                        |
 | 3. Backend MVP  | Free-tier only until funded (see `AGENTS.md` rule 1)                          | 🚧 3.1–3.5, 3.7 done; 3.6 CI done, hosting waits on founder |
-| 4. Productize   | Multi-tenant, DR drills, compliance reports                                   | Not started                                                 |
+| 4. Productize   | Multi-tenant, DR drills, compliance reports                                   | 🚧 Team invites + 4.1 drill evidence reports done           |
 
 Phase 3 milestones (`docs/PHASE_3_PLAN.md`):
 
@@ -29,7 +29,7 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 
 ## Health (verified 2026-11-09)
 
-- CI on every PR, all green on `main`: lint, types, 140+ unit tests, coverage thresholds, build, bundle budget, production audit · Playwright desktop + mobile, including a Content-Security-Policy check · local Supabase: 60 pgTAP + 7 console E2E · CodeQL · gitleaks full-history secret scan.
+- CI on every PR, all green on `main`: lint, types, 160+ unit tests, coverage thresholds, build, bundle budget, production audit · Playwright desktop + mobile, including a Content-Security-Policy check · local Supabase: 96 pgTAP + 10 console E2E · CodeQL · gitleaks full-history secret scan.
 - Live site deployed from `main`; `version.json` matches; CSP active; the Share QR always encodes the live version (verified by decoding it).
 - GitHub: secret scanning + push protection, private vulnerability reporting, Dependabot alerts + automated security fixes are enabled.
 - `npm audit`: 0 vulnerabilities. Toolchain: Vite 8, Vitest 5, React 18.
@@ -38,7 +38,7 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 ## Next steps (in order)
 
 1. **Founder (free, no card):** create a Supabase account (sign up with GitHub). Then 3.6 hosting: link the project, push migrations, create the GitHub OAuth app, disable password sign-ups, set the console env in the deploy.
-2. **Phase 4, free parts:** DR drill scheduler (non-disruptive drills against the simulated provider), drill evidence report export (PDF/CSV from the audit chain), Slack/PagerDuty webhook alerts (free tiers). ✅ Team invites/roles and the onboarding checklist are done (2026-11-09).
+2. **Phase 4, free parts:** DR drill scheduler (non-disruptive drills against the simulated provider), Slack/PagerDuty webhook alerts (free tiers). ✅ Done 2026-11-09: team invites/roles + onboarding checklist; 4.1 drill evidence reports (RTO/RPO targets, PASS/FAIL drill history, Print/Save as PDF, SHA-256-fingerprinted JSON; deployed as `89c4e1b`). RPO stays "not measured" until real replication data is connected.
 3. **Requires funding (founder approves):** AWS account + Elastic Disaster Recovery for real replication data (~$40–60/mo), Supabase Pro ($25/mo), custom domain (~$1/mo), which also enables HTTP security headers (`frame-ancestors`).
 
 ## Open decisions for the founder
