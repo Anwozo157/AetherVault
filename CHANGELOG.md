@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Status update (2026-11-09)
+
+- `docs/STATUS.md`: Phase 4.1 drill evidence reports marked done (Phase 4 in progress); health counts updated (160+ unit, 96 pgTAP, 10 console E2E).
+
 ### Phase 4.1: Drill evidence reports + recovery objectives (2026-11-09)
 
 - **Drills tab** (console): recovery-time and data-loss targets (admins edit; changes audited), a table of every drill with outcome and recovery time vs target (PASS/FAIL), and a summary ("N of M completed drills met the target").
