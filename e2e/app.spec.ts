@@ -129,7 +129,10 @@ test.describe('Security', () => {
     await expect(page.getByTestId('share-qr')).toBeVisible();
     await page.keyboard.press('Escape');
     await page.getByRole('button', { name: /Investor Deck/ }).click();
-    await expect(page.getByText(/Uptime 2025/).first()).toBeAttached();
+    for (let slide = 1; slide <= 7; slide++) {
+      await expect(page.getByText(`Slide ${slide} of 7`)).toBeVisible();
+      if (slide < 7) await page.getByRole('button', { name: 'Next slide' }).click();
+    }
     expect(violations).toEqual([]);
   });
 });
