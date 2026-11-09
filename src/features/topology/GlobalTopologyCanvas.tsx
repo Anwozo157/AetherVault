@@ -1,88 +1,398 @@
-import { useRef, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Sphere, Line, OrbitControls } from '@react-three/drei';
+import { Html, Line, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
+import { SOURCE, TARGET_REGIONS, findTargetRegion, type Region } from '../../config/regions';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
+import {
+  FACING_LAT,
+  angleBetween,
+  arcPoints,
+  fibonacciLatLon,
+  latLonToVec3,
+  type Vec3,
+} from './geo';
+import { isLand } from './landMask';
 
-// 1. The Core Infrastructure Globe
-// Cyan wireframe (brand accent) over a dark solid core. The core hides the back
-// half of the wireframe so the front grid reads cleanly instead of a dense mesh.
-const GLOBE_WIREFRAME_COLOR = '#00F0FF';
-const GLOBE_WIREFRAME_OPACITY = 0.22;
-/** Region markers sit just above the surface so the solid core never hides them. */
-const NODE_RADIUS = 2.03;
-const onSurface = (x: number, y: number, z: number) =>
-  new THREE.Vector3(x, y, z).normalize().multiplyScalar(NODE_RADIUS);
+// Brand palette (mirrors tailwind.config.js aether-* tokens; three.js needs raw values).
+const C = {
+  cyan: '#00F0FF',
+  green: '#00FF9D',
+  amber: '#FFB800',
+  red: '#FF3B30',
+  idle: '#5B6B7F',
+  ocean: '#060A12',
+} as const;
 
-const Globe = () => (
-  <group>
-    <Sphere args={[1.98, 48, 48]}>
-      <meshBasicMaterial color="#070B12" />
-    </Sphere>
-    <Sphere args={[2, 36, 24]}>
-      <meshBasicMaterial
-        color={GLOBE_WIREFRAME_COLOR}
-        wireframe
-        transparent
-        opacity={GLOBE_WIREFRAME_OPACITY}
-      />
-    </Sphere>
-  </group>
-);
+const R = 2;
+const DEG = Math.PI / 180;
+const EARTH_RADIUS_KM = 6371;
 
-// 2. Animated Replication Stream (eBPF Block Transfer)
-const DataConduit = ({
-  start,
-  end,
-  color,
-  speed = 0.6,
-  jitter = false,
-  still = false,
-}: {
-  start: THREE.Vector3;
-  end: THREE.Vector3;
-  color: string;
-  speed?: number;
-  jitter?: boolean;
-  /** Reduced motion: park the packet mid-arc instead of animating it. */
-  still?: boolean;
-}) => {
-  // Generate a smooth arc between the two cloud regions
-  const curve = useMemo(() => {
-    const mid = start.clone().lerp(end, 0.5).normalize().multiplyScalar(2.5);
-    return new THREE.QuadraticBezierCurve3(start, mid, end);
-  }, [start, end]);
+type Phase = 'sync' | 'inflight' | 'secured' | 'chaos';
 
-  const points = useMemo(() => curve.getPoints(50), [curve]);
-  const particleRef = useRef<THREE.Mesh>(null);
+function phaseOf(status: string, chaos: boolean): Phase {
+  if (chaos) return 'chaos';
+  if (status === 'ACTIVE_SYNC') return 'sync';
+  if (status === 'TARGET_SECURED') return 'secured';
+  return 'inflight';
+}
 
-  // Animate a telemetry packet along the arc at 60fps
-  useFrame(({ clock }) => {
-    if (!particleRef.current) return;
-    const time = still ? 0.5 : (clock.getElapsedTime() * speed) % 1;
-    const position = curve.getPoint(time);
+/** Target marker color: a healthy standby replica is green, distinct from the cyan primary. */
+const TARGET_COLOR: Record<Phase, string> = {
+  sync: C.green,
+  inflight: C.amber,
+  secured: C.green,
+  chaos: C.red,
+};
 
-    if (jitter && !still) {
-      // Simulate packet turbulence / jitter
-      position.x += (Math.random() - 0.5) * 0.08;
-      position.y += (Math.random() - 0.5) * 0.08;
+const PHASE_STYLE: Record<Phase, { color: string; speed: number; packets: number; label: string }> =
+  {
+    sync: { color: C.cyan, speed: 0.35, packets: 3, label: 'Replicating' },
+    inflight: { color: C.amber, speed: 1.1, packets: 6, label: 'Failover in progress' },
+    secured: { color: C.green, speed: 0.25, packets: 2, label: 'Target active' },
+    chaos: { color: C.red, speed: 0.6, packets: 4, label: 'Chaos injected: jitter + packet loss' },
+  };
+
+const STAGE_LABEL: Record<string, string> = {
+  QUIESCE_AND_SNAPSHOT: 'Quiesce + snapshot',
+  HYDRATING_TARGET: 'Hydrating target',
+  DNS_CUTOVER: 'DNS cutover',
+};
+
+const v3 = (p: Vec3) => new THREE.Vector3(p[0], p[1], p[2]);
+
+// ---------------------------------------------------------------------------
+// Earth: dark ocean, faint graticule, continents as a dot matrix, atmosphere rim
+// ---------------------------------------------------------------------------
+
+function Graticule() {
+  const lines = useMemo(() => {
+    const out: Vec3[][] = [];
+    for (let lat = -60; lat <= 60; lat += 30) {
+      out.push(
+        Array.from({ length: 73 }, (_, i) => latLonToVec3({ lat, lon: -180 + i * 5 }, R * 1.001)),
+      );
     }
+    for (let lon = -180; lon < 180; lon += 30) {
+      out.push(
+        Array.from({ length: 37 }, (_, i) => latLonToVec3({ lat: -90 + i * 5, lon }, R * 1.001)),
+      );
+    }
+    return out;
+  }, []);
+  return (
+    <group>
+      {lines.map((pts, i) => (
+        <Line key={i} points={pts} color={C.cyan} lineWidth={0.6} transparent opacity={0.07} />
+      ))}
+    </group>
+  );
+}
 
-    particleRef.current.position.copy(position);
+function LandDots() {
+  const ref = useRef<THREE.InstancedMesh>(null);
+  const positions = useMemo(
+    () =>
+      fibonacciLatLon(14000)
+        .filter((p) => isLand(p.lat, p.lon))
+        .map((p) => latLonToVec3(p, R * 1.002)),
+    [],
+  );
+
+  useEffect(() => {
+    const mesh = ref.current;
+    if (!mesh) return;
+    const dummy = new THREE.Object3D();
+    positions.forEach((p, i) => {
+      dummy.position.set(p[0], p[1], p[2]);
+      dummy.lookAt(p[0] * 2, p[1] * 2, p[2] * 2); // face outward
+      dummy.updateMatrix();
+      mesh.setMatrixAt(i, dummy.matrix);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+  }, [positions]);
+
+  return (
+    <instancedMesh ref={ref} args={[undefined, undefined, positions.length]}>
+      <circleGeometry args={[0.011, 6]} />
+      <meshBasicMaterial color={C.cyan} transparent opacity={0.55} toneMapped={false} />
+    </instancedMesh>
+  );
+}
+
+const atmosphereShader = {
+  uniforms: { glowColor: { value: new THREE.Color(C.cyan) } },
+  vertexShader: /* glsl */ `
+    varying vec3 vNormal;
+    void main() {
+      vNormal = normalize(normalMatrix * normal);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }`,
+  fragmentShader: /* glsl */ `
+    uniform vec3 glowColor;
+    varying vec3 vNormal;
+    void main() {
+      float rim = pow(0.72 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
+      gl_FragColor = vec4(glowColor, clamp(rim, 0.0, 1.0) * 0.9);
+    }`,
+};
+
+function Earth() {
+  return (
+    <group>
+      <mesh>
+        <sphereGeometry args={[R, 64, 64]} />
+        <meshBasicMaterial color={C.ocean} />
+      </mesh>
+      <Graticule />
+      <LandDots />
+      {/* Atmosphere: back-face fresnel shell, additive so it glows on dark backgrounds */}
+      <mesh scale={1.13}>
+        <sphereGeometry args={[R, 64, 64]} />
+        <shaderMaterial
+          args={[atmosphereShader]}
+          side={THREE.BackSide}
+          blending={THREE.AdditiveBlending}
+          transparent
+          depthWrite={false}
+        />
+      </mesh>
+    </group>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Regions: marker dot, pulse ring, label
+// ---------------------------------------------------------------------------
+
+type MarkerRole = 'source' | 'target' | 'standby';
+
+/** Label offsets keep neighbors apart (Ashburn and Boydton are ~270 km apart). */
+const LABEL_SIDE: Record<string, 'left' | 'right' | 'below'> = {
+  [SOURCE.id]: 'right',
+  'azure-eastus2': 'below',
+  'gcp-us-central1': 'left',
+  'aws-us-west-2': 'left',
+};
+
+function RegionMarker({
+  region,
+  role,
+  color,
+  pulse,
+  still,
+  showLabel,
+}: {
+  region: Region;
+  role: MarkerRole;
+  color: string;
+  pulse: number;
+  still: boolean;
+  showLabel: boolean;
+}) {
+  const pos = useMemo(() => v3(latLonToVec3(region, R * 1.004)), [region]);
+  const ring = useRef<THREE.Mesh>(null);
+  const ringMat = useRef<THREE.MeshBasicMaterial>(null);
+  const orient = useMemo(() => {
+    const o = new THREE.Object3D();
+    o.position.copy(pos);
+    o.lookAt(pos.clone().multiplyScalar(2));
+    return o.quaternion.clone();
+  }, [pos]);
+
+  useFrame(({ clock }) => {
+    if (!ring.current || !ringMat.current) return;
+    const t = still ? 0.35 : (clock.getElapsedTime() * pulse) % 1;
+    ring.current.scale.setScalar(1 + t * 2.4);
+    ringMat.current.opacity = (1 - t) * (role === 'standby' ? 0.25 : 0.7);
+  });
+
+  const size = role === 'standby' ? 0.035 : 0.055;
+  const side = LABEL_SIDE[region.id] ?? 'right';
+
+  return (
+    <group position={pos} quaternion={orient}>
+      <mesh>
+        <circleGeometry args={[size, 24]} />
+        <meshBasicMaterial color={color} toneMapped={false} />
+      </mesh>
+      <mesh ref={ring}>
+        <ringGeometry args={[size * 1.15, size * 1.45, 32]} />
+        <meshBasicMaterial ref={ringMat} color={color} transparent toneMapped={false} />
+      </mesh>
+      {showLabel && (
+        <Html center zIndexRange={[20, 0]} style={{ pointerEvents: 'none' }}>
+          <div
+            className={`whitespace-nowrap font-mono text-[10px] leading-tight px-1.5 py-0.5 rounded-md border bg-black/60 backdrop-blur-sm ${
+              role === 'standby' ? 'border-white/10 text-zinc-500' : 'border-white/15 text-white'
+            }`}
+            style={{
+              transform:
+                side === 'left'
+                  ? 'translate(-58%, -50%)'
+                  : side === 'below'
+                    ? 'translate(0, 70%)'
+                    : 'translate(58%, -50%)',
+            }}
+          >
+            <span style={{ color }}>{region.cloud}</span>{' '}
+            {region.id.replace(/^(aws|gcp|azure)-/, '')}
+            {role !== 'standby' && <span className="block text-zinc-400">{region.city}</span>}
+          </div>
+        </Html>
+      )}
+    </group>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Replication arc with comet-trail packets
+// ---------------------------------------------------------------------------
+
+const TRAIL = 6;
+
+function ReplicationArc({
+  from,
+  to,
+  color,
+  speed,
+  packets,
+  jitter,
+  still,
+}: {
+  from: Region;
+  to: Region;
+  color: string;
+  speed: number;
+  packets: number;
+  jitter: boolean;
+  still: boolean;
+}) {
+  const points = useMemo(() => arcPoints(from, to, R).map(v3), [from, to]);
+  const curve = useMemo(() => new THREE.CatmullRomCurve3(points), [points]);
+  const group = useRef<THREE.Group>(null);
+
+  useFrame(({ clock }) => {
+    const g = group.current;
+    if (!g) return;
+    const base = still ? 0.5 : clock.getElapsedTime() * speed;
+    g.children.forEach((child, i) => {
+      const packet = Math.floor(i / TRAIL);
+      const step = i % TRAIL;
+      const visible = packet < packets;
+      child.visible = visible;
+      if (!visible) return;
+      let t = (base + packet / packets - step * 0.012) % 1;
+      if (t < 0) t += 1;
+      const p = curve.getPoint(t);
+      if (jitter && !still) {
+        p.x += (Math.random() - 0.5) * 0.05;
+        p.y += (Math.random() - 0.5) * 0.05;
+      }
+      child.position.copy(p);
+    });
   });
 
   return (
     <group>
-      <Line points={points} color={color} lineWidth={1.5} transparent opacity={0.4} />
-      <mesh ref={particleRef}>
-        <sphereGeometry args={[0.05, 16, 16]} />
-        <meshBasicMaterial color={color} toneMapped={false} />
-      </mesh>
+      <Line points={points} color={color} lineWidth={1.4} transparent opacity={0.35} />
+      {/* Soft glow underlay for the arc */}
+      <Line points={points} color={color} lineWidth={5} transparent opacity={0.07} />
+      <group ref={group}>
+        {Array.from({ length: 6 * TRAIL }, (_, i) => {
+          const step = i % TRAIL;
+          return (
+            <mesh key={i}>
+              <sphereGeometry args={[0.032 * (1 - step / (TRAIL + 1)), 10, 10]} />
+              <meshBasicMaterial
+                color={color}
+                transparent
+                opacity={step === 0 ? 1 : 0.55 * (1 - step / TRAIL)}
+                toneMapped={false}
+              />
+            </mesh>
+          );
+        })}
+      </group>
     </group>
   );
-};
+}
 
-// 3. Principal Architect Canvas Implementation
+// ---------------------------------------------------------------------------
+// Scene: tilted so the continental US faces the camera, with a gentle sway
+// ---------------------------------------------------------------------------
+
+function World({
+  target,
+  phase,
+  still,
+  compact,
+}: {
+  target: Region;
+  phase: Phase;
+  still: boolean;
+  compact: boolean;
+}) {
+  const sway = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    if (sway.current)
+      sway.current.rotation.y = still ? 0 : Math.sin(clock.getElapsedTime() * 0.12) * 0.3;
+  });
+  const style = PHASE_STYLE[phase];
+  // After a secured failover the target serves traffic; replication runs back to the old
+  // primary (ready for failback), so the stream reverses direction.
+  const [from, to] = phase === 'secured' ? [target, SOURCE] : [SOURCE, target];
+  const sourceColor = phase === 'secured' ? C.idle : phase === 'chaos' ? C.red : C.cyan;
+
+  return (
+    <group rotation={[FACING_LAT * DEG, 0, 0]}>
+      <group ref={sway}>
+        <Earth />
+        <RegionMarker
+          region={SOURCE}
+          role="source"
+          color={sourceColor}
+          pulse={phase === 'secured' ? 0.25 : 0.6}
+          still={still}
+          showLabel
+        />
+        {TARGET_REGIONS.map((r) =>
+          r.id === target.id ? (
+            <RegionMarker
+              key={r.id}
+              region={r}
+              role="target"
+              color={TARGET_COLOR[phase]}
+              pulse={phase === 'inflight' ? 1.6 : 0.7}
+              still={still}
+              showLabel
+            />
+          ) : (
+            <RegionMarker
+              key={r.id}
+              region={r}
+              role="standby"
+              color={C.idle}
+              pulse={0.3}
+              still={still}
+              showLabel={!compact}
+            />
+          ),
+        )}
+        <ReplicationArc
+          from={from}
+          to={to}
+          color={style.color}
+          speed={style.speed}
+          packets={style.packets}
+          jitter={phase === 'chaos'}
+          still={still}
+        />
+      </group>
+    </group>
+  );
+}
+
 export default function GlobalTopologyCanvas({
   status = 'ACTIVE_SYNC',
   targetRegion = 'gcp-us-central1',
@@ -93,130 +403,68 @@ export default function GlobalTopologyCanvas({
   chaosActive?: boolean;
 }) {
   const reducedMotion = usePrefersReducedMotion();
-
-  // Geographically mapped coordinates for AWS us-east-1 and variable targets
-  const awsNode = useMemo(() => onSurface(1.2, 1.0, 1.2), []);
-
-  const targetNode = useMemo(() => {
-    switch (targetRegion) {
-      case 'aws-us-west-2':
-        return onSurface(-1.8, 0.8, -0.6);
-      case 'azure-eastus2':
-        return onSurface(1.1, 0.8, 1.4);
-      case 'gcp-us-central1':
-      default:
-        return onSurface(-1.0, 1.2, 1.4);
-    }
-  }, [targetRegion]);
-
-  // Dynamic visual states based on the failover state machine & chaos injection
-  const { conduitColor, conduitSpeed, statusLabel } = useMemo(() => {
-    if (chaosActive) {
-      return {
-        conduitColor: '#FF3B30',
-        conduitSpeed: 0.9,
-        statusLabel: 'CHAOS INJECTED • Network Jitter & Dropped Packets',
-      };
-    }
-
-    switch (status) {
-      case 'ACTIVE_SYNC':
-        return {
-          conduitColor: '#00F0FF',
-          conduitSpeed: 0.6,
-          statusLabel: 'Encrypted eBPF Replication Active',
-        };
-      case 'TARGET_SECURED':
-        return {
-          conduitColor: '#00FF9D',
-          conduitSpeed: 0.3,
-          statusLabel: 'Failover Secured • Target Active',
-        };
-      default:
-        // Failover in progress (Replicating, Hydrating, Rerouting)
-        return {
-          conduitColor: '#FFB800',
-          conduitSpeed: 1.8,
-          statusLabel: 'Hydrating Target & Rerouting Traffic...',
-        };
-    }
-  }, [status, chaosActive]);
-
-  const targetLabel = useMemo(() => {
-    switch (targetRegion) {
-      case 'aws-us-west-2':
-        return 'AWS us-west-2 (Oregon)';
-      case 'azure-eastus2':
-        return 'Azure East US 2 (Virginia)';
-      case 'gcp-us-central1':
-      default:
-        return 'GCP us-central1 (Iowa)';
-    }
-  }, [targetRegion]);
+  const target = findTargetRegion(targetRegion);
+  const phase = phaseOf(status, chaosActive);
+  const style = PHASE_STYLE[phase];
+  const distanceKm = Math.round((angleBetween(SOURCE, target) * EARTH_RADIUS_KM) / 10) * 10;
+  const compact = typeof window !== 'undefined' && window.innerWidth < 640;
+  const stage = STAGE_LABEL[status];
 
   return (
-    <div className="w-full h-72 md:h-80 rounded-2xl overflow-hidden border border-white/10 bg-[#05070B]/80 relative shadow-2xl backdrop-blur-xl mb-6">
-      {/* HUD Header Overlay */}
-      <div className="absolute top-4 left-4 z-10 flex items-center gap-3">
-        <div
-          className="w-2.5 h-2.5 rounded-full animate-pulse transition-colors duration-500 shadow-lg"
-          style={{ backgroundColor: conduitColor, boxShadow: `0 0 10px ${conduitColor}` }}
-        />
+    <div className="w-full h-80 md:h-[26rem] rounded-2xl overflow-hidden border border-white/10 bg-aether-ink/80 relative shadow-2xl backdrop-blur-xl mb-6">
+      {/* Route + state readout */}
+      <div className="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center gap-2 pointer-events-none">
         <span
-          className="text-xs font-mono uppercase tracking-widest bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 transition-colors duration-500"
-          style={{ color: conduitColor }}
-        >
-          Tunnel: CoreSite/AWS us-east-1 ➔ {targetLabel} • {statusLabel}
+          className="w-2.5 h-2.5 rounded-full animate-pulse shrink-0"
+          style={{ backgroundColor: style.color, boxShadow: `0 0 10px ${style.color}` }}
+          aria-hidden="true"
+        />
+        <span className="text-[11px] font-mono uppercase tracking-widest bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-zinc-200 max-w-full">
+          {SOURCE.id} <span aria-label="to">→</span> {target.id}
+          <span className="text-zinc-500"> · </span>
+          <span style={{ color: style.color }}>{stage ?? style.label}</span>
         </span>
       </div>
 
-      <div className="absolute bottom-4 right-4 z-10 hidden sm:flex items-center gap-4 text-[10px] font-mono text-zinc-500 uppercase tracking-widest bg-black/40 px-3 py-1 rounded-lg border border-white/5">
-        <span>Three.js 60FPS</span>
-        <span>•</span>
-        <span>Interactive Drag / Orbit</span>
+      {/* Legend + facts */}
+      <div className="absolute bottom-3 left-3 z-10 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-mono text-zinc-400 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/5 pointer-events-none">
+        <span className="flex items-center gap-1.5">
+          <span
+            className="w-2 h-2 rounded-full"
+            style={{ background: phase === 'secured' ? C.idle : C.cyan }}
+          />
+          {phase === 'secured' ? 'Former primary' : 'Primary'}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full" style={{ background: TARGET_COLOR[phase] }} />
+          Target
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full" style={{ background: C.idle }} />
+          Standby
+        </span>
+        <span className="text-zinc-500">≈{distanceKm.toLocaleString('en-US')} km great-circle</span>
+      </div>
+      <div className="absolute bottom-3 right-3 z-10 hidden sm:block text-[10px] font-mono text-zinc-500 uppercase tracking-widest pointer-events-none">
+        Drag to rotate
       </div>
 
-      {/* dpr cap: high-density phones (2.5-3x) render at most 1.5x, cutting GPU work
-          by up to 4x with no visible loss on a small, glowing wireframe. */}
-      <Canvas camera={{ position: [0, 0, 5], fov: 45 }} dpr={[1, 1.5]}>
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} intensity={1} color="#00F0FF" />
-        <pointLight position={[-10, -10, -10]} intensity={0.6} color="#00FF9D" />
+      <p className="sr-only">
+        Globe showing replication from {SOURCE.label} to {target.label}, about {distanceKm}{' '}
+        kilometers apart. State: {stage ?? style.label}.
+      </p>
 
-        <Globe />
-
-        {/* AWS Primary Node (us-east-1) */}
-        <mesh position={awsNode}>
-          <sphereGeometry args={[0.07, 16, 16]} />
-          <meshBasicMaterial color="#00F0FF" toneMapped={false} />
-        </mesh>
-
-        {/* Dynamic Target Node */}
-        <mesh position={targetNode}>
-          <sphereGeometry args={[0.07, 16, 16]} />
-          <meshBasicMaterial
-            color={chaosActive ? '#FF3B30' : status === 'TARGET_SECURED' ? '#00FF9D' : '#FFB800'}
-            toneMapped={false}
-          />
-        </mesh>
-
-        <DataConduit
-          start={awsNode}
-          end={targetNode}
-          color={conduitColor}
-          speed={conduitSpeed}
-          jitter={chaosActive}
-          still={reducedMotion}
-        />
-
-        {/* Smooth Orbit Controls */}
+      {/* dpr cap: high-density phones render at most 1.5x, cutting GPU work by up to 4x. */}
+      <Canvas camera={{ position: [0, 0, 6.3], fov: 42 }} dpr={[1, 1.5]} aria-hidden="true">
+        <World target={target} phase={phase} still={reducedMotion} compact={compact} />
         <OrbitControls
           enableZoom={false}
           enablePan={false}
-          autoRotate={!reducedMotion}
-          autoRotateSpeed={0.5}
-          maxPolarAngle={Math.PI / 1.5}
+          rotateSpeed={0.5}
           minPolarAngle={Math.PI / 3}
+          maxPolarAngle={(2 * Math.PI) / 3}
+          minAzimuthAngle={-Math.PI / 2.2}
+          maxAzimuthAngle={Math.PI / 2.2}
         />
       </Canvas>
     </div>

@@ -55,5 +55,4 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 - Repo lives at `~/Developer/AetherVault`. Do not move it back into iCloud.
 - Local Supabase: analytics, Studio, storage and edge runtime are disabled in `supabase/config.toml` (analytics alone used ~4 CPU cores). Re-enable Studio temporarily if you need the web dashboard.
 - `DEGRADED_STATE` exists in the state machine but is never entered; chaos mode only changes telemetry.
-- Share modal QR code uses the free `api.qrserver.com` service (external request).
 - Supabase CLI 3.0 is available (repo pins 2.122.0); upgrade as its own tested task.
