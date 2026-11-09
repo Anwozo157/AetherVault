@@ -12,6 +12,10 @@ async function signIn(browser: Browser, email: string) {
   const page = await context.newPage();
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
+  // Any Content-Security-Policy violation (e.g. a blocked database or websocket call) fails the test.
+  page.on('console', (m) => {
+    if (/Content Security Policy|Refused to/i.test(m.text())) errors.push(m.text());
+  });
   await page.goto('/#/console');
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(PASSWORD);
@@ -142,8 +146,12 @@ test("audit log: verify passes, then detects an entry altered behind the app's b
   await expect(operator.page.getByRole('button', { name: /1-CLICK FAILOVER/ })).toBeVisible();
 
   await operator.page.getByRole('button', { name: 'Audit Log' }).click();
-  await expect(operator.page.getByRole('cell', { name: 'Failover aborted / withdrawn' }).first()).toBeVisible();
-  await expect(operator.page.getByRole('cell', { name: 'Failover requested' }).first()).toBeVisible();
+  await expect(
+    operator.page.getByRole('cell', { name: 'Failover aborted / withdrawn' }).first(),
+  ).toBeVisible();
+  await expect(
+    operator.page.getByRole('cell', { name: 'Failover requested' }).first(),
+  ).toBeVisible();
 
   await operator.page.getByRole('button', { name: 'Verify chain' }).click();
   await expect(operator.page.getByRole('status')).toContainText('Chain intact');
