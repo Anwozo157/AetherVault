@@ -96,4 +96,4 @@ Use GitHub's private vulnerability reporting on this repository (Security tab â†
 
 - `frame-ancestors` / other HTTP security headers need a host that sends headers (custom domain on a CDN; requires funding).
 - Hosted backend not yet created (Phase 3.6); its dashboard settings must match `supabase/config.toml` (disable password sign-ups, enable leaked-password protection, rate limits).
-- No third-party penetration test or SOC 2 yet (when customers require it).
+- No third-party penetration test or SOC 2 yet (when customers require it). Readiness self-assessment and free next steps: `docs/SOC2_READINESS.md`.

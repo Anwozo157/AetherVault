@@ -41,6 +41,8 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 2. **Phase 4, free parts:** DR drill scheduler (non-disruptive drills against the simulated provider), Slack/PagerDuty webhook alerts (free tiers). ✅ Done 2026-11-09: team invites/roles + onboarding checklist; 4.1 drill evidence reports (RTO/RPO targets, PASS/FAIL drill history, Print/Save as PDF, SHA-256-fingerprinted JSON; deployed as `89c4e1b`). RPO stays "not measured" until real replication data is connected.
 3. **Requires funding (founder approves):** AWS account + Elastic Disaster Recovery for real replication data (~$40–60/mo), Supabase Pro ($25/mo), custom domain (~$1/mo), which also enables HTTP security headers (`frame-ancestors`).
 
+4. **SOC 2 readiness (free):** checklist started in `docs/SOC2_READINESS.md`. Founder: enable branch protection on `main`, FileVault/auto-updates/2FA check. Agent: write the core policy set, risk register, vendor inventory.
+
 ## Open decisions for the founder
 
 - Approve funds (costs in `docs/PHASE_3_PLAN.md` and the investor market report).
