@@ -120,6 +120,7 @@ Browser A (operator)            Supabase (Postgres + Auth + Realtime)          B
   the database); RPC errors appear as `CRIT` lines in the audit stream.
 - **Bundle:** supabase-js loads only on `#/console`; the public demo's initial JS is unchanged
   (budget 120 kB gzip).
+- **Audit Log tab (3.5):** `AuditCapability` (optional on `DrProvider`) lists pages from `audit_log_page()` and verifies via `verify_audit_chain_report()`; `features/audit/` renders the table, filters, Verify and CSV export (formula-injection safe).
 - **Public build:** no `VITE_SUPABASE_*` env, so no sign-in link and `#/console` explains that the
   console isn't deployed.
 

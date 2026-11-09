@@ -17,6 +17,8 @@ class FakeServer {
   audit: AuditEntry[] = [];
   clockSkewMs = 0;
   failNextStatus = false;
+  /** Simulates the server detecting an altered entry. */
+  tampered: number | null = null;
   private listeners = new Set<() => void>();
 
   serverNow() {
@@ -82,6 +84,22 @@ class FakeServer {
       resetFailover: vi.fn(async () => {
         this.run = null;
         this.log(userId, 'failover.reset', { run_id: 'run-1' });
+      }),
+      getAuditPage: async (_org: string, limit: number, before?: number) =>
+        this.audit
+          .filter((e) => before === undefined || e.id < before)
+          .slice(0, limit)
+          .map((e) => ({
+            ...e,
+            prev_hash: '0'.repeat(64),
+            hash: e.id.toString(16).padStart(64, 'a'),
+          })),
+      verifyAuditChain: async () => ({
+        ok: this.tampered === null,
+        broken_id: this.tampered,
+        checked: this.audit.length,
+        head_hash: this.audit[0] ? 'a'.repeat(64) : null,
+        verified_at: new Date(this.serverNow()).toISOString(),
       }),
       subscribe: (_org, onChange) => {
         this.listeners.add(onChange);
@@ -352,5 +370,25 @@ describe('SupabaseDrProvider', () => {
     await vi.advanceTimersByTimeAsync(1000);
     expect(op.getTelemetry().drsAgentStatus).toBe('SYNCHRONIZING');
     expect(op.getState()).toBe(SystemState.IDLE);
+  });
+
+  test('audit: lists entries newest first with hashes, pages by id, and reports the chain', async () => {
+    const op = connect(server, USERS.op, 'operator');
+    await op.triggerFailover('us-east-1', 'aws-us-west-2');
+    await op.approvals.cancel();
+    const page = await op.audit.list({ limit: 1 });
+    expect(page).toHaveLength(1);
+    expect(page[0]).toMatchObject({ action: 'failover.aborted', actorEmail: 'op@test' });
+    expect(page[0].hash).toMatch(/^[0-9a-f]{64}$/);
+    const older = await op.audit.list({ before: page[0].id });
+    expect(older.map((r) => r.action)).toEqual(['failover.requested']);
+
+    await expect(op.audit.verify()).resolves.toMatchObject({
+      ok: true,
+      brokenId: null,
+      checked: 2,
+    });
+    server.tampered = 1;
+    await expect(op.audit.verify()).resolves.toMatchObject({ ok: false, brokenId: 1 });
   });
 });

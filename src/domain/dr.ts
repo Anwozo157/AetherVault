@@ -107,6 +107,34 @@ export interface ApprovalCapability {
   cancel(): Promise<void>;
 }
 
+/** One entry of a tamper-evident audit log. */
+export interface AuditRecord {
+  id: number;
+  actorEmail: string | null;
+  action: string;
+  detail: Record<string, unknown>;
+  createdAt: string;
+  prevHash: string;
+  hash: string;
+}
+
+export interface ChainReport {
+  ok: boolean;
+  /** First entry whose hash does not verify, when `ok` is false. */
+  brokenId: number | null;
+  checked: number;
+  headHash: string | null;
+  verifiedAt: string;
+}
+
+/** Optional capability: a server-side, hash-chained audit log (not in the simulated demo). */
+export interface AuditCapability {
+  /** Newest first; pass the oldest id you have as `before` to load the next page. */
+  list(options?: { limit?: number; before?: number }): Promise<AuditRecord[]>;
+  /** Recomputes the hash chain on the server. */
+  verify(): Promise<ChainReport>;
+}
+
 /** Contract every disaster-recovery data source must implement. */
 export interface DrProvider {
   /** Human-readable provider name, shown in the UI. */
@@ -117,6 +145,8 @@ export interface DrProvider {
   readonly telemetryIsSimulated: boolean;
   /** Present when failovers need a second person's approval. */
   readonly approvals?: ApprovalCapability;
+  /** Present when actions are recorded in a verifiable audit log. */
+  readonly audit?: AuditCapability;
 
   getState(): SystemState;
   getMetrics(): BasicMetrics;

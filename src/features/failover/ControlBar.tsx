@@ -1,7 +1,7 @@
-import { Flame, HardDrive, Layers } from 'lucide-react';
+import { Flame, HardDrive, Layers, ScrollText } from 'lucide-react';
 import { TARGET_REGIONS } from '../../config/regions';
 
-export type CommandTab = 'hud' | 'drs';
+export type CommandTab = 'hud' | 'drs' | 'audit';
 
 interface ControlBarProps {
   tab: CommandTab;
@@ -11,6 +11,8 @@ interface ControlBarProps {
   regionLocked: boolean;
   chaosActive: boolean;
   onToggleChaos: () => void;
+  /** Show the Audit Log tab (server-backed providers only). */
+  showAudit?: boolean;
 }
 
 export default function ControlBar({
@@ -21,6 +23,7 @@ export default function ControlBar({
   regionLocked,
   chaosActive,
   onToggleChaos,
+  showAudit = false,
 }: ControlBarProps) {
   const tabClass = (active: boolean) =>
     `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
@@ -29,7 +32,7 @@ export default function ControlBar({
 
   return (
     <div className="w-full flex flex-wrap items-center justify-between gap-3 mb-4 px-1">
-      <div className="flex items-center gap-2 bg-white/[0.03] p-1 rounded-xl border border-white/10">
+      <div className="flex flex-wrap items-center gap-2 bg-white/[0.03] p-1 rounded-xl border border-white/10">
         <button
           onClick={() => onTabChange('hud')}
           aria-pressed={tab === 'hud'}
@@ -46,6 +49,16 @@ export default function ControlBar({
           <HardDrive className="w-3.5 h-3.5 text-aether-green" />
           <span>AWS DRS & Telemetry</span>
         </button>
+        {showAudit && (
+          <button
+            onClick={() => onTabChange('audit')}
+            aria-pressed={tab === 'audit'}
+            className={tabClass(tab === 'audit')}
+          >
+            <ScrollText className="w-3.5 h-3.5 text-aether-amber" />
+            <span>Audit Log</span>
+          </button>
+        )}
       </div>
 
       <div className="flex items-center gap-2">
