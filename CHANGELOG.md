@@ -5,6 +5,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Always-current Share QR; deck accuracy (2026-11-09)
+
+- Each build publishes `version.json`. Opening Share checks it (no cache) and builds the QR from the newest live version, so even a stale cached page hands out the current build; a stale page offers a reload. Version strings are validated (hex only) before use.
+- Pitch deck: replaced "85% of human-error outages stem from procedures (Uptime 2025)", which could not be verified on any public page, with the verifiable figure: 80% of operators say better management and processes would have prevented their most recent outage (Uptime 2025).
+- Investor market report written (Claude Doc, sourced; backup in Obsidian).
+
 ### Globe rebuilt on real geography; local QR codes (2026-11-09)
 
 - **Fixed:** AWS us-west-2 (Oregon) was placed by hand-picked coordinates ~120° around the globe, and its bezier arc dipped below the surface, so the route vanished inside the globe. Regions now use real data-center coordinates (`config/regions.ts`) and great-circle arcs that are tested to stay above the surface for every route.

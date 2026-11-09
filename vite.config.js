@@ -13,13 +13,28 @@ function buildVersion() {
   }
 }
 
+const VERSION = buildVersion();
+const BUILD_DATE = new Date().toISOString().slice(0, 10);
+
+/** Emits version.json so open pages (and the Share QR) can find the newest live build. */
+const versionFile = () => ({
+  name: 'aethervault-version-file',
+  generateBundle() {
+    this.emitFile({
+      type: 'asset',
+      fileName: 'version.json',
+      source: JSON.stringify({ version: VERSION, date: BUILD_DATE }) + '\n',
+    });
+  },
+});
+
 export default defineConfig({
   base: './',
   define: {
-    __APP_VERSION__: JSON.stringify(buildVersion()),
-    __BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10)),
+    __APP_VERSION__: JSON.stringify(VERSION),
+    __BUILD_DATE__: JSON.stringify(BUILD_DATE),
   },
-  plugins: [react()],
+  plugins: [react(), versionFile()],
   build: {
     // The lazily loaded 3D globe chunk bundles three.js (~930 kB). It is not on the
     // critical path, so warn only above that; the initial bundle is ~300 kB.
