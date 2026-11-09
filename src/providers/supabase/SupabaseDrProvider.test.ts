@@ -19,6 +19,7 @@ class FakeServer {
   failNextStatus = false;
   /** Simulates the server detecting an altered entry. */
   tampered: number | null = null;
+  rto = 900;
   invites: Array<{
     id: string;
     email: string;
@@ -130,6 +131,27 @@ class FakeServer {
       }),
       setMemberRole: vi.fn(async () => {}),
       removeMember: vi.fn(async () => {}),
+      getObjectives: async () => ({ rto_target_seconds: this.rto, rpo_target_seconds: 60 }),
+      setObjectives: vi.fn(async (_org: string, rto: number) => {
+        this.rto = rto;
+      }),
+      listRuns: async () => [
+        {
+          id: 'run-9',
+          source_region: 'us-east-1',
+          target_region: 'aws-us-west-2',
+          requested_by_email: 'op@test',
+          requested_at: '2026-11-09T00:00:00Z',
+          approved_by_email: 'ap@test',
+          approved_at: '2026-11-09T00:00:30Z',
+          aborted_at: null,
+          reset_at: null,
+          outcome: 'secured' as const,
+          recovery_seconds: '5.5' as unknown as number, // Postgres numeric arrives as a string
+          rto_target_seconds: this.rto,
+        },
+      ],
+      drillEvidence: vi.fn(async (runId: string) => ({ run: { id: runId } }) as never),
       subscribe: (_org, onChange) => {
         this.listeners.add(onChange);
         return () => this.listeners.delete(onChange);
@@ -468,5 +490,20 @@ describe('SupabaseDrProvider', () => {
     expect(text).toContain('n@test joined as approver.');
     expect(text).toContain('op@test revoked the invite for x@test.');
     expect(text).toContain('op@test removed n@test from the organization.');
+  });
+
+  test('drills: objectives round-trip, runs are mapped (numeric -> number), evidence by id', async () => {
+    const op = connect(server, USERS.op, 'admin');
+    await expect(op.drills.getObjectives()).resolves.toEqual({ rtoSeconds: 900, rpoSeconds: 60 });
+    await op.drills.setObjectives({ rtoSeconds: 300, rpoSeconds: 30 });
+    await expect(op.drills.getObjectives()).resolves.toEqual({ rtoSeconds: 300, rpoSeconds: 60 });
+    const [run] = await op.drills.listRuns();
+    expect(run).toMatchObject({
+      id: 'run-9',
+      outcome: 'secured',
+      recoverySeconds: 5.5,
+      rtoTargetSeconds: 300,
+    });
+    await expect(op.drills.evidence('run-9')).resolves.toMatchObject({ run: { id: 'run-9' } });
   });
 });

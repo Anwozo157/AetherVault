@@ -17,6 +17,7 @@ const GlobalTopologyCanvas = lazy(() => import('./topology/GlobalTopologyCanvas'
 const AwsDrsHud = lazy(() => import('./telemetry/AwsDrsHud'));
 const AuditLogPanel = lazy(() => import('./audit/AuditLogPanel'));
 const TeamPanel = lazy(() => import('./team/TeamPanel'));
+const DrillsPanel = lazy(() => import('./drills/DrillsPanel'));
 const OnboardingChecklist = lazy(() => import('./onboarding/OnboardingChecklist'));
 
 function PanelPlaceholder({ label, height = 'h-[320px]' }: { label: string; height?: string }) {
@@ -68,6 +69,7 @@ export default function CommandCenter({
         onToggleChaos={onToggleChaos}
         showAudit={!!provider.audit}
         showTeam={!!provider.team}
+        showDrills={!!provider.drills}
       />
 
       {provider.team && provider.audit && provider.team.myRole === 'admin' && orgId && (
@@ -126,6 +128,16 @@ export default function CommandCenter({
             )}
           </motion.div>
         </>
+      ) : tab === 'drills' && provider.drills ? (
+        <ErrorBoundary fallback={<PanelPlaceholder label="Drills panel failed to load." />}>
+          <Suspense fallback={<PanelPlaceholder label="Loading drills…" />}>
+            <DrillsPanel
+              drills={provider.drills}
+              myRole={provider.team?.myRole ?? 'viewer'}
+              refreshKey={activityKey}
+            />
+          </Suspense>
+        </ErrorBoundary>
       ) : tab === 'team' && provider.team ? (
         <ErrorBoundary fallback={<PanelPlaceholder label="Team panel failed to load." />}>
           <Suspense fallback={<PanelPlaceholder label="Loading team…" />}>

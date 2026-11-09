@@ -1,7 +1,7 @@
-import { Flame, HardDrive, Layers, ScrollText, Users } from 'lucide-react';
+import { ClipboardCheck, Flame, HardDrive, Layers, ScrollText, Users } from 'lucide-react';
 import { TARGET_REGIONS } from '../../config/regions';
 
-export type CommandTab = 'hud' | 'drs' | 'audit' | 'team';
+export type CommandTab = 'hud' | 'drs' | 'drills' | 'audit' | 'team';
 
 interface ControlBarProps {
   tab: CommandTab;
@@ -15,6 +15,8 @@ interface ControlBarProps {
   showAudit?: boolean;
   /** Show the Team tab (server-backed providers only). */
   showTeam?: boolean;
+  /** Show the Drills tab (server-backed providers only). */
+  showDrills?: boolean;
 }
 
 export default function ControlBar({
@@ -27,6 +29,7 @@ export default function ControlBar({
   onToggleChaos,
   showAudit = false,
   showTeam = false,
+  showDrills = false,
 }: ControlBarProps) {
   const tabClass = (active: boolean) =>
     `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
@@ -52,6 +55,16 @@ export default function ControlBar({
           <HardDrive className="w-3.5 h-3.5 text-aether-green" />
           <span>AWS DRS & Telemetry</span>
         </button>
+        {showDrills && (
+          <button
+            onClick={() => onTabChange('drills')}
+            aria-pressed={tab === 'drills'}
+            className={tabClass(tab === 'drills')}
+          >
+            <ClipboardCheck className="w-3.5 h-3.5 text-aether-green" />
+            <span>Drills</span>
+          </button>
+        )}
         {showAudit && (
           <button
             onClick={() => onTabChange('audit')}

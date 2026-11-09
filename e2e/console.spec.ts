@@ -1,4 +1,6 @@
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { expect, test, type Browser, type Page } from '@playwright/test';
 
 // Two real browser sessions against local Supabase: the Phase 3.4 "done when" check.
@@ -136,6 +138,49 @@ function sqlAsOwner(sql: string) {
   ).trim();
 }
 
+test('drill evidence: a completed drill reports PASS, and the downloaded file matches its fingerprint', async ({
+  browser,
+}) => {
+  const operator = await signIn(browser, 'operator@aethervault.local');
+  const approver = await signIn(browser, 'approver@aethervault.local');
+  await holdFailover(operator.page);
+  await approver.page.getByRole('button', { name: 'Approve failover' }).click();
+  await expect(operator.page.getByRole('button', { name: 'Reset to Standby' })).toBeVisible({
+    timeout: 15_000,
+  });
+  await operator.page.getByRole('button', { name: 'Reset to Standby' }).click();
+
+  await operator.page.getByRole('button', { name: 'Drills', exact: true }).click();
+  await expect(operator.page.getByText(/· PASS/).first()).toBeVisible({ timeout: 10_000 });
+  await operator.page
+    .getByRole('button', { name: /Evidence report for drill/ })
+    .first()
+    .click();
+
+  const report = operator.page.getByRole('dialog');
+  await expect(report.getByText('PASS', { exact: true })).toBeVisible();
+  await expect(report.getByText('operator@aethervault.local').first()).toBeVisible();
+  await expect(report.getByText('approver@aethervault.local').first()).toBeVisible();
+  await expect(report.getByText('Met (different requester and approver)')).toBeVisible();
+  await expect(report.getByText(/Audit chain intact/)).toBeVisible();
+
+  const shown = (await report.getByText(/Report fingerprint/).textContent())!.match(
+    /[0-9a-f]{64}/,
+  )![0];
+  const [download] = await Promise.all([
+    operator.page.waitForEvent('download'),
+    report.getByRole('button', { name: /Download JSON/ }).click(),
+  ]);
+  const file = readFileSync((await download.path())!, 'utf8');
+  const recomputed = createHash('sha256').update(file.trimEnd()).digest('hex');
+  expect(recomputed).toBe(shown);
+  expect(JSON.parse(file).results.rto_met).toBe(true);
+
+  expect(operator.errors).toEqual([]);
+  await operator.close();
+  await approver.close();
+});
+
 test("audit log: verify passes, then detects an entry altered behind the app's back", async ({
   browser,
 }) => {
@@ -220,7 +265,7 @@ test('new customer: signs up, creates an organization, invites a teammate who jo
   });
   await founder.page.getByLabel('Organization name').fill(orgName);
   await founder.page.getByRole('button', { name: 'Create organization' }).click();
-  await expect(founder.page.getByText(orgName)).toBeVisible();
+  await expect(founder.page.getByText(orgName).first()).toBeVisible();
   await expect(founder.page.getByText('Get set up · 1 of 4')).toBeVisible();
 
   // 2. They invite a teammate as approver; the checklist advances.

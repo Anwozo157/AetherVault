@@ -2,7 +2,7 @@
 // this interface (not on supabase-js directly) so it can be unit-tested with a fake.
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { MemberRole, Unsubscribe } from '../../domain/dr';
+import type { DrillEvidence, MemberRole, RunOutcome, Unsubscribe } from '../../domain/dr';
 
 export interface ServerRun {
   id: string;
@@ -58,6 +58,21 @@ export interface InviteRow {
   created_at: string;
 }
 
+export interface RunRow {
+  id: string;
+  source_region: string;
+  target_region: string;
+  requested_by_email: string | null;
+  requested_at: string;
+  approved_by_email: string | null;
+  approved_at: string | null;
+  aborted_at: string | null;
+  reset_at: string | null;
+  outcome: RunOutcome;
+  recovery_seconds: number | null;
+  rto_target_seconds: number;
+}
+
 export interface Membership {
   orgId: string;
   orgName: string;
@@ -79,6 +94,10 @@ export interface ConsoleApi {
   revokeInvite(inviteId: string): Promise<void>;
   setMemberRole(orgId: string, userId: string, role: MemberRole): Promise<void>;
   removeMember(orgId: string, userId: string): Promise<void>;
+  getObjectives(orgId: string): Promise<{ rto_target_seconds: number; rpo_target_seconds: number }>;
+  setObjectives(orgId: string, rtoSeconds: number, rpoSeconds: number): Promise<void>;
+  listRuns(orgId: string): Promise<RunRow[]>;
+  drillEvidence(runId: string): Promise<DrillEvidence>;
   /** Calls back whenever runs or audit entries for the org change. */
   subscribe(orgId: string, onChange: () => void): Unsubscribe;
 }
@@ -122,6 +141,19 @@ export function createSupabaseConsoleApi(client: SupabaseClient): ConsoleApi {
       call<void>(client.rpc('set_member_role', { p_org: orgId, p_user: userId, p_role: role })),
     removeMember: (orgId, userId) =>
       call<void>(client.rpc('remove_member', { p_org: orgId, p_user: userId })),
+    getObjectives: (orgId) =>
+      call<{ rto_target_seconds: number; rpo_target_seconds: number }>(
+        client
+          .from('orgs')
+          .select('rto_target_seconds, rpo_target_seconds')
+          .eq('id', orgId)
+          .single(),
+      ),
+    setObjectives: (orgId, rto, rpo) =>
+      call<void>(client.rpc('set_recovery_objectives', { p_org: orgId, p_rto: rto, p_rpo: rpo })),
+    listRuns: (orgId) =>
+      call<RunRow[]>(client.rpc('list_failover_runs', { p_org: orgId, p_limit: 50 })),
+    drillEvidence: (runId) => call<DrillEvidence>(client.rpc('drill_evidence', { p_run: runId })),
     subscribe(orgId, onChange) {
       const filter = `org_id=eq.${orgId}`;
       const channel = client

@@ -122,6 +122,7 @@ Browser A (operator)            Supabase (Postgres + Auth + Realtime)          B
   (budget 120 kB gzip).
 - **Audit Log tab (3.5):** `AuditCapability` (optional on `DrProvider`) lists pages from `audit_log_page()` and verifies via `verify_audit_chain_report()`; `features/audit/` renders the table, filters, Verify and CSV export (formula-injection safe).
 - **Team (invites, roles):** `TeamCapability` (optional on `DrProvider`) backed by `list_org_members`, `invite_member`, `set_member_role`, `remove_member`, `revoke_invite`; `features/team/`. `ConsoleRoot` calls `accept_pending_invites()` after sign-in and offers an organization switcher. `features/onboarding/` shows an admin checklist computed from team and audit data (per-browser dismiss flag only).
+- **Drills & evidence (4.1):** `DrillsCapability` (optional on `DrProvider`) reads/sets recovery objectives, lists runs (`list_failover_runs`) and fetches `drill_evidence(run)`. `features/drills/` renders the table and the evidence report (portal to `<body>` so print shows only the report); `evidence.ts` computes the canonical-JSON SHA-256 fingerprint.
 - **Public build:** no `VITE_SUPABASE_*` env, so no sign-in link and `#/console` explains that the
   console isn't deployed.
 

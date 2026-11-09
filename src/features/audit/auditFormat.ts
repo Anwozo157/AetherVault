@@ -13,6 +13,7 @@ export const ACTION_LABEL: Record<string, string> = {
   'member.invite_revoked': 'Invite revoked',
   'member.joined': 'Member joined',
   'member.removed': 'Member removed',
+  'org.objectives_set': 'Recovery targets changed',
 };
 
 export function describeDetail(r: AuditRecord): string {
@@ -23,6 +24,8 @@ export function describeDetail(r: AuditRecord): string {
     return `at ${s('stage')!.replace(/_/g, ' ').toLowerCase()}`;
   if (r.action === 'member.role_set' && s('role')) return `role: ${s('role')}`;
   if (r.action === 'org.created' && s('name')) return s('name')!;
+  if (r.action === 'org.objectives_set')
+    return `RTO ${String(d.rto_seconds)} s, RPO ${String(d.rpo_seconds)} s`;
   if (r.action === 'member.invited' || r.action === 'member.joined')
     return `${s('email') ?? '?'} as ${s('role') ?? '?'}`;
   if (r.action === 'member.invite_revoked' || r.action === 'member.removed')

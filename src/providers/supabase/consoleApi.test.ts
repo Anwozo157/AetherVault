@@ -11,9 +11,12 @@ function fakeClient(result: { data: unknown; error: { message: string } | null }
   const channel = { on: vi.fn(), subscribe: vi.fn() };
   channel.on.mockReturnValue(channel);
   channel.subscribe.mockReturnValue(channel);
-  const query = { select: vi.fn(), eq: vi.fn() };
+  const query = { select: vi.fn(), eq: vi.fn(), single: vi.fn() };
   query.select.mockReturnValue(query);
-  query.eq.mockResolvedValue(result);
+  // eq() is awaited directly (memberships) or followed by single() (objectives).
+  const eqResult = Object.assign(Promise.resolve(result), { single: query.single });
+  query.eq.mockReturnValue(eqResult);
+  query.single.mockResolvedValue(result);
   const client = {
     rpc: vi.fn().mockResolvedValue(result),
     from: vi.fn().mockReturnValue(query),
@@ -41,6 +44,9 @@ describe('createSupabaseConsoleApi', () => {
     await api.revokeInvite('i');
     await api.setMemberRole('o', 'u', 'viewer');
     await api.removeMember('o', 'u');
+    await api.setObjectives('o', 300, 30);
+    await api.listRuns('o');
+    await api.drillEvidence('r');
     expect(raw.rpc.mock.calls).toEqual([
       ['get_failover_status', { p_org: 'o' }],
       ['org_audit_feed', { p_org: 'o', p_limit: 50 }],
@@ -56,6 +62,9 @@ describe('createSupabaseConsoleApi', () => {
       ['revoke_invite', { p_invite: 'i' }],
       ['set_member_role', { p_org: 'o', p_user: 'u', p_role: 'viewer' }],
       ['remove_member', { p_org: 'o', p_user: 'u' }],
+      ['set_recovery_objectives', { p_org: 'o', p_rto: 300, p_rpo: 30 }],
+      ['list_failover_runs', { p_org: 'o', p_limit: 50 }],
+      ['drill_evidence', { p_run: 'r' }],
     ]);
   });
 
@@ -106,5 +115,20 @@ describe('acceptPendingInvites', () => {
     const { client, raw } = fakeClient({ data: 2, error: null });
     await expect(acceptPendingInvites(client)).resolves.toBe(2);
     expect(raw.rpc).toHaveBeenCalledWith('accept_pending_invites');
+  });
+});
+
+describe('objectives read', () => {
+  test('reads the org row', async () => {
+    const { client, raw, query } = fakeClient({
+      data: { rto_target_seconds: 300, rpo_target_seconds: 30 },
+      error: null,
+    });
+    await expect(createSupabaseConsoleApi(client).getObjectives('o')).resolves.toEqual({
+      rto_target_seconds: 300,
+      rpo_target_seconds: 30,
+    });
+    expect(raw.from).toHaveBeenCalledWith('orgs');
+    expect(query.eq).toHaveBeenCalledWith('id', 'o');
   });
 });

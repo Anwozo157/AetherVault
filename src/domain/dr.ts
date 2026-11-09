@@ -165,6 +165,78 @@ export interface TeamCapability {
   remove(userId: string): Promise<void>;
 }
 
+export interface RecoveryObjectives {
+  rtoSeconds: number;
+  rpoSeconds: number;
+}
+
+export type RunOutcome = 'pending' | 'in_progress' | 'secured' | 'aborted' | 'withdrawn';
+
+export interface RunSummary {
+  id: string;
+  sourceRegion: string;
+  targetRegion: string;
+  requestedByEmail: string | null;
+  requestedAt: string;
+  approvedByEmail: string | null;
+  approvedAt: string | null;
+  outcome: RunOutcome;
+  recoverySeconds: number | null;
+  rtoTargetSeconds: number;
+}
+
+/** Evidence record for one failover drill (server-generated; see drill_evidence()). */
+export interface DrillEvidence {
+  report_version: number;
+  generated_at: string;
+  generated_by: string | null;
+  organization: { id: string; name: string };
+  objectives: { rto_seconds: number; rpo_seconds: number };
+  run: {
+    id: string;
+    source_region: string;
+    target_region: string;
+    requested_by: string | null;
+    requested_at: string;
+    approved_by: string | null;
+    approved_at: string | null;
+    aborted_at: string | null;
+    reset_at: string | null;
+    outcome: RunOutcome;
+    two_person_rule_met: boolean;
+  };
+  timeline: Array<{ stage: string; at: string }>;
+  results: {
+    decision_seconds: number | null;
+    recovery_seconds: number | null;
+    rto_met: boolean | null;
+    rpo_measured: boolean;
+  };
+  audit_entries: Array<{
+    id: number;
+    at: string;
+    actor: string | null;
+    action: string;
+    hash: string;
+  }>;
+  chain: {
+    ok: boolean;
+    broken_id: number | null;
+    checked: number;
+    head_hash: string | null;
+    verified_at: string;
+  };
+}
+
+/** Optional capability: recovery objectives and drill evidence (REL13-BP01/BP03). */
+export interface DrillsCapability {
+  getObjectives(): Promise<RecoveryObjectives>;
+  /** Admins only. */
+  setObjectives(objectives: RecoveryObjectives): Promise<void>;
+  listRuns(): Promise<RunSummary[]>;
+  evidence(runId: string): Promise<DrillEvidence>;
+}
+
 /** Contract every disaster-recovery data source must implement. */
 export interface DrProvider {
   /** Human-readable provider name, shown in the UI. */
@@ -179,6 +251,8 @@ export interface DrProvider {
   readonly audit?: AuditCapability;
   /** Present when the organization's members can be managed. */
   readonly team?: TeamCapability;
+  /** Present when drills produce evidence reports. */
+  readonly drills?: DrillsCapability;
 
   getState(): SystemState;
   getMetrics(): BasicMetrics;

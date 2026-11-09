@@ -6,6 +6,7 @@ import {
   type ApprovalCapability,
   type AuditCapability,
   type TeamCapability,
+  type DrillsCapability,
   type BasicMetrics,
   type DrProvider,
   type DrTelemetry,
@@ -72,6 +73,11 @@ function describeAudit(entry: AuditEntry): { level: LogEvent['level']; message: 
         level: 'WARN',
         message: `${actor} removed ${String(d.email)} from the organization.`,
       };
+    case 'org.objectives_set':
+      return {
+        level: 'INFO',
+        message: `${actor} set recovery targets: RTO ${String(d.rto_seconds)} s, RPO ${String(d.rpo_seconds)} s.`,
+      };
     case 'member.role_set':
       return { level: 'INFO', message: `${actor} set a member's role to ${String(d.role)}.` };
     default:
@@ -86,6 +92,7 @@ export class SupabaseDrProvider implements DrProvider {
   readonly approvals: ApprovalCapability;
   readonly audit: AuditCapability;
   readonly team: TeamCapability;
+  readonly drills: DrillsCapability;
   /** Resolves after the first sync with the server (useful in tests). */
   readonly ready: Promise<void>;
 
@@ -142,6 +149,27 @@ export class SupabaseDrProvider implements DrProvider {
       revokeInvite: (id) => api.revokeInvite(id),
       setRole: (userId, role) => api.setMemberRole(org, userId, role),
       remove: (userId) => api.removeMember(org, userId),
+    };
+    this.drills = {
+      getObjectives: async () => {
+        const o = await api.getObjectives(org);
+        return { rtoSeconds: o.rto_target_seconds, rpoSeconds: o.rpo_target_seconds };
+      },
+      setObjectives: ({ rtoSeconds, rpoSeconds }) => api.setObjectives(org, rtoSeconds, rpoSeconds),
+      listRuns: async () =>
+        (await api.listRuns(org)).map((r) => ({
+          id: r.id,
+          sourceRegion: r.source_region,
+          targetRegion: r.target_region,
+          requestedByEmail: r.requested_by_email,
+          requestedAt: r.requested_at,
+          approvedByEmail: r.approved_by_email,
+          approvedAt: r.approved_at,
+          outcome: r.outcome,
+          recoverySeconds: r.recovery_seconds === null ? null : Number(r.recovery_seconds),
+          rtoTargetSeconds: r.rto_target_seconds,
+        })),
+      evidence: (runId) => api.drillEvidence(runId),
     };
     this.audit = {
       list: async ({ limit = 100, before } = {}) =>
