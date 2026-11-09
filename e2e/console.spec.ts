@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { expect, test, type Browser, type Page } from '@playwright/test';
 
 // Two real browser sessions against local Supabase: the Phase 3.4 "done when" check.
@@ -119,5 +120,49 @@ test('signing out returns to the sign-in form', async ({ browser }) => {
   const operator = await signIn(browser, 'operator@aethervault.local');
   await operator.page.getByRole('button', { name: 'Sign out' }).click();
   await expect(operator.page.getByRole('form', { name: 'Sign in' })).toBeVisible();
+  await operator.close();
+});
+
+/** Runs SQL as the database owner inside the local Supabase container (test setup only). */
+function sqlAsOwner(sql: string) {
+  return execFileSync(
+    'docker',
+    ['exec', 'supabase_db_AetherVault', 'psql', '-U', 'postgres', '-tAc', sql],
+    { encoding: 'utf8' },
+  ).trim();
+}
+
+test("audit log: verify passes, then detects an entry altered behind the app's back", async ({
+  browser,
+}) => {
+  const operator = await signIn(browser, 'operator@aethervault.local');
+  // Generate real activity: request, then withdraw.
+  await holdFailover(operator.page);
+  await operator.page.getByRole('button', { name: 'Withdraw request' }).click();
+  await expect(operator.page.getByRole('button', { name: /1-CLICK FAILOVER/ })).toBeVisible();
+
+  await operator.page.getByRole('button', { name: 'Audit Log' }).click();
+  await expect(operator.page.getByRole('cell', { name: 'Failover aborted / withdrawn' }).first()).toBeVisible();
+  await expect(operator.page.getByRole('cell', { name: 'Failover requested' }).first()).toBeVisible();
+
+  await operator.page.getByRole('button', { name: 'Verify chain' }).click();
+  await expect(operator.page.getByRole('status')).toContainText('Chain intact');
+
+  // An attacker with database access edits history: change where a past failover went.
+  const victim = sqlAsOwner("select min(id) from audit_log where action = 'failover.requested'");
+  sqlAsOwner(
+    `alter table audit_log disable trigger audit_log_no_update_delete; ` +
+      `update audit_log set detail = jsonb_set(detail, '{target}', '"attacker-region"') where id = ${victim}; ` +
+      `alter table audit_log enable trigger audit_log_no_update_delete;`,
+  );
+
+  await operator.page.getByRole('button', { name: 'Verify chain' }).click();
+  await expect(operator.page.getByRole('status')).toContainText(
+    `Tampering detected: entry #${victim} was altered`,
+  );
+  await expect(
+    operator.page.getByTestId(`audit-row-${victim}`).getByText('Altered entry:'),
+  ).toBeAttached();
+  expect(operator.errors).toEqual([]);
   await operator.close();
 });

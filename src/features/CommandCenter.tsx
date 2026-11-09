@@ -14,6 +14,7 @@ import MetricsOverview from './telemetry/MetricsOverview';
 // Heavy panels load on demand so the first paint stays fast on phones.
 const GlobalTopologyCanvas = lazy(() => import('./topology/GlobalTopologyCanvas'));
 const AwsDrsHud = lazy(() => import('./telemetry/AwsDrsHud'));
+const AuditLogPanel = lazy(() => import('./audit/AuditLogPanel'));
 
 function PanelPlaceholder({ label, height = 'h-[320px]' }: { label: string; height?: string }) {
   return (
@@ -56,6 +57,7 @@ export default function CommandCenter({
         regionLocked={state !== SystemState.IDLE || !!run}
         chaosActive={chaosActive}
         onToggleChaos={onToggleChaos}
+        showAudit={!!provider.audit}
       />
 
       {tab === 'hud' ? (
@@ -101,6 +103,12 @@ export default function CommandCenter({
             )}
           </motion.div>
         </>
+      ) : tab === 'audit' && provider.audit ? (
+        <ErrorBoundary fallback={<PanelPlaceholder label="Audit log failed to load." />}>
+          <Suspense fallback={<PanelPlaceholder label="Loading audit log…" />}>
+            <AuditLogPanel audit={provider.audit} refreshKey={logs.length} />
+          </Suspense>
+        </ErrorBoundary>
       ) : (
         <ErrorBoundary fallback={<PanelPlaceholder label="Telemetry panel failed to load." />}>
           <Suspense fallback={<PanelPlaceholder label="Loading telemetry…" />}>

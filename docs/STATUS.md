@@ -10,7 +10,7 @@
 | 0. Foundation   | Strict TS, ESLint/Prettier, compiled Tailwind + brand tokens, docs            | ✅ Done (2026-11-08) |
 | 1. Architecture | `DrProvider` interface, feature folders, abort, lazy loading, simulated badge | ✅ Done (2026-11-08) |
 | 2. Quality bar  | Playwright E2E, WCAG 2.2 AA, Lighthouse 90+, GitHub Actions CI                | ✅ Done (2026-11-08) |
-| 3. Backend MVP  | Free-tier only until funded (see `AGENTS.md` rule 1)                          | 🚧 3.1–3.4 done      |
+| 3. Backend MVP  | Free-tier only until funded (see `AGENTS.md` rule 1)                          | 🚧 3.1–3.5 done      |
 | 4. Productize   | Multi-tenant, DR drills, compliance reports                                   | Not started          |
 
 Phase 3 milestones (`docs/PHASE_3_PLAN.md`):
@@ -21,7 +21,7 @@ Phase 3 milestones (`docs/PHASE_3_PLAN.md`):
 | 3.2 | Local Supabase + schema + RLS + audit triggers      | ✅ pgTAP                                          |
 | 3.3 | Server failover functions                           | ✅ pgTAP                                          |
 | 3.4 | `SupabaseDrProvider` + sign-in + approval UI        | ✅ Two-browser E2E passes (`npm run e2e:console`) |
-| 3.5 | Audit log UI + hash-chain verification              | Next                                              |
+| 3.5 | Audit log UI + hash-chain verification              | ✅ Tamper E2E passes                              |
 | 3.6 | CI runs Supabase; hosted free project; GitHub OAuth | Needs founder: free Supabase account (no card)    |
 | 3.7 | `docs/SECURITY.md`, deck roadmap                    | Not started                                       |
 

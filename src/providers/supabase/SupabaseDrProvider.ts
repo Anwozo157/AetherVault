@@ -4,6 +4,7 @@
 
 import {
   type ApprovalCapability,
+  type AuditCapability,
   type BasicMetrics,
   type DrProvider,
   type DrTelemetry,
@@ -68,6 +69,7 @@ export class SupabaseDrProvider implements DrProvider {
   readonly isSimulated = false;
   readonly telemetryIsSimulated = true;
   readonly approvals: ApprovalCapability;
+  readonly audit: AuditCapability;
   /** Resolves after the first sync with the server (useful in tests). */
   readonly ready: Promise<void>;
 
@@ -99,6 +101,28 @@ export class SupabaseDrProvider implements DrProvider {
     this.now = options.now ?? (() => Date.now());
     this.metrics = this.telemetrySource.getMetrics();
     this.approvals = this.createApprovals();
+    this.audit = {
+      list: async ({ limit = 100, before } = {}) =>
+        (await this.api.getAuditPage(this.ctx.orgId, limit, before)).map((r) => ({
+          id: r.id,
+          actorEmail: r.actor_email,
+          action: r.action,
+          detail: r.detail,
+          createdAt: r.created_at,
+          prevHash: r.prev_hash,
+          hash: r.hash,
+        })),
+      verify: async () => {
+        const r = await this.api.verifyAuditChain(this.ctx.orgId);
+        return {
+          ok: r.ok,
+          brokenId: r.broken_id,
+          checked: r.checked,
+          headHash: r.head_hash,
+          verifiedAt: r.verified_at,
+        };
+      },
+    };
 
     // Simulated idle metrics flow through only while no failover is executing.
     this.cleanups.push(

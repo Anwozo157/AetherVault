@@ -5,6 +5,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Phase 3.5: Audit log screen + tamper check (2026-11-09)
+
+- New **Audit Log** tab in the signed-in console (hidden in the public demo):
+  - newest-first table with person, plain-language action, details and fingerprint
+  - filter by action or person; older entries load in pages
+  - **Verify chain** recomputes the SHA-256 chain on the server: "Chain intact: N entries verified", or "Tampering detected: entry #N was altered" with that row highlighted
+  - **Export CSV** for auditors, carrying the chain status; spreadsheet-formula injection neutralized
+- Database: `audit_log_page()` (keyset pages with hashes) and `verify_audit_chain_report()`; 10 new pgTAP tests (60 total), including tamper detection.
+- End-to-end proof: a browser test alters a past entry directly in the database, bypassing the app, and the screen flags that exact entry.
+- Tests: 137 unit tests; console E2E 7/7.
+
 ### Always-current Share QR; deck accuracy (2026-11-09)
 
 - Each build publishes `version.json`. Opening Share checks it (no cache) and builds the QR from the newest live version, so even a stale cached page hands out the current build; a stale page offers a reload. Version strings are validated (hex only) before use.

@@ -28,6 +28,8 @@ describe('createSupabaseConsoleApi', () => {
     await api.approveFailover('r');
     await api.abortFailover('r');
     await api.resetFailover('r');
+    await api.getAuditPage('o', 25, 90);
+    await api.verifyAuditChain('o');
     expect(raw.rpc.mock.calls).toEqual([
       ['get_failover_status', { p_org: 'o' }],
       ['org_audit_feed', { p_org: 'o', p_limit: 50 }],
@@ -35,6 +37,8 @@ describe('createSupabaseConsoleApi', () => {
       ['approve_failover', { p_run: 'r' }],
       ['abort_failover', { p_run: 'r' }],
       ['reset_failover', { p_run: 'r' }],
+      ['audit_log_page', { p_org: 'o', p_limit: 25, p_before: 90 }],
+      ['verify_audit_chain_report', { p_org: 'o' }],
     ]);
   });
 

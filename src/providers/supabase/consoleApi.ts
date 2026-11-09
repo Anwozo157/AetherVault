@@ -30,6 +30,19 @@ export interface AuditEntry {
   created_at: string;
 }
 
+export interface AuditPageRow extends AuditEntry {
+  prev_hash: string;
+  hash: string;
+}
+
+export interface ChainReportRow {
+  ok: boolean;
+  broken_id: number | null;
+  checked: number;
+  head_hash: string | null;
+  verified_at: string;
+}
+
 export interface Membership {
   orgId: string;
   orgName: string;
@@ -43,6 +56,8 @@ export interface ConsoleApi {
   approveFailover(runId: string): Promise<void>;
   abortFailover(runId: string): Promise<void>;
   resetFailover(runId: string): Promise<void>;
+  getAuditPage(orgId: string, limit: number, before?: number): Promise<AuditPageRow[]>;
+  verifyAuditChain(orgId: string): Promise<ChainReportRow>;
   /** Calls back whenever runs or audit entries for the org change. */
   subscribe(orgId: string, onChange: () => void): Unsubscribe;
 }
@@ -68,6 +83,12 @@ export function createSupabaseConsoleApi(client: SupabaseClient): ConsoleApi {
     approveFailover: (runId) => call<void>(client.rpc('approve_failover', { p_run: runId })),
     abortFailover: (runId) => call<void>(client.rpc('abort_failover', { p_run: runId })),
     resetFailover: (runId) => call<void>(client.rpc('reset_failover', { p_run: runId })),
+    getAuditPage: (orgId, limit, before) =>
+      call<AuditPageRow[]>(
+        client.rpc('audit_log_page', { p_org: orgId, p_limit: limit, p_before: before ?? null }),
+      ),
+    verifyAuditChain: (orgId) =>
+      call<ChainReportRow>(client.rpc('verify_audit_chain_report', { p_org: orgId })),
     subscribe(orgId, onChange) {
       const filter = `org_id=eq.${orgId}`;
       const channel = client
