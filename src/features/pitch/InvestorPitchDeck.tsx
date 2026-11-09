@@ -450,8 +450,8 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               </div>
               <h4 className="text-sm font-bold text-white mb-1">Interactive 3D HUD</h4>
               <p className="text-[11px] text-zinc-400">
-                Three.js orbital globe, procedural audio synthesizer, and zero-cost GitHub Pages
-                mobile deployment.
+                Real-geography globe of every recovery route, executive view, investor deck, and
+                zero-cost GitHub Pages mobile deployment.
               </p>
             </div>
 
@@ -462,10 +462,10 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
                 </span>
                 <Activity className="w-4 h-4 text-aether-cyan" />
               </div>
-              <h4 className="text-sm font-bold text-white mb-1">Simulated DR Telemetry</h4>
+              <h4 className="text-sm font-bold text-white mb-1">Approval & Audit Backend</h4>
               <p className="text-[11px] text-zinc-400">
-                Simulated AWS DRS and CloudWatch-style dashboard, block replication matrix, audit
-                log stream, and abortable failover workflow.
+                Sign-in and roles, two-person failover approval, and a tamper-evident audit log
+                with one-click verification. Runs locally; replication telemetry still simulated.
               </p>
             </div>
 
