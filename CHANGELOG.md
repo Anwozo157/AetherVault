@@ -5,6 +5,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Team invites and onboarding (2026-11-09)
+
+- **Team tab** (console): admins invite by email with a role (with a plain explanation of each role), get a ready-to-send invite message (copy button), change roles, remove members (with confirmation) and revoke pending invites. Non-admins see the team read-only.
+- **Joining:** after sign-in, `accept_pending_invites()` adds the person to every organization that invited their **verified** email, with the invited role. Users in several organizations get an organization switcher in the header.
+- **Onboarding checklist** for admins: create organization, invite an approver, run a first drill, verify the audit chain; computed from real data, dismissible per organization.
+- **Database** (`20261109000004_team_invites.sql`): `org_invites` with RLS; `invite_member`, `revoke_invite`, `accept_pending_invites`, `remove_member`, `list_org_members`, `list_org_invites`. Admins cannot remove or demote themselves; unverified emails never join; every change is audited (`member.invited/joined/removed/invite_revoked`). 20 new pgTAP tests (80 total).
+- **E2E:** a brand-new founder signs up by email link, creates an organization, invites a teammate; the teammate signs in and lands in that organization as approver; the founder's team list updates live.
+- **Fixes:** panels now refresh on every new activity (the activity list is capped at 50, so its length stopped changing); screen-reader-only labels inside scrolling tables no longer widen the page on phones (Team and Audit tables).
+- Invite emails are not sent automatically yet (needs an email service with hosting); the admin sends the generated message.
+
 ### Deck roadmap, GitHub protections, status (2026-11-09)
 
 - Deck roadmap slide: Phase 2 now describes the built approval and audit backend (runs locally; telemetry still simulated) instead of only simulated telemetry; Phase 1 mentions the real-geography globe.

@@ -41,6 +41,14 @@ describe('auditFormat', () => {
       describeDetail(rec(3, { action: 'member.role_set', detail: { role: 'approver' } })),
     ).toBe('role: approver');
     expect(ACTION_LABEL['failover.approved']).toBe('Failover approved');
+    expect(
+      describeDetail(
+        rec(4, { action: 'member.joined', detail: { email: 'n@co.com', role: 'approver' } }),
+      ),
+    ).toBe('n@co.com as approver');
+    expect(
+      describeDetail(rec(5, { action: 'member.removed', detail: { email: 'x@co.com' } })),
+    ).toBe('x@co.com');
   });
 
   test('CSV quotes fields, records the chain status, and neutralizes spreadsheet formulas', () => {

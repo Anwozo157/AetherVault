@@ -9,6 +9,7 @@ import SignInForm from '../features/console/SignInForm';
 import { DrProviderRoot } from '../providers/DrProviderContext';
 import { SupabaseDrProvider } from '../providers/supabase/SupabaseDrProvider';
 import {
+  acceptPendingInvites,
   createOrg,
   createSupabaseConsoleApi,
   listMemberships,
@@ -101,15 +102,20 @@ function Console({ session }: { session: Session }) {
   const [provider, setProvider] = useState<SupabaseDrProvider | null>(null);
   const userId = session.user.id;
 
+  const [activeOrgId, setActiveOrgId] = useState<string | null>(null);
+
   const load = useCallback(() => {
-    listMemberships(supabase, userId)
+    // Join any organizations that invited this (verified) email, then load memberships.
+    acceptPendingInvites(supabase)
+      .catch(() => 0) // never block sign-in on invite acceptance
+      .then(() => listMemberships(supabase, userId))
       .then(setMemberships)
       .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
   }, [supabase, userId]);
 
   useEffect(load, [load]);
 
-  const active = memberships?.[0];
+  const active = memberships?.find((m) => m.orgId === activeOrgId) ?? memberships?.[0];
   useEffect(() => {
     if (!active) return;
     const p = new SupabaseDrProvider(createSupabaseConsoleApi(supabase), {
@@ -146,6 +152,12 @@ function Console({ session }: { session: Session }) {
           role: active.role,
           email: session.user.email ?? '',
           onSignOut: () => void supabase.auth.signOut(),
+          orgs:
+            memberships.length > 1
+              ? memberships.map((m) => ({ id: m.orgId, name: m.orgName }))
+              : undefined,
+          activeOrgId: active.orgId,
+          onSwitchOrg: setActiveOrgId,
         }}
       />
     </DrProviderRoot>

@@ -9,6 +9,10 @@ export const ACTION_LABEL: Record<string, string> = {
   'failover.approved': 'Failover approved',
   'failover.aborted': 'Failover aborted / withdrawn',
   'failover.reset': 'Drill reset',
+  'member.invited': 'Member invited',
+  'member.invite_revoked': 'Invite revoked',
+  'member.joined': 'Member joined',
+  'member.removed': 'Member removed',
 };
 
 export function describeDetail(r: AuditRecord): string {
@@ -19,6 +23,10 @@ export function describeDetail(r: AuditRecord): string {
     return `at ${s('stage')!.replace(/_/g, ' ').toLowerCase()}`;
   if (r.action === 'member.role_set' && s('role')) return `role: ${s('role')}`;
   if (r.action === 'org.created' && s('name')) return s('name')!;
+  if (r.action === 'member.invited' || r.action === 'member.joined')
+    return `${s('email') ?? '?'} as ${s('role') ?? '?'}`;
+  if (r.action === 'member.invite_revoked' || r.action === 'member.removed')
+    return s('email') ?? '';
   return '';
 }
 

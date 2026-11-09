@@ -6,6 +6,7 @@ import { useDrSession } from '../hooks/useDrSession';
 import { useFailoverRun } from '../hooks/useFailoverRun';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { sound } from '../lib/audioEffects';
+import { setFlag } from './onboarding/progress';
 import ApprovalPanel from './failover/ApprovalPanel';
 import ControlBar, { type CommandTab } from './failover/ControlBar';
 import FailoverControl from './failover/FailoverControl';
@@ -15,6 +16,8 @@ import MetricsOverview from './telemetry/MetricsOverview';
 const GlobalTopologyCanvas = lazy(() => import('./topology/GlobalTopologyCanvas'));
 const AwsDrsHud = lazy(() => import('./telemetry/AwsDrsHud'));
 const AuditLogPanel = lazy(() => import('./audit/AuditLogPanel'));
+const TeamPanel = lazy(() => import('./team/TeamPanel'));
+const OnboardingChecklist = lazy(() => import('./onboarding/OnboardingChecklist'));
 
 function PanelPlaceholder({ label, height = 'h-[320px]' }: { label: string; height?: string }) {
   return (
@@ -36,6 +39,12 @@ export default function CommandCenter({
 }) {
   const { provider, state, metrics, telemetry, logs } = useDrSession();
   const [tab, setTab] = useState<CommandTab>('hud');
+  const [verifyTick, setVerifyTick] = useState(0);
+  // Organization identity for per-org onboarding flags (server-backed providers only).
+  const orgId = provider.team?.orgId ?? null;
+  // Changes on every new activity entry (the log list itself is capped at 50, so its length
+  // stops changing once full). Panels reload when this changes.
+  const activityKey = logs.length ? logs[logs.length - 1].id : '';
   const [selectedTarget, setSelectedTarget] = useState(DEFAULT_TARGET_REGION);
   const run = useFailoverRun();
   const approvals = provider.approvals;
@@ -58,7 +67,21 @@ export default function CommandCenter({
         chaosActive={chaosActive}
         onToggleChaos={onToggleChaos}
         showAudit={!!provider.audit}
+        showTeam={!!provider.team}
       />
+
+      {provider.team && provider.audit && provider.team.myRole === 'admin' && orgId && (
+        <Suspense fallback={null}>
+          <OnboardingChecklist
+            key={`${orgId}-${verifyTick}`}
+            orgId={orgId}
+            team={provider.team}
+            audit={provider.audit}
+            refreshKey={activityKey}
+            onGoTo={setTab}
+          />
+        </Suspense>
+      )}
 
       {tab === 'hud' ? (
         <>
@@ -103,10 +126,25 @@ export default function CommandCenter({
             )}
           </motion.div>
         </>
+      ) : tab === 'team' && provider.team ? (
+        <ErrorBoundary fallback={<PanelPlaceholder label="Team panel failed to load." />}>
+          <Suspense fallback={<PanelPlaceholder label="Loading team…" />}>
+            <TeamPanel team={provider.team} refreshKey={activityKey} />
+          </Suspense>
+        </ErrorBoundary>
       ) : tab === 'audit' && provider.audit ? (
         <ErrorBoundary fallback={<PanelPlaceholder label="Audit log failed to load." />}>
           <Suspense fallback={<PanelPlaceholder label="Loading audit log…" />}>
-            <AuditLogPanel audit={provider.audit} refreshKey={logs.length} />
+            <AuditLogPanel
+              audit={provider.audit}
+              refreshKey={activityKey}
+              onVerified={(r) => {
+                if (r.ok && orgId) {
+                  setFlag('verified', orgId);
+                  setVerifyTick((n) => n + 1);
+                }
+              }}
+            />
           </Suspense>
         </ErrorBoundary>
       ) : (

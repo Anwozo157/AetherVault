@@ -135,6 +135,36 @@ export interface AuditCapability {
   verify(): Promise<ChainReport>;
 }
 
+export interface TeamMember {
+  userId: string;
+  email: string;
+  role: MemberRole;
+  joinedAt: string;
+  isMe: boolean;
+}
+
+export interface TeamInvite {
+  id: string;
+  email: string;
+  role: MemberRole;
+  invitedByEmail: string | null;
+  createdAt: string;
+}
+
+/** Optional capability: organization membership management (server-backed providers). */
+export interface TeamCapability {
+  readonly orgId: string;
+  readonly orgName: string;
+  readonly myRole: MemberRole;
+  listMembers(): Promise<TeamMember[]>;
+  /** Admins only. */
+  listInvites(): Promise<TeamInvite[]>;
+  invite(email: string, role: MemberRole): Promise<void>;
+  revokeInvite(id: string): Promise<void>;
+  setRole(userId: string, role: MemberRole): Promise<void>;
+  remove(userId: string): Promise<void>;
+}
+
 /** Contract every disaster-recovery data source must implement. */
 export interface DrProvider {
   /** Human-readable provider name, shown in the UI. */
@@ -147,6 +177,8 @@ export interface DrProvider {
   readonly approvals?: ApprovalCapability;
   /** Present when actions are recorded in a verifiable audit log. */
   readonly audit?: AuditCapability;
+  /** Present when the organization's members can be managed. */
+  readonly team?: TeamCapability;
 
   getState(): SystemState;
   getMetrics(): BasicMetrics;

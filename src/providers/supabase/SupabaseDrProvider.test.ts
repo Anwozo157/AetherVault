@@ -19,6 +19,13 @@ class FakeServer {
   failNextStatus = false;
   /** Simulates the server detecting an altered entry. */
   tampered: number | null = null;
+  invites: Array<{
+    id: string;
+    email: string;
+    role: MemberRole;
+    invited_by_email: string | null;
+    created_at: string;
+  }> = [];
   private listeners = new Set<() => void>();
 
   serverNow() {
@@ -101,6 +108,28 @@ class FakeServer {
         head_hash: this.audit[0] ? 'a'.repeat(64) : null,
         verified_at: new Date(this.serverNow()).toISOString(),
       }),
+      listMembers: async () =>
+        Object.entries(EMAIL).map(([user_id, email]) => ({
+          user_id,
+          email,
+          role: user_id === USERS.ap ? ('approver' as const) : ('operator' as const),
+          joined_at: new Date(0).toISOString(),
+        })),
+      listInvites: async () => [...this.invites],
+      inviteMember: vi.fn(async (_org: string, email: string, role) => {
+        this.invites.push({
+          id: `inv-${this.invites.length + 1}`,
+          email,
+          role,
+          invited_by_email: EMAIL[userId],
+          created_at: new Date().toISOString(),
+        });
+      }),
+      revokeInvite: vi.fn(async (id: string) => {
+        this.invites = this.invites.filter((i) => i.id !== id);
+      }),
+      setMemberRole: vi.fn(async () => {}),
+      removeMember: vi.fn(async () => {}),
       subscribe: (_org, onChange) => {
         this.listeners.add(onChange);
         return () => this.listeners.delete(onChange);
@@ -390,5 +419,54 @@ describe('SupabaseDrProvider', () => {
     });
     server.tampered = 1;
     await expect(op.audit.verify()).resolves.toMatchObject({ ok: false, brokenId: 1 });
+  });
+
+  test('team: lists members (marking me), invites and revokes', async () => {
+    const op = connect(server, USERS.op, 'operator');
+    expect(op.team.orgName).toBe('Acme');
+    expect(op.team.myRole).toBe('operator');
+    const members = await op.team.listMembers();
+    expect(members.find((m) => m.isMe)?.email).toBe('op@test');
+    await op.team.invite('new@test', 'approver');
+    expect(await op.team.listInvites()).toEqual([
+      expect.objectContaining({
+        id: 'inv-1',
+        email: 'new@test',
+        role: 'approver',
+        invitedByEmail: 'op@test',
+      }),
+    ]);
+    await op.team.revokeInvite('inv-1');
+    expect(await op.team.listInvites()).toEqual([]);
+    await op.team.setRole(USERS.ap, 'admin');
+    await op.team.remove(USERS.ap);
+  });
+
+  test('team activity reads as plain sentences in the live log', async () => {
+    const op = connect(server, USERS.op, 'operator');
+    await op.ready;
+    for (const [action, detail] of [
+      ['member.invited', { email: 'n@test', role: 'approver' }],
+      ['member.joined', { email: 'n@test', role: 'approver' }],
+      ['member.invite_revoked', { email: 'x@test' }],
+      ['member.removed', { email: 'n@test' }],
+    ] as const) {
+      server.audit.unshift({
+        id: server.audit.length + 1,
+        actor_email: 'op@test',
+        action,
+        detail,
+        created_at: new Date().toISOString(),
+      });
+    }
+    await op.refresh();
+    const text = op
+      .getRecentLogs()
+      .map((l) => l.message)
+      .join(' | ');
+    expect(text).toContain('op@test invited n@test as approver.');
+    expect(text).toContain('n@test joined as approver.');
+    expect(text).toContain('op@test revoked the invite for x@test.');
+    expect(text).toContain('op@test removed n@test from the organization.');
   });
 });
