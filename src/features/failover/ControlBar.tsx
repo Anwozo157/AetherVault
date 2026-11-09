@@ -1,7 +1,7 @@
-import { Flame, HardDrive, Layers, ScrollText } from 'lucide-react';
+import { Flame, HardDrive, Layers, ScrollText, Users } from 'lucide-react';
 import { TARGET_REGIONS } from '../../config/regions';
 
-export type CommandTab = 'hud' | 'drs' | 'audit';
+export type CommandTab = 'hud' | 'drs' | 'audit' | 'team';
 
 interface ControlBarProps {
   tab: CommandTab;
@@ -13,6 +13,8 @@ interface ControlBarProps {
   onToggleChaos: () => void;
   /** Show the Audit Log tab (server-backed providers only). */
   showAudit?: boolean;
+  /** Show the Team tab (server-backed providers only). */
+  showTeam?: boolean;
 }
 
 export default function ControlBar({
@@ -24,6 +26,7 @@ export default function ControlBar({
   chaosActive,
   onToggleChaos,
   showAudit = false,
+  showTeam = false,
 }: ControlBarProps) {
   const tabClass = (active: boolean) =>
     `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
@@ -57,6 +60,16 @@ export default function ControlBar({
           >
             <ScrollText className="w-3.5 h-3.5 text-aether-amber" />
             <span>Audit Log</span>
+          </button>
+        )}
+        {showTeam && (
+          <button
+            onClick={() => onTabChange('team')}
+            aria-pressed={tab === 'team'}
+            className={tabClass(tab === 'team')}
+          >
+            <Users className="w-3.5 h-3.5 text-aether-cyan" />
+            <span>Team</span>
           </button>
         )}
       </div>

@@ -174,3 +174,80 @@ test("audit log: verify passes, then detects an entry altered behind the app's b
   expect(operator.errors).toEqual([]);
   await operator.close();
 });
+
+/** Requests a magic link from the page, then follows it from the local inbox (Mailpit). */
+async function signInWithEmailLink(browser: Browser, email: string) {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('/#/console');
+  await page.getByLabel('Email').fill(email);
+  await page.getByRole('button', { name: /Email me a sign-in link/ }).click();
+  await expect(page.getByRole('status')).toContainText('local inbox');
+  let link: string | undefined;
+  await expect
+    .poll(
+      async () => {
+        const list = await (await fetch('http://127.0.0.1:54324/api/v1/messages?limit=20')).json();
+        const msg = list.messages.find(
+          (m: { To: { Address: string }[] }) => m.To[0].Address === email,
+        );
+        if (!msg) return undefined;
+        const full = await (await fetch(`http://127.0.0.1:54324/api/v1/message/${msg.ID}`)).json();
+        link = (full.Text.match(/https?:\/\/\S+verify\?\S+/) || [])[0];
+        return link;
+      },
+      { timeout: 20_000 },
+    )
+    .toBeTruthy();
+  await page.goto(link!);
+  return { page, errors, close: () => context.close() };
+}
+
+test('new customer: signs up, creates an organization, invites a teammate who joins as approver', async ({
+  browser,
+}) => {
+  const stamp = Date.now();
+  const founderEmail = `founder.${stamp}@aethervault.local`;
+  const hireEmail = `new.hire.${stamp}@aethervault.local`;
+  const orgName = `Founder Co ${stamp}`;
+
+  // 1. A brand-new person signs up with an email link and creates their organization.
+  const founder = await signInWithEmailLink(browser, founderEmail);
+  await expect(founder.page.getByText('You are not in an organization yet')).toBeVisible({
+    timeout: 20_000,
+  });
+  await founder.page.getByLabel('Organization name').fill(orgName);
+  await founder.page.getByRole('button', { name: 'Create organization' }).click();
+  await expect(founder.page.getByText(orgName)).toBeVisible();
+  await expect(founder.page.getByText('Get set up · 1 of 4')).toBeVisible();
+
+  // 2. They invite a teammate as approver; the checklist advances.
+  await founder.page.getByRole('button', { name: 'Team', exact: true }).click();
+  await founder.page.getByLabel('Teammate email').fill(hireEmail);
+  await founder.page.getByLabel('Role', { exact: true }).selectOption('approver');
+  await founder.page.getByRole('button', { name: 'Invite' }).click();
+  await expect(founder.page.getByText(`Invited ${hireEmail} as approver`)).toBeVisible();
+  await expect(
+    founder.page.getByText(/Sign in with .* using "Email me a sign-in link"/),
+  ).toBeVisible();
+  await expect(founder.page.getByText('Get set up · 2 of 4')).toBeVisible({ timeout: 10_000 });
+
+  // 3. The teammate signs in with that email and lands directly in the organization.
+  const hire = await signInWithEmailLink(browser, hireEmail);
+  await expect(hire.page.getByText(orgName)).toBeVisible({ timeout: 20_000 });
+  await expect(hire.page.getByText('approver', { exact: true })).toBeVisible();
+  await expect(hire.page.getByText(/Get set up/)).toHaveCount(0); // checklist is for admins
+
+  // 4. The founder's team list updates live; the invite is no longer pending.
+  await expect(founder.page.getByRole('cell', { name: hireEmail, exact: true })).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(founder.page.getByText(`${hireEmail} · approver`)).toHaveCount(0);
+
+  expect(founder.errors).toEqual([]);
+  expect(hire.errors).toEqual([]);
+  await founder.close();
+  await hire.close();
+});

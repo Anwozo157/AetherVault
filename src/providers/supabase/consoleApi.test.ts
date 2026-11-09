@@ -1,6 +1,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { describe, expect, test, vi } from 'vitest';
-import { createOrg, createSupabaseConsoleApi, listMemberships } from './consoleApi';
+import {
+  acceptPendingInvites,
+  createOrg,
+  createSupabaseConsoleApi,
+  listMemberships,
+} from './consoleApi';
 
 function fakeClient(result: { data: unknown; error: { message: string } | null }) {
   const channel = { on: vi.fn(), subscribe: vi.fn() };
@@ -30,6 +35,12 @@ describe('createSupabaseConsoleApi', () => {
     await api.resetFailover('r');
     await api.getAuditPage('o', 25, 90);
     await api.verifyAuditChain('o');
+    await api.listMembers('o');
+    await api.listInvites('o');
+    await api.inviteMember('o', 'a@b.co', 'approver');
+    await api.revokeInvite('i');
+    await api.setMemberRole('o', 'u', 'viewer');
+    await api.removeMember('o', 'u');
     expect(raw.rpc.mock.calls).toEqual([
       ['get_failover_status', { p_org: 'o' }],
       ['org_audit_feed', { p_org: 'o', p_limit: 50 }],
@@ -39,6 +50,12 @@ describe('createSupabaseConsoleApi', () => {
       ['reset_failover', { p_run: 'r' }],
       ['audit_log_page', { p_org: 'o', p_limit: 25, p_before: 90 }],
       ['verify_audit_chain_report', { p_org: 'o' }],
+      ['list_org_members', { p_org: 'o' }],
+      ['list_org_invites', { p_org: 'o' }],
+      ['invite_member', { p_org: 'o', p_email: 'a@b.co', p_role: 'approver' }],
+      ['revoke_invite', { p_invite: 'i' }],
+      ['set_member_role', { p_org: 'o', p_user: 'u', p_role: 'viewer' }],
+      ['remove_member', { p_org: 'o', p_user: 'u' }],
     ]);
   });
 
@@ -81,5 +98,13 @@ describe('memberships and org creation', () => {
     const { client, raw } = fakeClient({ data: 'o2', error: null });
     await expect(createOrg(client, 'NewCo')).resolves.toBe('o2');
     expect(raw.rpc).toHaveBeenCalledWith('create_org', { p_name: 'NewCo' });
+  });
+});
+
+describe('acceptPendingInvites', () => {
+  test('calls the accept RPC and returns how many organizations were joined', async () => {
+    const { client, raw } = fakeClient({ data: 2, error: null });
+    await expect(acceptPendingInvites(client)).resolves.toBe(2);
+    expect(raw.rpc).toHaveBeenCalledWith('accept_pending_invites');
   });
 });

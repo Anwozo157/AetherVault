@@ -1,7 +1,7 @@
 # Project Status
 
 > Living handoff document. **Every agent or contributor updates this at the end of a session.**
-> Last updated: 2026-11-09 by Claude Code (Opus 5.5).
+> Last updated: 2026-11-09 (team invites + onboarding) by Claude Code (Opus 5.5).
 
 ## Where we are
 
@@ -38,7 +38,7 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 ## Next steps (in order)
 
 1. **Founder (free, no card):** create a Supabase account (sign up with GitHub). Then 3.6 hosting: link the project, push migrations, create the GitHub OAuth app, disable password sign-ups, set the console env in the deploy.
-2. **Phase 4, free parts:** DR drill scheduler (non-disruptive drills against the simulated provider), drill evidence report export (PDF/CSV from the audit chain), Slack/PagerDuty webhook alerts (free tiers), org admin screen (invite members, change roles).
+2. **Phase 4, free parts:** DR drill scheduler (non-disruptive drills against the simulated provider), drill evidence report export (PDF/CSV from the audit chain), Slack/PagerDuty webhook alerts (free tiers). ✅ Team invites/roles and the onboarding checklist are done (2026-11-09).
 3. **Requires funding (founder approves):** AWS account + Elastic Disaster Recovery for real replication data (~$40–60/mo), Supabase Pro ($25/mo), custom domain (~$1/mo), which also enables HTTP security headers (`frame-ancestors`).
 
 ## Open decisions for the founder

@@ -8,10 +8,13 @@ const PAGE = 100;
 export default function AuditLogPanel({
   audit,
   refreshKey,
+  onVerified,
 }: {
   audit: AuditCapability;
+  /** Called after each verification (e.g. to tick the onboarding step). */
+  onVerified?: (report: ChainReport) => void;
   /** Changes when new activity arrives, so the list reloads. */
-  refreshKey: number;
+  refreshKey: number | string;
 }) {
   const [records, setRecords] = useState<AuditRecord[]>([]);
   const [hasMore, setHasMore] = useState(false);
@@ -56,7 +59,9 @@ export default function AuditLogPanel({
     setVerifying(true);
     setError(null);
     try {
-      setReport(await audit.verify());
+      const r = await audit.verify();
+      setReport(r);
+      onVerified?.(r);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -181,7 +186,7 @@ export default function AuditLogPanel({
         </p>
       )}
 
-      <div className="overflow-x-auto rounded-xl border border-white/10">
+      <div className="relative overflow-x-auto rounded-xl border border-white/10">
         <table className="w-full min-w-[640px] text-left text-xs font-mono">
           <caption className="sr-only">Audit log entries, newest first</caption>
           <thead className="text-[10px] uppercase tracking-widest text-zinc-500 bg-white/[0.02]">

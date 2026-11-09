@@ -17,6 +17,10 @@ export interface HeaderSession {
   role: MemberRole;
   email: string;
   onSignOut: () => void;
+  /** Present when the user belongs to more than one organization. */
+  orgs?: Array<{ id: string; name: string }>;
+  activeOrgId?: string;
+  onSwitchOrg?: (orgId: string) => void;
 }
 
 interface AppHeaderProps {
@@ -113,7 +117,22 @@ export default function AppHeader({
         {session ? (
           <div className="flex items-center gap-2 pl-3 pr-1 py-1 rounded-xl bg-white/[0.03] border border-white/10">
             <span className="text-[11px] font-mono leading-tight text-right">
-              <span className="block text-white">{session.orgName}</span>
+              {session.orgs && session.onSwitchOrg ? (
+                <select
+                  aria-label="Switch organization"
+                  value={session.activeOrgId}
+                  onChange={(e) => session.onSwitchOrg?.(e.target.value)}
+                  className="block bg-transparent text-white text-right focus:outline-none cursor-pointer"
+                >
+                  {session.orgs.map((o) => (
+                    <option key={o.id} value={o.id} className="bg-aether-panel">
+                      {o.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <span className="block text-white">{session.orgName}</span>
+              )}
               <span className="block text-zinc-400" title={session.email}>
                 {session.role}
               </span>

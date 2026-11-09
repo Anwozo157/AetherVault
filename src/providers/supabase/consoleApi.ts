@@ -43,6 +43,21 @@ export interface ChainReportRow {
   verified_at: string;
 }
 
+export interface MemberRow {
+  user_id: string;
+  email: string;
+  role: MemberRole;
+  joined_at: string;
+}
+
+export interface InviteRow {
+  id: string;
+  email: string;
+  role: MemberRole;
+  invited_by_email: string | null;
+  created_at: string;
+}
+
 export interface Membership {
   orgId: string;
   orgName: string;
@@ -58,6 +73,12 @@ export interface ConsoleApi {
   resetFailover(runId: string): Promise<void>;
   getAuditPage(orgId: string, limit: number, before?: number): Promise<AuditPageRow[]>;
   verifyAuditChain(orgId: string): Promise<ChainReportRow>;
+  listMembers(orgId: string): Promise<MemberRow[]>;
+  listInvites(orgId: string): Promise<InviteRow[]>;
+  inviteMember(orgId: string, email: string, role: MemberRole): Promise<void>;
+  revokeInvite(inviteId: string): Promise<void>;
+  setMemberRole(orgId: string, userId: string, role: MemberRole): Promise<void>;
+  removeMember(orgId: string, userId: string): Promise<void>;
   /** Calls back whenever runs or audit entries for the org change. */
   subscribe(orgId: string, onChange: () => void): Unsubscribe;
 }
@@ -89,6 +110,18 @@ export function createSupabaseConsoleApi(client: SupabaseClient): ConsoleApi {
       ),
     verifyAuditChain: (orgId) =>
       call<ChainReportRow>(client.rpc('verify_audit_chain_report', { p_org: orgId })),
+    listMembers: (orgId) => call<MemberRow[]>(client.rpc('list_org_members', { p_org: orgId })),
+    listInvites: (orgId) => call<InviteRow[]>(client.rpc('list_org_invites', { p_org: orgId })),
+    inviteMember: async (orgId, email, role) => {
+      await call<string>(
+        client.rpc('invite_member', { p_org: orgId, p_email: email, p_role: role }),
+      );
+    },
+    revokeInvite: (inviteId) => call<void>(client.rpc('revoke_invite', { p_invite: inviteId })),
+    setMemberRole: (orgId, userId, role) =>
+      call<void>(client.rpc('set_member_role', { p_org: orgId, p_user: userId, p_role: role })),
+    removeMember: (orgId, userId) =>
+      call<void>(client.rpc('remove_member', { p_org: orgId, p_user: userId })),
     subscribe(orgId, onChange) {
       const filter = `org_id=eq.${orgId}`;
       const channel = client
@@ -123,4 +156,9 @@ export async function listMemberships(client: SupabaseClient, userId: string) {
 
 export async function createOrg(client: SupabaseClient, name: string) {
   return call<string>(client.rpc('create_org', { p_name: name }));
+}
+
+/** Joins every organization that invited the signed-in user's verified email. */
+export async function acceptPendingInvites(client: SupabaseClient) {
+  return call<number>(client.rpc('accept_pending_invites'));
 }

@@ -464,8 +464,8 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               </div>
               <h4 className="text-sm font-bold text-white mb-1">Approval & Audit Backend</h4>
               <p className="text-[11px] text-zinc-400">
-                Sign-in and roles, two-person failover approval, and a tamper-evident audit log
-                with one-click verification. Runs locally; replication telemetry still simulated.
+                Sign-in and roles, two-person failover approval, and a tamper-evident audit log with
+                one-click verification. Runs locally; replication telemetry still simulated.
               </p>
             </div>
 

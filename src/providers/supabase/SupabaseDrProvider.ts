@@ -5,6 +5,7 @@
 import {
   type ApprovalCapability,
   type AuditCapability,
+  type TeamCapability,
   type BasicMetrics,
   type DrProvider,
   type DrTelemetry,
@@ -57,6 +58,20 @@ function describeAudit(entry: AuditEntry): { level: LogEvent['level']; message: 
       return { level: 'INFO', message: `Failover drill reset by ${actor}. Primary region active.` };
     case 'org.created':
       return { level: 'INFO', message: `Organization created: ${String(d.name)}.` };
+    case 'member.invited':
+      return {
+        level: 'INFO',
+        message: `${actor} invited ${String(d.email)} as ${String(d.role)}.`,
+      };
+    case 'member.joined':
+      return { level: 'SUCCESS', message: `${String(d.email)} joined as ${String(d.role)}.` };
+    case 'member.invite_revoked':
+      return { level: 'INFO', message: `${actor} revoked the invite for ${String(d.email)}.` };
+    case 'member.removed':
+      return {
+        level: 'WARN',
+        message: `${actor} removed ${String(d.email)} from the organization.`,
+      };
     case 'member.role_set':
       return { level: 'INFO', message: `${actor} set a member's role to ${String(d.role)}.` };
     default:
@@ -70,6 +85,7 @@ export class SupabaseDrProvider implements DrProvider {
   readonly telemetryIsSimulated = true;
   readonly approvals: ApprovalCapability;
   readonly audit: AuditCapability;
+  readonly team: TeamCapability;
   /** Resolves after the first sync with the server (useful in tests). */
   readonly ready: Promise<void>;
 
@@ -101,6 +117,32 @@ export class SupabaseDrProvider implements DrProvider {
     this.now = options.now ?? (() => Date.now());
     this.metrics = this.telemetrySource.getMetrics();
     this.approvals = this.createApprovals();
+    const org = ctx.orgId;
+    this.team = {
+      orgId: ctx.orgId,
+      orgName: ctx.orgName,
+      myRole: ctx.role,
+      listMembers: async () =>
+        (await api.listMembers(org)).map((m) => ({
+          userId: m.user_id,
+          email: m.email,
+          role: m.role,
+          joinedAt: m.joined_at,
+          isMe: m.user_id === ctx.userId,
+        })),
+      listInvites: async () =>
+        (await api.listInvites(org)).map((i) => ({
+          id: i.id,
+          email: i.email,
+          role: i.role,
+          invitedByEmail: i.invited_by_email,
+          createdAt: i.created_at,
+        })),
+      invite: (email, role) => api.inviteMember(org, email, role),
+      revokeInvite: (id) => api.revokeInvite(id),
+      setRole: (userId, role) => api.setMemberRole(org, userId, role),
+      remove: (userId) => api.removeMember(org, userId),
+    };
     this.audit = {
       list: async ({ limit = 100, before } = {}) =>
         (await this.api.getAuditPage(this.ctx.orgId, limit, before)).map((r) => ({
