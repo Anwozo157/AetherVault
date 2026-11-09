@@ -5,6 +5,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Deck roadmap, GitHub protections, status (2026-11-09)
+
+- Deck roadmap slide: Phase 2 now describes the built approval and audit backend (runs locally; telemetry still simulated) instead of only simulated telemetry; Phase 1 mentions the real-geography globe.
+- GitHub repository: enabled secret scanning with push protection, private vulnerability reporting, Dependabot alerts and automated security fixes.
+- `docs/STATUS.md` rewritten: 3.5 and 3.7 done, 3.6 CI done (hosting waits on the founder's free Supabase account); next steps split into founder actions, free Phase 4 work, and items requiring funding.
+
 ### Security hardening (2026-11-09)
 
 - **Content-Security-Policy** in every production build: scripts only from the site itself (no inline, no eval), network calls only to the site and its configured database (https + websocket), no plugins; plus a strict referrer policy. Tested on every screen in CI, public demo and console.
