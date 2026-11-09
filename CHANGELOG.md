@@ -8,7 +8,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 ### SOC 2 readiness checklist (2026-11-09)
 
 - `docs/SOC2_READINESS.md`: self-assessment against the Trust Services Criteria (Security CC1–CC9 + Availability), with evidence and gaps per control, free next steps and items that need funding. Explicitly not an audit or certification.
-- Gap found: `main` has no branch protection; listed as the first founder action.
+- GitHub branch protection on `main` (founder-approved): the 5 CI and CodeQL checks are required, force pushes and deletion are blocked, review conversations must be resolved. Admins can bypass so the founder's local merge-then-push workflow still works.
 
 ### Status update (2026-11-09)
 
