@@ -5,6 +5,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Globe rebuilt on real geography; local QR codes (2026-11-09)
+
+- **Fixed:** AWS us-west-2 (Oregon) was placed by hand-picked coordinates ~120° around the globe, and its bezier arc dipped below the surface, so the route vanished inside the globe. Regions now use real data-center coordinates (`config/regions.ts`) and great-circle arcs that are tested to stay above the surface for every route.
+- **Globe upgrade:**
+  - Continents drawn as a dot matrix from Natural Earth (public domain; generated once by `scripts/generate-land-mask.mjs`, no runtime fetch), plus an atmosphere glow and a faint graticule
+  - Labeled region markers with pulse rings; standby regions shown dimmed
+  - Comet-trail packets; replication reverses toward the former primary after failover
+  - North America framed at rest with a gentle sway; real great-circle distance shown
+- Removed unverifiable overlay text ("Three.js 60FPS", "eBPF", "CoreSite").
+- **Share on Phone:**
+  - QR generated in the browser (MIT `qrcode`, loaded on open) instead of the third-party api.qrserver.com service
+  - Links carry the build version (`?v=<commit>`) so phones never show a stale cached deploy
+  - Build stamp, copy-link button, Escape/backdrop to close
+  - Verified by decoding the rendered QR with an independent reader; zero external requests
+- Tests: geometry (arcs above surface, distances), land-mask accuracy, share URL/QR (126 unit tests total).
+
 ### Local sign-in fixes (2026-11-08)
 
 - Sign-in form (local mode): "Email me a sign-in link" now says no real email is sent and points to the local inbox (Mailpit, http://127.0.0.1:54324), instead of claiming the email was sent.

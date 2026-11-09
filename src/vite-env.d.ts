@@ -8,3 +8,8 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+/** Short git commit of this build (vite.config.js). */
+declare const __APP_VERSION__: string;
+/** UTC build date, YYYY-MM-DD. */
+declare const __BUILD_DATE__: string;
