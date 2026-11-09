@@ -91,13 +91,13 @@
 
 ## CC8: Change management
 
-| Control                                                | Status | Evidence / gap                                                                      |
-| ------------------------------------------------------ | ------ | ----------------------------------------------------------------------------------- |
-| Changes tracked and tested before release              | ✅     | Git history, Conventional Commits, CI on every push and PR, `CHANGELOG.md`          |
-| Database changes versioned                             | ✅     | `supabase/migrations/` only; pgTAP tests in CI                                      |
-| Protected main branch (required checks, no force push) | ❌     | **`main` has no branch protection or ruleset (checked 2026-11-09).** Free to enable |
-| Independent review of changes                          | ❌     | Hard with one engineer; auditors accept documented compensating controls for now    |
-| Production deploy authorization                        | 🟡     | Founder-approved deploys (`AGENTS.md` rule 6); not technically enforced             |
+| Control                                                | Status | Evidence / gap                                                                                                                                                                                                   |
+| ------------------------------------------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Changes tracked and tested before release              | ✅     | Git history, Conventional Commits, CI on every push and PR, `CHANGELOG.md`                                                                                                                                       |
+| Database changes versioned                             | ✅     | `supabase/migrations/` only; pgTAP tests in CI                                                                                                                                                                   |
+| Protected main branch (required checks, no force push) | 🟡     | Enabled 2026-11-09: the 5 CI/CodeQL checks are required, force pushes and deletion blocked. Admins can still bypass (needed while one person merges locally); enforce for admins once there is a second engineer |
+| Independent review of changes                          | ❌     | Hard with one engineer; auditors accept documented compensating controls for now                                                                                                                                 |
+| Production deploy authorization                        | 🟡     | Founder-approved deploys (`AGENTS.md` rule 6); not technically enforced                                                                                                                                          |
 
 ## CC9: Risk mitigation (vendors, business disruption)
 
@@ -117,7 +117,7 @@
 
 ## Free next steps (in order)
 
-1. 👤 Enable branch protection on `main`: require CI and CodeQL to pass, block force pushes and deletion.
+1. ✅ Branch protection on `main` (2026-11-09): CI and CodeQL required, force pushes and deletion blocked.
 2. 👤 Turn on FileVault, auto-updates and screen lock on the work Mac; confirm 2FA on every account in the `docs/SECURITY.md` inventory.
 3. Write the core policy set (short, plain language): information security, acceptable use, access control, change management, incident response, vendor management, business continuity.
 4. Add a risk register (likelihood, impact, owner, review date) and a quarterly review checklist with dated records.
