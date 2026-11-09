@@ -17,3 +17,31 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Drill evidence report: print only the report, in normal flow, on white paper. */
+@media print {
+  @page {
+    margin: 16mm;
+  }
+  html,
+  body:has(.evidence-overlay) {
+    background: #fff !important;
+  }
+  body:has(.evidence-overlay) > *:not(.evidence-overlay) {
+    display: none !important;
+  }
+  .evidence-overlay {
+    position: static !important;
+    overflow: visible !important;
+    background: #fff !important;
+    padding: 0 !important;
+    backdrop-filter: none !important;
+  }
+  .print-area {
+    break-inside: auto;
+  }
+  .print-area section,
+  .print-area li {
+    break-inside: avoid;
+  }
+}

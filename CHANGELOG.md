@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Phase 4.1: Drill evidence reports + recovery objectives (2026-11-09)
+
+- **Drills tab** (console): recovery-time and data-loss targets (admins edit; changes audited), a table of every drill with outcome and recovery time vs target (PASS/FAIL), and a summary ("N of M completed drills met the target").
+- **Evidence report** per drill: result, people (requester, approver, two-person rule), stage timeline, related audit entries with hashes, audit-chain status at generation time, generator and time. **Print / Save as PDF** (clean one-page layout) and **Download JSON**; a SHA-256 **fingerprint** of the canonical JSON is printed on the report so a saved copy can be checked later.
+- Honest by design: the data-loss (RPO) result says "not measured" until real replication data is connected.
+- Aligned with AWS Well-Architected REL13-BP01 (define RTO/RPO) and REL13-BP03 (test DR, verify objectives are met).
+- Database (`20261109000005_drill_evidence.sql`): `orgs.rto_target_seconds`/`rpo_target_seconds`, `set_recovery_objectives`, `run_outcome`, `list_failover_runs`, `drill_evidence`. 16 new pgTAP tests (96 total).
+- E2E: a two-person drill shows PASS; the downloaded JSON's SHA-256, recomputed independently, matches the fingerprint on the report.
+
 ### Team invites and onboarding (2026-11-09)
 
 - **Team tab** (console): admins invite by email with a role (with a plain explanation of each role), get a ready-to-send invite message (copy button), change roles, remove members (with confirmation) and revoke pending invites. Non-admins see the team read-only.
