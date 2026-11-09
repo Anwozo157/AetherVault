@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### SOC 2 readiness checklist (2026-11-09)
+
+- `docs/SOC2_READINESS.md`: self-assessment against the Trust Services Criteria (Security CC1–CC9 + Availability), with evidence and gaps per control, free next steps and items that need funding. Explicitly not an audit or certification.
+- Gap found: `main` has no branch protection; listed as the first founder action.
+
 ### Status update (2026-11-09)
 
 - `docs/STATUS.md`: Phase 4.1 drill evidence reports marked done (Phase 4 in progress); health counts updated (160+ unit, 96 pgTAP, 10 console E2E).
