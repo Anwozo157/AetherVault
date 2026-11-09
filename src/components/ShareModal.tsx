@@ -1,7 +1,13 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, Copy } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { APP_VERSION, BUILD_DATE, shareUrl } from '../config/build';
+import {
+  APP_VERSION,
+  BUILD_DATE,
+  fetchLiveVersion,
+  shareUrl,
+  type LiveVersion,
+} from '../config/build';
 
 /**
  * QR code generated in the browser (no third-party QR service: nothing about the
@@ -20,9 +26,26 @@ async function qrSvgDataUrl(text: string): Promise<string> {
 }
 
 export default function ShareModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const url = shareUrl();
+  // The QR always encodes the newest LIVE build, checked each time Share opens, so even a
+  // phone or laptop holding an old cached page hands out the current version.
+  const [live, setLive] = useState<LiveVersion | null>(null);
+  const version = live?.version ?? APP_VERSION;
+  const date = live?.date || BUILD_DATE;
+  const url = shareUrl(version);
+  const stale = live !== null && live.version !== APP_VERSION;
   const [qr, setQr] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    void fetchLiveVersion().then((v) => {
+      if (!cancelled && v) setLive(v);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -90,8 +113,21 @@ export default function ShareModal({ open, onClose }: { open: boolean; onClose: 
             </div>
 
             <p className="text-[11px] font-mono text-zinc-500 mb-3">
-              Build {APP_VERSION} · {BUILD_DATE}
+              Build {version} · {date}
+              {live ? ' · live' : ''}
             </p>
+            {stale && (
+              <p role="status" className="text-[11px] font-mono text-aether-amber mb-3">
+                A newer version is live. The QR already points to it.{' '}
+                <button
+                  type="button"
+                  onClick={() => window.location.reload()}
+                  className="underline hover:text-white"
+                >
+                  Reload this page
+                </button>
+              </p>
+            )}
 
             <div className="mb-5 flex items-center justify-center gap-2 min-w-0">
               <a

@@ -127,17 +127,17 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-4">
                 <Users className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">Human Error in Outages</h3>
+              <h3 className="text-lg font-bold text-white mb-2">Outages Are a Process Problem</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Uptime Institute's 2025 outage analysis found 85% of human-error outages stem from
-                procedures not being followed or being flawed: exactly where manual runbooks break
-                down under pressure.
+                In Uptime Institute's 2025 outage analysis, 80% of operators said better management
+                and processes would have prevented their most recent outage: exactly where manual
+                runbooks break down under pressure.
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-white/10">
-              <span className="text-2xl font-bold font-mono text-aether-cyan">85%</span>
+              <span className="text-2xl font-bold font-mono text-aether-cyan">80%</span>
               <p className="text-[10px] font-mono text-zinc-500">
-                Human-Error Outages Tied to Procedures (Uptime 2025)
+                Say Better Process Would Have Prevented It (Uptime 2025)
               </p>
             </div>
           </div>

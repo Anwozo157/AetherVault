@@ -1,8 +1,8 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, test, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import ErrorBoundary from './ErrorBoundary';
 import ShareModal from './ShareModal';
-import { APP_VERSION, BUILD_DATE, LIVE_URL, shareUrl } from '../config/build';
+import { APP_VERSION, BUILD_DATE, LIVE_URL, fetchLiveVersion, shareUrl } from '../config/build';
 
 describe('ShareModal', () => {
   test('generates the QR locally for the versioned live link, and closes', async () => {
@@ -55,6 +55,48 @@ describe('ErrorBoundary', () => {
     );
     expect(screen.getByText('3D unavailable')).toBeInTheDocument();
     spy.mockRestore();
+  });
+});
+
+describe('live version (Share QR always points at the newest deploy)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  test('a newer live build replaces the QR target and offers a reload', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ version: 'fedcba9', date: '2026-12-01' }),
+      }),
+    );
+    render(<ShareModal open onClose={vi.fn()} />);
+    expect(await screen.findByText(/A newer version is live/)).toBeInTheDocument();
+    expect(await screen.findByText('Build fedcba9 · 2026-12-01 · live')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByTestId('share-qr')).toHaveAccessibleName(
+        expect.stringContaining('?v=fedcba9'),
+      ),
+    );
+  });
+
+  test('fetchLiveVersion bypasses caches and rejects bad payloads', async () => {
+    const ok = vi
+      .fn()
+      .mockResolvedValue({ ok: true, json: async () => ({ version: 'abc1234', date: 'd' }) });
+    await expect(fetchLiveVersion(ok, '/')).resolves.toEqual({ version: 'abc1234', date: 'd' });
+    expect(ok.mock.calls[0][0]).toMatch(/^\/version\.json\?t=\d+$/);
+    expect(ok.mock.calls[0][1]).toEqual({ cache: 'no-store' });
+
+    const evil = vi
+      .fn()
+      .mockResolvedValue({ ok: true, json: async () => ({ version: '<script>' }) });
+    await expect(fetchLiveVersion(evil)).resolves.toBeNull();
+    const down = vi.fn().mockRejectedValue(new Error('offline'));
+    await expect(fetchLiveVersion(down)).resolves.toBeNull();
+    const missing = vi.fn().mockResolvedValue({ ok: false });
+    await expect(fetchLiveVersion(missing)).resolves.toBeNull();
   });
 });
 
