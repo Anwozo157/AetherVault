@@ -106,3 +106,30 @@ test.describe('Investor deck', () => {
     await expect(page.getByText(/MarketsandMarkets, Jan 2026/)).toBeVisible();
   });
 });
+
+test.describe('Security', () => {
+  test('the Content-Security-Policy blocks nothing the app needs, on every screen', async ({
+    page,
+  }) => {
+    const violations: string[] = [];
+    page.on('console', (m) => {
+      if (/Content Security Policy|Refused to/i.test(m.text())) violations.push(m.text());
+    });
+    await page.addInitScript(() => {
+      document.addEventListener('securitypolicyviolation', (e) => {
+        console.error(`Refused to load (CSP): ${e.violatedDirective} ${e.blockedURI}`);
+      });
+    });
+    await page.goto('/');
+    await expect(page.locator('meta[http-equiv="Content-Security-Policy"]')).toHaveCount(1);
+    await expect(page.locator('canvas')).toBeVisible();
+    await page.getByRole('button', { name: /AWS DRS & Telemetry/ }).click();
+    await expect(page.getByText('Live Replication & Audit Stream')).toBeVisible();
+    await page.getByRole('button', { name: /Share on phone/i }).click();
+    await expect(page.getByTestId('share-qr')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: /Investor Deck/ }).click();
+    await expect(page.getByText(/Uptime 2025/).first()).toBeAttached();
+    expect(violations).toEqual([]);
+  });
+});

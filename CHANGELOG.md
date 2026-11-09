@@ -5,6 +5,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Security hardening (2026-11-09)
+
+- **Content-Security-Policy** in every production build: scripts only from the site itself (no inline, no eval), network calls only to the site and its configured database (https + websocket), no plugins; plus a strict referrer policy. Tested on every screen in CI, public demo and console.
+- **Secret scanning:** gitleaks scans the full git history in CI (70 commits scanned locally: no leaks).
+- **Password policy:** minimum 12 characters with letters and digits (local config; carried to the hosted project in 3.6).
+- **`docs/SECURITY.md`:** threat model, data flow, what is encrypted where (and why browser code is not), controls, credential inventory with backup/rotation runbook, incident runbook. Root `SECURITY.md` for private vulnerability reports.
+
 ### Phase 3.5: Audit log screen + tamper check (2026-11-09)
 
 - New **Audit Log** tab in the signed-in console (hidden in the public demo):
