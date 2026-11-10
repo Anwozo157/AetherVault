@@ -5,6 +5,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Phase 4.7: Connect-your-AWS-account guide and DR documentation (2026-11-10)
+
+- **Connect your AWS account** (AWS DRS & Telemetry tab): a six-step guide. (1) Choose the recovery Region and initialize Elastic Disaster Recovery. (2) Open the network path (TCP 443 and 1500). (3) Install the replication agent: Linux and Windows commands for the chosen Region, using short-lived credentials. (4) Create the collector token. (5) Deploy the collector: `terraform.tfvars` filled in with this console's URL, anon key and the new token, plus plan/apply commands. (6) Confirm live data. The token, connection and live-data steps are checked against the server; the admin ticks the rest, and progress is remembered per organization in the browser. Sample data never counts as connected. The guide warns when the console runs on a local database a collector in AWS can't reach. It is open until the account is connected, then folds away.
+- **Docs:** `docs/AWS_DR_BEST_PRACTICES.md` (account and Region, network, agent install, replication and launch settings, drills, failback for physical servers, monitoring, cost; sourced from AWS documentation). `docs/TERRAFORM.md` (version pinning, plan/apply discipline, least-privilege deployer, secrets in tfvars and state, S3 remote state with native locking, day-2 operations). `docs/PILOT_DAY.md` (blockers, week-before, on-the-day steps, first drill, removal, troubleshooting, NewConnect questions). Collector README links them.
+- **Terraform:** `collector/terraform/backend.tf.example` (encrypted S3 state with `use_lockfile`); `backend.tf` and `tfplan` are gitignored.
+- Tests: guide unit tests (helpers, remembered progress, token into tfvars shown once, replace confirmation, live/sample/stale states, read-only for non-admins, local-database warning) and a browser check.
+
 ### Phase 4.6: DR runbooks (2026-11-10)
 
 - **Runbook tab** (console): each organization keeps one versioned runbook of steps for before, during and after recovery. Admins edit it (add, reorder, remove; up to 50 steps) or start from a generic AWS Elastic Disaster Recovery template; everyone else reads it.
