@@ -5,6 +5,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Phase 3.6: Hosted Supabase project (2026-11-10)
+
+- **Hosted backend:** Supabase project `aethervault` (us-east-1, Free plan) linked; all 10 migrations pushed (no seed data, so no demo accounts exist in production). All 235 pgTAP tests pass against it; `pg_cron` jobs (drill scheduler, alert sweeper) are running; `pg_net`, Vault and pgcrypto are installed; row-level security is on for every public table.
+- **Auth:** site URL and the only allowed redirect are the GitHub Pages address; the hosted console signs in by magic link only; email confirmation stays on (invites match by email, so unverified addresses must never sign in); 12-character minimum with letters and digits.
+- **Production build** reads `.env.production` (project URL + public anon key; committed, public by design). The Content-Security-Policy now allows exactly that project (HTTPS + WSS). `.gitleaks.toml` allowlists only that exact key; a test confirms any other JWT, such as a service key, is still flagged.
+- Checked in a browser against a local production build: the hosted API answered with no CSP errors, and the collector endpoint rejected a fake token (401).
+- Not yet: the site is not redeployed (needs founder OK). Supabase's built-in email reaches only the Supabase organization's team members, so customer sign-ins need custom SMTP.
+
 ### Phase 4.7: Connect-your-AWS-account guide and DR documentation (2026-11-10)
 
 - **Connect your AWS account** (AWS DRS & Telemetry tab): a six-step guide. (1) Choose the recovery Region and initialize Elastic Disaster Recovery. (2) Open the network path (TCP 443 and 1500). (3) Install the replication agent: Linux and Windows commands for the chosen Region, using short-lived credentials. (4) Create the collector token. (5) Deploy the collector: `terraform.tfvars` filled in with this console's URL, anon key and the new token, plus plan/apply commands. (6) Confirm live data. The token, connection and live-data steps are checked against the server; the admin ticks the rest, and progress is remembered per organization in the browser. Sample data never counts as connected. The guide warns when the console runs on a local database a collector in AWS can't reach. It is open until the account is connected, then folds away.

@@ -10,3 +10,4 @@ test-results
 !.env.example
 dist-console
 dist-collector
+!.env.production
