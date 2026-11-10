@@ -4,8 +4,9 @@
 export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ?? '';
 export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
 export const hasBackend = SUPABASE_URL !== '' && SUPABASE_ANON_KEY !== '';
-/** Local Docker database: safe to show the seeded demo accounts. */
-export const isLocalBackend = /^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(SUPABASE_URL);
+/** Local Docker database: safe to show the seeded demo accounts. Fixed at build time
+ *  (vite.config.js) so production bundles contain no local-only code. */
+export const isLocalBackend: boolean = __LOCAL_BACKEND__;
 
 export const CONSOLE_HASH = '#/console';
 /** The public simulated demo (3D command center + investor deck). The site root is the landing page. */

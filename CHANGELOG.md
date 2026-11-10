@@ -11,7 +11,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 - **Auth:** site URL and the only allowed redirect are the GitHub Pages address; the hosted console signs in by magic link only; email confirmation stays on (invites match by email, so unverified addresses must never sign in); 12-character minimum with letters and digits.
 - **Production build** reads `.env.production` (project URL + public anon key; committed, public by design). The Content-Security-Policy now allows exactly that project (HTTPS + WSS). `.gitleaks.toml` allowlists only that exact key; a test confirms any other JWT, such as a service key, is still flagged.
 - Checked in a browser against a local production build: the hosted API answered with no CSP errors, and the collector endpoint rejected a fake token (401).
-- Not yet: the site is not redeployed (needs founder OK). Supabase's built-in email reaches only the Supabase organization's team members, so customer sign-ins need custom SMTP.
+- **Fix:** "local database" is now a build-time constant (`__LOCAL_BACKEND__`). Production bundles no longer contain the local mail-inbox URL or the demo-account list, and the deploy guard against local URLs passes. The local console E2E still signs in with the demo accounts.
+- The database password was reset to a generated value kept only in the macOS Keychain.
+- Not yet: Supabase's built-in email reaches only the Supabase organization's team members, so customer sign-ins need custom SMTP.
 
 ### Phase 4.7: Connect-your-AWS-account guide and DR documentation (2026-11-10)
 
