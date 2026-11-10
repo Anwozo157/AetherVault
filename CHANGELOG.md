@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Docs: multicloud research and live AWS proof of concept (2026-11-10)
+
+- `docs/MULTICLOUD_DR.md`: Azure Site Recovery for physical servers (architecture with the on-premises replication appliance, ports, recovery points, supported systems, test failover, monitoring fields, pricing model), sourced from Microsoft Learn, with unverified items marked. A side-by-side table compares it with AWS. Google Cloud research is blocked (docs domain not fetchable from this session), so that section lists the exact pages to read next. It also lists what adding a cloud to AetherVault takes.
+- `docs/AWS_LIVE_POC.md`: a live test in our own AWS account before NewConnect: what's needed, cost (about $12–20 for a week), steps, done-when, teardown.
+
 ### Phase 3.6: Hosted Supabase project (2026-11-10)
 
 - **Hosted backend:** Supabase project `aethervault` (us-east-1, Free plan) linked; all 10 migrations pushed (no seed data, so no demo accounts exist in production). All 235 pgTAP tests pass against it; `pg_cron` jobs (drill scheduler, alert sweeper) are running; `pg_net`, Vault and pgcrypto are installed; row-level security is on for every public table.
