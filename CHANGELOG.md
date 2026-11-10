@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Phase 4.3: Slack and PagerDuty alerts (2026-11-10)
+
+- **Alerts tab** (console): admins add Slack (incoming webhook) or PagerDuty (Events API v2) channels and choose events: failovers, failed drills, passed drills. Everyone in the organization sees the channels and recent deliveries; admins can send a test or remove a channel.
+- **What is sent:** failover requested (needs a second approver), approved, withdrawn, aborted, reset; drill passed, failed or aborted. Drill messages say the telemetry is simulated. PagerDuty incidents are keyed per run, so withdrawing, aborting or resetting a failover resolves its incident; passed drills never page anyone.
+- **Security:** secrets are encrypted with Supabase Vault, never returned to the browser (last 4 characters only) and never written to the audit log. Only Slack webhook URLs and the fixed PagerDuty endpoint are accepted, so the database cannot be pointed at other hosts. Adding, removing and testing channels is audited.
+- **Reliability:** an audit-log trigger queues alerts with `pg_net` (sent after commit). Any alerting error is caught and logged as a failed delivery; it can never block or undo a failover. A `pg_cron` job records each HTTP result (sent / failed with status and reason) every minute.
+- Not yet: replication-lag alerts (telemetry is simulated until AWS is connected) and email (needs a mail provider).
+- Tests: 29 pgTAP tests (validation, look-alike hosts rejected, secrets in Vault only, routing per event, PagerDuty trigger/resolve and dedup keys, simulated labels, sweep results, broken channel never blocks a failover, secret deleted on removal), unit tests for the panel and provider, and a console E2E (masked secret, viewer read-only, removal) that never sends anything.
+
 ### Phase 4.2: Scheduled drills (2026-11-10)
 
 - **Non-disruptive drills:** a drill launches recovery in an isolated network and never cuts production over (the AWS Elastic Disaster Recovery drill model), so it runs without a second approver. Drills never show as the live failover and never block a real one; one drill runs at a time per organization.

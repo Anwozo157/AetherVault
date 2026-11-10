@@ -269,6 +269,50 @@ export interface DrillsCapability {
   startDrill(targetRegion: string): Promise<string>;
 }
 
+export type AlertChannelKind = 'slack' | 'pagerduty';
+/** failover: requested/approved/aborted/reset; drill_failed also covers aborted drills. */
+export type AlertEvent = 'failover' | 'drill_failed' | 'drill_passed';
+
+export interface AlertChannel {
+  id: string;
+  kind: AlertChannelKind;
+  name: string;
+  /** Last 4 characters of the webhook URL or integration key; the secret is never returned. */
+  hint: string;
+  events: AlertEvent[];
+  createdByEmail: string | null;
+  createdAt: string;
+}
+
+export interface AlertDelivery {
+  id: number;
+  channelName: string;
+  kind: AlertChannelKind;
+  event: string;
+  title: string;
+  status: 'queued' | 'sent' | 'failed';
+  httpStatus: number | null;
+  error: string | null;
+  createdAt: string;
+}
+
+/** Optional capability: Slack / PagerDuty alerts on failover and drill events. */
+export interface AlertsCapability {
+  listChannels(): Promise<AlertChannel[]>;
+  listDeliveries(): Promise<AlertDelivery[]>;
+  /** Admins only. */
+  addChannel(channel: {
+    kind: AlertChannelKind;
+    name: string;
+    secret: string;
+    events: AlertEvent[];
+  }): Promise<void>;
+  /** Admins only. */
+  removeChannel(id: string): Promise<void>;
+  /** Admins only. */
+  sendTest(id: string): Promise<void>;
+}
+
 /** Contract every disaster-recovery data source must implement. */
 export interface DrProvider {
   /** Human-readable provider name, shown in the UI. */
@@ -285,6 +329,8 @@ export interface DrProvider {
   readonly team?: TeamCapability;
   /** Present when drills produce evidence reports. */
   readonly drills?: DrillsCapability;
+  /** Present when events can be sent to Slack / PagerDuty. */
+  readonly alerts?: AlertsCapability;
 
   getState(): SystemState;
   getMetrics(): BasicMetrics;

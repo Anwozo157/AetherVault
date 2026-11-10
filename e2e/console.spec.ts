@@ -333,3 +333,38 @@ test('drills: an operator runs an isolated drill without approval; it passes wit
   await admin.close();
   await operator.close();
 });
+
+test('alerts: an admin adds a Slack channel (secret masked), viewers see it read-only, then it is removed', async ({
+  browser,
+}) => {
+  // No failover or drill runs while the channel exists, so nothing is ever sent to Slack.
+  const admin = await signIn(browser, 'admin@aethervault.local');
+  await admin.page.getByRole('button', { name: 'Alerts', exact: true }).click();
+  const form = admin.page.getByRole('form', { name: 'Add alert channel' });
+  await form.getByLabel('Name').fill('#dr-alerts');
+  await form.getByLabel('Slack webhook URL').fill('https://example.com/not-slack');
+  await form.getByRole('button', { name: 'Add channel' }).click();
+  await expect(admin.page.getByRole('alert')).toContainText('Slack webhook URL must look like');
+
+  await form
+    .getByLabel('Slack webhook URL')
+    .fill('https://hooks.slack.com/services/T000/B000/e2eTESTxyz9');
+  await form.getByRole('button', { name: 'Add channel' }).click();
+  const row = admin.page.getByTestId('channel-#dr-alerts');
+  await expect(row).toContainText('…xyz9');
+  await expect(admin.page.getByText('e2eTEST')).toHaveCount(0);
+
+  const viewer = await signIn(browser, 'viewer@aethervault.local');
+  await viewer.page.getByRole('button', { name: 'Alerts', exact: true }).click();
+  await expect(viewer.page.getByTestId('channel-#dr-alerts')).toContainText('…xyz9');
+  await expect(viewer.page.getByRole('button', { name: /Remove alert channel/ })).toHaveCount(0);
+
+  await admin.page.getByRole('button', { name: 'Remove alert channel #dr-alerts' }).click();
+  await expect(row).toHaveCount(0);
+  await expect(admin.page.getByText('No alert channels yet.')).toBeVisible();
+
+  expect(admin.errors).toEqual([]);
+  expect(viewer.errors).toEqual([]);
+  await admin.close();
+  await viewer.close();
+});

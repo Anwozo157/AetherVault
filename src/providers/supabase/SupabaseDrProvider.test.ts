@@ -177,6 +177,33 @@ class FakeServer {
         if (this.schedule) this.schedule = { ...this.schedule, enabled: false };
       }),
       startDrill: vi.fn(async () => 'drill-1'),
+      listAlertChannels: async () => [
+        {
+          id: 'ch-1',
+          kind: 'slack' as const,
+          name: 'Ops',
+          hint: 'ABCD',
+          events: ['failover' as const],
+          created_by_email: 'op@test',
+          created_at: '2026-11-10T00:00:00Z',
+        },
+      ],
+      listAlertDeliveries: async () => [
+        {
+          id: 3,
+          channel_name: 'Ops',
+          kind: 'slack' as const,
+          event: 'failover.requested',
+          title: 'Failover requested',
+          status: 'sent' as const,
+          http_status: 200,
+          error: null,
+          created_at: '2026-11-10T00:00:01Z',
+        },
+      ],
+      addAlertChannel: vi.fn(async () => 'ch-2'),
+      removeAlertChannel: vi.fn(async () => {}),
+      sendTestAlert: vi.fn(async () => {}),
       subscribe: (_org, onChange) => {
         this.listeners.add(onChange);
         return () => this.listeners.delete(onChange);
@@ -553,6 +580,60 @@ describe('SupabaseDrProvider', () => {
     await admin.drills.disableSchedule();
     await expect(admin.drills.getSchedule()).resolves.toMatchObject({ enabled: false });
     await expect(admin.drills.startDrill('gcp-us-central1')).resolves.toBe('drill-1');
+  });
+
+  test('alerts: channels and deliveries are mapped; writes pass through', async () => {
+    const api = server.apiFor(USERS.op);
+    const admin = new SupabaseDrProvider(api, {
+      orgId: ORG,
+      orgName: 'Acme',
+      userId: USERS.op,
+      role: 'admin',
+    });
+    providers.push(admin);
+    await expect(admin.alerts.listChannels()).resolves.toEqual([
+      {
+        id: 'ch-1',
+        kind: 'slack',
+        name: 'Ops',
+        hint: 'ABCD',
+        events: ['failover'],
+        createdByEmail: 'op@test',
+        createdAt: '2026-11-10T00:00:00Z',
+      },
+    ]);
+    await expect(admin.alerts.listDeliveries()).resolves.toEqual([
+      expect.objectContaining({ id: 3, channelName: 'Ops', status: 'sent', httpStatus: 200 }),
+    ]);
+    await admin.alerts.addChannel({
+      kind: 'pagerduty',
+      name: 'On-call',
+      secret: 'k'.repeat(32),
+      events: ['failover'],
+    });
+    expect(api.addAlertChannel).toHaveBeenCalledWith(ORG, 'pagerduty', 'On-call', 'k'.repeat(32), [
+      'failover',
+    ]);
+    await admin.alerts.sendTest('ch-1');
+    expect(api.sendTestAlert).toHaveBeenCalledWith('ch-1');
+    await admin.alerts.removeChannel('ch-1');
+    expect(api.removeAlertChannel).toHaveBeenCalledWith('ch-1');
+  });
+
+  test('alert channel changes read as sentences', async () => {
+    const op = connect(server, USERS.op, 'operator');
+    await op.ready;
+    server.pushAudit('alert.channel_added', USERS.op, { kind: 'pagerduty', name: 'On-call' });
+    server.pushAudit('alert.test_sent', USERS.op, { name: 'On-call' });
+    server.pushAudit('alert.channel_removed', USERS.op, { name: 'On-call' });
+    await vi.advanceTimersByTimeAsync(5000);
+    const text = op
+      .getRecentLogs()
+      .map((l) => l.message)
+      .join(' | ');
+    expect(text).toContain('op@test added PagerDuty alerts: On-call.');
+    expect(text).toContain('op@test sent a test alert to On-call.');
+    expect(text).toContain('op@test removed alert channel On-call.');
   });
 
   test('drill audit entries become readable log lines', async () => {

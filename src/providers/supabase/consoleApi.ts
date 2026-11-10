@@ -3,6 +3,8 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type {
+  AlertChannelKind,
+  AlertEvent,
   DrillCadence,
   DrillEvidence,
   DrillTrigger,
@@ -92,6 +94,28 @@ export interface ScheduleRow {
   enabled: boolean;
 }
 
+export interface AlertChannelRow {
+  id: string;
+  kind: AlertChannelKind;
+  name: string;
+  hint: string;
+  events: AlertEvent[];
+  created_by_email: string | null;
+  created_at: string;
+}
+
+export interface AlertDeliveryRow {
+  id: number;
+  channel_name: string;
+  kind: AlertChannelKind;
+  event: string;
+  title: string;
+  status: 'queued' | 'sent' | 'failed';
+  http_status: number | null;
+  error: string | null;
+  created_at: string;
+}
+
 export interface Membership {
   orgId: string;
   orgName: string;
@@ -127,6 +151,17 @@ export interface ConsoleApi {
   ): Promise<string>;
   disableDrillSchedule(orgId: string): Promise<void>;
   startDrill(orgId: string, source: string, target: string): Promise<string>;
+  listAlertChannels(orgId: string): Promise<AlertChannelRow[]>;
+  listAlertDeliveries(orgId: string): Promise<AlertDeliveryRow[]>;
+  addAlertChannel(
+    orgId: string,
+    kind: AlertChannelKind,
+    name: string,
+    secret: string,
+    events: AlertEvent[],
+  ): Promise<string>;
+  removeAlertChannel(channelId: string): Promise<void>;
+  sendTestAlert(channelId: string): Promise<void>;
   /** Calls back whenever runs or audit entries for the org change. */
   subscribe(orgId: string, onChange: () => void): Unsubscribe;
 }
@@ -205,6 +240,24 @@ export function createSupabaseConsoleApi(client: SupabaseClient): ConsoleApi {
       call<void>(client.rpc('disable_drill_schedule', { p_org: orgId })),
     startDrill: (orgId, source, target) =>
       call<string>(client.rpc('start_drill', { p_org: orgId, p_source: source, p_target: target })),
+    listAlertChannels: (orgId) =>
+      call<AlertChannelRow[]>(client.rpc('list_alert_channels', { p_org: orgId })),
+    listAlertDeliveries: (orgId) =>
+      call<AlertDeliveryRow[]>(client.rpc('list_alert_deliveries', { p_org: orgId, p_limit: 30 })),
+    addAlertChannel: (orgId, kind, name, secret, events) =>
+      call<string>(
+        client.rpc('add_alert_channel', {
+          p_org: orgId,
+          p_kind: kind,
+          p_name: name,
+          p_secret: secret,
+          p_events: events,
+        }),
+      ),
+    removeAlertChannel: (channelId) =>
+      call<void>(client.rpc('remove_alert_channel', { p_channel: channelId })),
+    sendTestAlert: (channelId) =>
+      call<void>(client.rpc('send_test_alert', { p_channel: channelId })),
     subscribe(orgId, onChange) {
       const filter = `org_id=eq.${orgId}`;
       const channel = client
