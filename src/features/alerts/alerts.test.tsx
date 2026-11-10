@@ -81,7 +81,7 @@ describe('AlertsPanel', () => {
         kind: 'pagerduty',
         name: 'On-call',
         secret: 'k'.repeat(32),
-        events: ['failover'],
+        events: ['failover', 'replication'],
       }),
     );
     expect(await screen.findByText(/PagerDuty channel added/)).toBeInTheDocument();
@@ -92,7 +92,7 @@ describe('AlertsPanel', () => {
     const alerts = fake();
     render(<AlertsPanel alerts={alerts} myRole="admin" refreshKey={0} />);
     const form = await screen.findByRole('form', { name: 'Add alert channel' });
-    for (const label of ['Failovers', 'Failed drills', 'Passed drills'])
+    for (const label of ['Failovers', 'Failed drills', 'Passed drills', 'Replication at risk'])
       fireEvent.click(within(form).getByLabelText(label));
     fireEvent.change(within(form).getByLabelText('Name'), { target: { value: 'x' } });
     fireEvent.change(within(form).getByLabelText('Slack webhook URL'), {

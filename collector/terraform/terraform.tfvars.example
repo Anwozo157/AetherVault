@@ -1,0 +1,5 @@
+drs_region           = "us-west-2"
+aethervault_url      = "https://YOUR-PROJECT.supabase.co"
+aethervault_anon_key = "PUBLIC_ANON_KEY"
+# Paste from the console (Replication → Connect AWS). Keep this file out of git.
+ingest_token = "avi_..."

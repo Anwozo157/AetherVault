@@ -21,6 +21,10 @@ export const ACTION_LABEL: Record<string, string> = {
   'alert.channel_added': 'Alert channel added',
   'alert.channel_removed': 'Alert channel removed',
   'alert.test_sent': 'Test alert sent',
+  'replication.rpo_breached': 'Data-loss target at risk',
+  'replication.rpo_recovered': 'Replication recovered',
+  'replication.token_created': 'Collector token created',
+  'replication.token_revoked': 'Collector token revoked',
 };
 
 export function describeDetail(r: AuditRecord): string {
@@ -44,6 +48,9 @@ export function describeDetail(r: AuditRecord): string {
   if (r.action === 'alert.channel_added' || r.action === 'alert.channel_removed')
     return `${s('kind') ?? '?'}: ${s('name') ?? '?'}`;
   if (r.action === 'alert.test_sent') return s('name') ?? '';
+  if (r.action === 'replication.rpo_breached' || r.action === 'replication.rpo_recovered')
+    return `worst lag ${d.max_lag_seconds === null || d.max_lag_seconds === undefined ? 'unknown' : `${String(d.max_lag_seconds)} s`}, target ${String(d.rpo_target_seconds)} s${s('source') === 'fixture' ? ' (sample data)' : ''}`;
+  if (r.action === 'replication.token_created') return `…${s('hint') ?? ''}`;
   if (r.action === 'member.invited' || r.action === 'member.joined')
     return `${s('email') ?? '?'} as ${s('role') ?? '?'}`;
   if (r.action === 'member.invite_revoked' || r.action === 'member.removed')

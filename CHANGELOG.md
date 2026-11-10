@@ -5,6 +5,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Phase 4.4: Real replication status from AWS Elastic Disaster Recovery (2026-11-10)
+
+- **Collector** (`collector/`, core in `src/integrations/awsDrs/`): a read-only Lambda for the customer's AWS account calls `drs:DescribeSourceServers` every minute and pushes replication status only (state, lag, backlog/total/replicated bytes, ETA, last seen, error code). AWS managed policy `AWSElasticDisasterRecoveryReadOnlyAccess`; push model, so AetherVault needs no access to the customer's account. Terraform module (`collector/terraform`, validated), single-file Lambda package (`npm run collector:package`), CLI with `--fixture`, `--dry-run`, `--record` and `--watch`.
+- **Ingest:** per-organization ingest token (192 bits, SHA-256 stored, shown once, rotate/revoke, audited); `ingest_replication_snapshot()` validates and sanitizes input, computes server health and RPO met/at risk itself, rate-limits to one snapshot per 20 s, keeps 7 days.
+- **Console:** AWS DRS & Telemetry tab gains a Replication panel: LIVE / STALE (no update for 5 min) / SAMPLE DATA badge, data-loss target met or at risk with worst lag vs target, servers replicating, backlog, lag sparkline, per-server status (state, error code, initial-sync progress and ETA, lag, backlog, last seen), and the Connect AWS token flow. The simulated HUD below stays labeled simulated.
+- **Alerts:** new "Replication at risk" event: RPO breaches page and recoveries resolve (PagerDuty), with sample data marked `[SAMPLE DATA]`.
+- **Fix:** a WebGL failure on the 3D tab no longer makes other tabs show "failed to load" (each panel's error boundary is keyed).
+- **Sample responses** are hand-built from the AWS API reference (no AWS account yet), not recorded; `lagDuration`'s format is undocumented, so unparseable values show as "lag unknown". Record real responses on pilot day with `--record`.
+- Tests: 29 pgTAP (tokens, validation, health mapping, breach/recovery transitions, alert queued), 25 collector unit tests against the sample responses (pagination, parsing, status-only payload, push errors), panel and provider tests, and a console E2E running the real collector code into the local database. Lambda package checked in isolation (reaches the AWS API with placeholder credentials and is rejected, as expected).
+
 ### Phase 4.3: Slack and PagerDuty alerts (2026-11-10)
 
 - **Alerts tab** (console): admins add Slack (incoming webhook) or PagerDuty (Events API v2) channels and choose events: failovers, failed drills, passed drills. Everyone in the organization sees the channels and recent deliveries; admins can send a test or remove a channel.

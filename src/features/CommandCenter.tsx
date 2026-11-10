@@ -19,6 +19,7 @@ const AuditLogPanel = lazy(() => import('./audit/AuditLogPanel'));
 const TeamPanel = lazy(() => import('./team/TeamPanel'));
 const DrillsPanel = lazy(() => import('./drills/DrillsPanel'));
 const AlertsPanel = lazy(() => import('./alerts/AlertsPanel'));
+const ReplicationPanel = lazy(() => import('./replication/ReplicationPanel'));
 const OnboardingChecklist = lazy(() => import('./onboarding/OnboardingChecklist'));
 
 function PanelPlaceholder({ label, height = 'h-[320px]' }: { label: string; height?: string }) {
@@ -90,6 +91,7 @@ export default function CommandCenter({
       {tab === 'hud' ? (
         <>
           <ErrorBoundary
+            key="hud"
             fallback={<PanelPlaceholder label="3D view unavailable on this device (WebGL)." />}
           >
             <Suspense fallback={<PanelPlaceholder label="Loading 3D topology…" />}>
@@ -131,7 +133,10 @@ export default function CommandCenter({
           </motion.div>
         </>
       ) : tab === 'drills' && provider.drills ? (
-        <ErrorBoundary fallback={<PanelPlaceholder label="Drills panel failed to load." />}>
+        <ErrorBoundary
+          key="drills"
+          fallback={<PanelPlaceholder label="Drills panel failed to load." />}
+        >
           <Suspense fallback={<PanelPlaceholder label="Loading drills…" />}>
             <DrillsPanel
               drills={provider.drills}
@@ -141,7 +146,10 @@ export default function CommandCenter({
           </Suspense>
         </ErrorBoundary>
       ) : tab === 'alerts' && provider.alerts ? (
-        <ErrorBoundary fallback={<PanelPlaceholder label="Alerts panel failed to load." />}>
+        <ErrorBoundary
+          key="alerts"
+          fallback={<PanelPlaceholder label="Alerts panel failed to load." />}
+        >
           <Suspense fallback={<PanelPlaceholder label="Loading alerts…" />}>
             <AlertsPanel
               alerts={provider.alerts}
@@ -151,13 +159,19 @@ export default function CommandCenter({
           </Suspense>
         </ErrorBoundary>
       ) : tab === 'team' && provider.team ? (
-        <ErrorBoundary fallback={<PanelPlaceholder label="Team panel failed to load." />}>
+        <ErrorBoundary
+          key="team"
+          fallback={<PanelPlaceholder label="Team panel failed to load." />}
+        >
           <Suspense fallback={<PanelPlaceholder label="Loading team…" />}>
             <TeamPanel team={provider.team} refreshKey={activityKey} />
           </Suspense>
         </ErrorBoundary>
       ) : tab === 'audit' && provider.audit ? (
-        <ErrorBoundary fallback={<PanelPlaceholder label="Audit log failed to load." />}>
+        <ErrorBoundary
+          key="audit"
+          fallback={<PanelPlaceholder label="Audit log failed to load." />}
+        >
           <Suspense fallback={<PanelPlaceholder label="Loading audit log…" />}>
             <AuditLogPanel
               audit={provider.audit}
@@ -172,11 +186,32 @@ export default function CommandCenter({
           </Suspense>
         </ErrorBoundary>
       ) : (
-        <ErrorBoundary fallback={<PanelPlaceholder label="Telemetry panel failed to load." />}>
-          <Suspense fallback={<PanelPlaceholder label="Loading telemetry…" />}>
-            <AwsDrsHud telemetry={telemetry} logs={logs} chaosActive={chaosActive} />
-          </Suspense>
-        </ErrorBoundary>
+        <>
+          {provider.replication && (
+            <ErrorBoundary
+              key="replication"
+              fallback={<PanelPlaceholder label="Replication panel failed to load." />}
+            >
+              <Suspense
+                fallback={<PanelPlaceholder label="Loading replication…" height="h-[160px]" />}
+              >
+                <ReplicationPanel
+                  replication={provider.replication}
+                  myRole={provider.team?.myRole ?? 'viewer'}
+                  refreshKey={activityKey}
+                />
+              </Suspense>
+            </ErrorBoundary>
+          )}
+          <ErrorBoundary
+            key="drs-hud"
+            fallback={<PanelPlaceholder label="Telemetry panel failed to load." />}
+          >
+            <Suspense fallback={<PanelPlaceholder label="Loading telemetry…" />}>
+              <AwsDrsHud telemetry={telemetry} logs={logs} chaosActive={chaosActive} />
+            </Suspense>
+          </ErrorBoundary>
+        </>
       )}
     </main>
   );

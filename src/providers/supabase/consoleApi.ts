@@ -11,6 +11,7 @@ import type {
   MemberRole,
   RunKind,
   RunOutcome,
+  ServerHealth,
   Unsubscribe,
 } from '../../domain/dr';
 
@@ -116,6 +117,53 @@ export interface AlertDeliveryRow {
   created_at: string;
 }
 
+export interface ReplicationServerRow {
+  id: string;
+  hostname: string;
+  state: string;
+  health: ServerHealth;
+  lag_seconds: number | null;
+  lag_raw: string | null;
+  backlog_bytes: number;
+  total_bytes: number;
+  replicated_bytes: number;
+  eta_at: string | null;
+  last_seen_at: string | null;
+  error: string | null;
+  last_launch_result: string | null;
+}
+
+export interface ReplicationSnapshotRow {
+  source: 'aws-drs' | 'fixture';
+  collected_at: string;
+  received_at: string;
+  server_now: string;
+  aws_account_id: string | null;
+  aws_region: string;
+  collector_version: string | null;
+  server_count: number;
+  healthy_count: number;
+  problem_count: number;
+  max_lag_seconds: number | null;
+  backlog_bytes: number;
+  rpo_target_seconds: number;
+  rpo_met: boolean | null;
+  servers: ReplicationServerRow[];
+}
+
+export interface LagHistoryRow {
+  collected_at: string;
+  /** Postgres numeric: may arrive as a string. */
+  max_lag_seconds: number | string | null;
+  rpo_met: boolean | null;
+}
+
+export interface IngestTokenRow {
+  hint: string;
+  created_at: string;
+  last_used_at: string | null;
+}
+
 export interface Membership {
   orgId: string;
   orgName: string;
@@ -162,6 +210,11 @@ export interface ConsoleApi {
   ): Promise<string>;
   removeAlertChannel(channelId: string): Promise<void>;
   sendTestAlert(channelId: string): Promise<void>;
+  latestReplication(orgId: string): Promise<ReplicationSnapshotRow | null>;
+  replicationHistory(orgId: string): Promise<LagHistoryRow[]>;
+  ingestTokenStatus(orgId: string): Promise<IngestTokenRow | null>;
+  createIngestToken(orgId: string): Promise<string>;
+  revokeIngestToken(orgId: string): Promise<void>;
   /** Calls back whenever runs or audit entries for the org change. */
   subscribe(orgId: string, onChange: () => void): Unsubscribe;
 }
@@ -258,6 +311,16 @@ export function createSupabaseConsoleApi(client: SupabaseClient): ConsoleApi {
       call<void>(client.rpc('remove_alert_channel', { p_channel: channelId })),
     sendTestAlert: (channelId) =>
       call<void>(client.rpc('send_test_alert', { p_channel: channelId })),
+    latestReplication: (orgId) =>
+      call<ReplicationSnapshotRow | null>(
+        client.rpc('latest_replication_snapshot', { p_org: orgId }),
+      ),
+    replicationHistory: (orgId) =>
+      call<LagHistoryRow[]>(client.rpc('replication_lag_history', { p_org: orgId, p_limit: 60 })),
+    ingestTokenStatus: (orgId) =>
+      call<IngestTokenRow | null>(client.rpc('ingest_token_status', { p_org: orgId })),
+    createIngestToken: (orgId) => call<string>(client.rpc('create_ingest_token', { p_org: orgId })),
+    revokeIngestToken: (orgId) => call<void>(client.rpc('revoke_ingest_token', { p_org: orgId })),
     subscribe(orgId, onChange) {
       const filter = `org_id=eq.${orgId}`;
       const channel = client

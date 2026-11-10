@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p collector",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -20,7 +20,10 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:test": "supabase test db",
-    "e2e:console": "bash scripts/e2e-console.sh"
+    "e2e:console": "bash scripts/e2e-console.sh",
+    "collector:build": "vite build -c collector/vite.config.ts --logLevel warn",
+    "collector": "npm run collector:build && node dist-collector/cli/cli.mjs",
+    "collector:package": "COLLECTOR_ENTRY=lambda npm run collector:build && cd dist-collector/lambda && zip -q -FS lambda.zip lambda.mjs && echo dist-collector/lambda/lambda.zip"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
@@ -35,6 +38,7 @@
     "three": "^0.187.0"
   },
   "devDependencies": {
+    "@aws-sdk/client-drs": "3.1156.0",
     "@eslint/js": "^9.14.0",
     "@playwright/test": "^1.65.0",
     "@testing-library/dom": "^10.4.2",

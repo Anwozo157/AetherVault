@@ -4,6 +4,7 @@
 
 import {
   type AlertsCapability,
+  type ReplicationCapability,
   type ApprovalCapability,
   type AuditCapability,
   type TeamCapability,
@@ -111,6 +112,23 @@ function describeAudit(entry: AuditEntry): { level: LogEvent['level']; message: 
       return { level: 'INFO', message: `${actor} removed alert channel ${String(d.name)}.` };
     case 'alert.test_sent':
       return { level: 'INFO', message: `${actor} sent a test alert to ${String(d.name)}.` };
+    case 'replication.rpo_breached':
+      return {
+        level: 'CRIT',
+        message: `${d.source === 'fixture' ? '[SAMPLE DATA] ' : ''}Data-loss target at risk: ${String(d.problem_count)} of ${String(d.server_count)} servers not replicating normally (worst lag ${d.max_lag_seconds === null ? 'unknown' : `${String(d.max_lag_seconds)} s`}, target ${String(d.rpo_target_seconds)} s).`,
+      };
+    case 'replication.rpo_recovered':
+      return {
+        level: 'SUCCESS',
+        message: `${d.source === 'fixture' ? '[SAMPLE DATA] ' : ''}Replication back within the data-loss target (worst lag ${String(d.max_lag_seconds)} s, target ${String(d.rpo_target_seconds)} s).`,
+      };
+    case 'replication.token_created':
+      return {
+        level: 'INFO',
+        message: `${actor} created an AWS collector token (…${String(d.hint)}).`,
+      };
+    case 'replication.token_revoked':
+      return { level: 'WARN', message: `${actor} revoked the AWS collector token.` };
     case 'org.objectives_set':
       return {
         level: 'INFO',
@@ -132,6 +150,7 @@ export class SupabaseDrProvider implements DrProvider {
   readonly team: TeamCapability;
   readonly drills: DrillsCapability;
   readonly alerts: AlertsCapability;
+  readonly replication: ReplicationCapability;
   /** Resolves after the first sync with the server (useful in tests). */
   readonly ready: Promise<void>;
 
@@ -257,6 +276,56 @@ export class SupabaseDrProvider implements DrProvider {
       },
       removeChannel: (id) => api.removeAlertChannel(id),
       sendTest: (id) => api.sendTestAlert(id),
+    };
+    const num = (v: number | string | null) => (v === null ? null : Number(v));
+    this.replication = {
+      latest: async () => {
+        const r = await api.latestReplication(org);
+        if (!r) return null;
+        return {
+          source: r.source,
+          collectedAt: r.collected_at,
+          receivedAt: r.received_at,
+          serverNow: r.server_now,
+          awsAccountId: r.aws_account_id,
+          awsRegion: r.aws_region,
+          collectorVersion: r.collector_version,
+          serverCount: r.server_count,
+          healthyCount: r.healthy_count,
+          problemCount: r.problem_count,
+          maxLagSeconds: num(r.max_lag_seconds),
+          backlogBytes: Number(r.backlog_bytes),
+          rpoTargetSeconds: r.rpo_target_seconds,
+          rpoMet: r.rpo_met,
+          servers: r.servers.map((s) => ({
+            id: s.id,
+            hostname: s.hostname,
+            state: s.state,
+            health: s.health,
+            lagSeconds: num(s.lag_seconds),
+            lagRaw: s.lag_raw,
+            backlogBytes: Number(s.backlog_bytes),
+            totalBytes: Number(s.total_bytes),
+            replicatedBytes: Number(s.replicated_bytes),
+            etaAt: s.eta_at,
+            lastSeenAt: s.last_seen_at,
+            error: s.error,
+            lastLaunchResult: s.last_launch_result,
+          })),
+        };
+      },
+      history: async () =>
+        (await api.replicationHistory(org)).map((h) => ({
+          collectedAt: h.collected_at,
+          maxLagSeconds: num(h.max_lag_seconds),
+          rpoMet: h.rpo_met,
+        })),
+      tokenStatus: async () => {
+        const t = await api.ingestTokenStatus(org);
+        return t ? { hint: t.hint, createdAt: t.created_at, lastUsedAt: t.last_used_at } : null;
+      },
+      createToken: () => api.createIngestToken(org),
+      revokeToken: () => api.revokeIngestToken(org),
     };
     this.audit = {
       list: async ({ limit = 100, before } = {}) =>

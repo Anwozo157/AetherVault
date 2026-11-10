@@ -204,6 +204,46 @@ class FakeServer {
       addAlertChannel: vi.fn(async () => 'ch-2'),
       removeAlertChannel: vi.fn(async () => {}),
       sendTestAlert: vi.fn(async () => {}),
+      latestReplication: async () => ({
+        source: 'aws-drs' as const,
+        collected_at: '2026-11-10T00:00:00Z',
+        received_at: '2026-11-10T00:00:01Z',
+        server_now: '2026-11-10T00:00:30Z',
+        aws_account_id: '111122223333',
+        aws_region: 'us-west-2',
+        collector_version: '0.1.0',
+        server_count: 1,
+        healthy_count: 1,
+        problem_count: 0,
+        max_lag_seconds: '4' as unknown as number,
+        backlog_bytes: 0,
+        rpo_target_seconds: 60,
+        rpo_met: true,
+        servers: [
+          {
+            id: 's-1',
+            hostname: 'app-01',
+            state: 'CONTINUOUS',
+            health: 'healthy' as const,
+            lag_seconds: 4,
+            lag_raw: 'PT4S',
+            backlog_bytes: 0,
+            total_bytes: 10,
+            replicated_bytes: 10,
+            eta_at: null,
+            last_seen_at: '2026-11-10T00:00:00Z',
+            error: null,
+            last_launch_result: 'NOT_STARTED',
+          },
+        ],
+      }),
+      replicationHistory: async () => [
+        { collected_at: '2026-11-09T23:59:00Z', max_lag_seconds: '3.5', rpo_met: true },
+        { collected_at: '2026-11-10T00:00:00Z', max_lag_seconds: null, rpo_met: null },
+      ],
+      ingestTokenStatus: async () => null,
+      createIngestToken: vi.fn(async () => 'avi_' + '0'.repeat(48)),
+      revokeIngestToken: vi.fn(async () => {}),
       subscribe: (_org, onChange) => {
         this.listeners.add(onChange);
         return () => this.listeners.delete(onChange);
@@ -618,6 +658,65 @@ describe('SupabaseDrProvider', () => {
     expect(api.sendTestAlert).toHaveBeenCalledWith('ch-1');
     await admin.alerts.removeChannel('ch-1');
     expect(api.removeAlertChannel).toHaveBeenCalledWith('ch-1');
+  });
+
+  test('replication: snapshot and history mapped (numeric strings -> numbers); token calls', async () => {
+    const api = server.apiFor(USERS.op);
+    const admin = new SupabaseDrProvider(api, {
+      orgId: ORG,
+      orgName: 'Acme',
+      userId: USERS.op,
+      role: 'admin',
+    });
+    providers.push(admin);
+    const latest = await admin.replication.latest();
+    expect(latest).toMatchObject({
+      source: 'aws-drs',
+      awsAccountId: '111122223333',
+      maxLagSeconds: 4,
+      rpoMet: true,
+      servers: [{ hostname: 'app-01', health: 'healthy', lagSeconds: 4, lagRaw: 'PT4S' }],
+    });
+    await expect(admin.replication.history()).resolves.toEqual([
+      { collectedAt: '2026-11-09T23:59:00Z', maxLagSeconds: 3.5, rpoMet: true },
+      { collectedAt: '2026-11-10T00:00:00Z', maxLagSeconds: null, rpoMet: null },
+    ]);
+    await expect(admin.replication.tokenStatus()).resolves.toBeNull();
+    await expect(admin.replication.createToken()).resolves.toMatch(/^avi_/);
+    expect(api.createIngestToken).toHaveBeenCalledWith(ORG);
+    await admin.replication.revokeToken();
+    expect(api.revokeIngestToken).toHaveBeenCalledWith(ORG);
+  });
+
+  test('replication audit entries read as sentences, sample data marked', async () => {
+    const op = connect(server, USERS.op, 'operator');
+    await op.ready;
+    server.pushAudit('replication.rpo_breached', null, {
+      problem_count: 1,
+      server_count: 4,
+      max_lag_seconds: 130,
+      rpo_target_seconds: 60,
+      source: 'fixture',
+    });
+    server.pushAudit('replication.rpo_recovered', null, {
+      max_lag_seconds: 3,
+      rpo_target_seconds: 60,
+      source: 'aws-drs',
+    });
+    server.pushAudit('replication.token_created', USERS.op, { hint: 'abcd' });
+    server.pushAudit('replication.token_revoked', USERS.op, {});
+    await vi.advanceTimersByTimeAsync(5000);
+    const logs = op.getRecentLogs();
+    const text = logs.map((l) => l.message).join(' | ');
+    expect(text).toContain(
+      '[SAMPLE DATA] Data-loss target at risk: 1 of 4 servers not replicating normally (worst lag 130 s, target 60 s).',
+    );
+    expect(text).toContain(
+      'Replication back within the data-loss target (worst lag 3 s, target 60 s).',
+    );
+    expect(text).toContain('op@test created an AWS collector token (…abcd).');
+    expect(text).toContain('op@test revoked the AWS collector token.');
+    expect(logs.find((l) => l.message.includes('at risk'))?.level).toBe('CRIT');
   });
 
   test('alert channel changes read as sentences', async () => {

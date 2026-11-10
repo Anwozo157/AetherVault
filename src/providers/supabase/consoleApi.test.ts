@@ -67,6 +67,11 @@ describe('createSupabaseConsoleApi', () => {
     ]);
     await api.removeAlertChannel('c');
     await api.sendTestAlert('c');
+    await api.latestReplication('o');
+    await api.replicationHistory('o');
+    await api.ingestTokenStatus('o');
+    await api.createIngestToken('o');
+    await api.revokeIngestToken('o');
     expect(raw.rpc.mock.calls).toEqual([
       ['get_failover_status', { p_org: 'o' }],
       ['org_audit_feed', { p_org: 'o', p_limit: 50 }],
@@ -111,6 +116,11 @@ describe('createSupabaseConsoleApi', () => {
       ],
       ['remove_alert_channel', { p_channel: 'c' }],
       ['send_test_alert', { p_channel: 'c' }],
+      ['latest_replication_snapshot', { p_org: 'o' }],
+      ['replication_lag_history', { p_org: 'o', p_limit: 60 }],
+      ['ingest_token_status', { p_org: 'o' }],
+      ['create_ingest_token', { p_org: 'o' }],
+      ['revoke_ingest_token', { p_org: 'o' }],
     ]);
   });
 

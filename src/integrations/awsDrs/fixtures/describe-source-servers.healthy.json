@@ -1,0 +1,159 @@
+[
+  {
+    "items": [
+      {
+        "sourceServerID": "s-0a1b2c3d4e5f60001",
+        "arn": "arn:aws:drs:us-west-2:111122223333:source-server/s-0a1b2c3d4e5f60001",
+        "agentVersion": "4.5.1",
+        "lastLaunchResult": "SUCCEEDED",
+        "replicationDirection": "FAILOVER",
+        "lifeCycle": {
+          "addedToServiceDateTime": "2026-10-01T15:04:11Z",
+          "firstByteDateTime": "2026-10-01T15:06:52Z",
+          "lastSeenByServiceDateTime": "2026-11-09T21:59:40Z",
+          "elapsedReplicationDuration": "P39DT6H52M"
+        },
+        "sourceProperties": {
+          "identificationHints": {
+            "hostname": "app-server-01",
+            "fqdn": "app-server-01.corp.example.internal"
+          },
+          "os": {
+            "fullString": "Microsoft Windows Server 2019 Standard"
+          },
+          "ramBytes": 34359738368,
+          "recommendedInstanceType": "m6i.xlarge",
+          "lastUpdatedDateTime": "2026-11-09T21:30:00Z"
+        },
+        "dataReplicationInfo": {
+          "dataReplicationState": "CONTINUOUS",
+          "replicatedDisks": [
+            {
+              "deviceName": "C:",
+              "totalStorageBytes": 214748364800,
+              "replicatedStorageBytes": 214748364800,
+              "rescannedStorageBytes": 0,
+              "backloggedStorageBytes": 0,
+              "volumeStatus": "REGULAR"
+            }
+          ],
+          "stagingAvailabilityZone": "us-west-2a",
+          "lagDuration": "PT2S"
+        },
+        "stagingArea": {
+          "status": "NOT_EXTENDED"
+        },
+        "tags": {}
+      },
+      {
+        "sourceServerID": "s-0a1b2c3d4e5f60002",
+        "arn": "arn:aws:drs:us-west-2:111122223333:source-server/s-0a1b2c3d4e5f60002",
+        "agentVersion": "4.5.1",
+        "lastLaunchResult": "NOT_STARTED",
+        "replicationDirection": "FAILOVER",
+        "lifeCycle": {
+          "addedToServiceDateTime": "2026-10-01T15:04:11Z",
+          "firstByteDateTime": "2026-10-01T15:06:52Z",
+          "lastSeenByServiceDateTime": "2026-11-09T21:59:40Z",
+          "elapsedReplicationDuration": "P39DT6H52M"
+        },
+        "sourceProperties": {
+          "identificationHints": {
+            "hostname": "db-server-01",
+            "fqdn": "db-server-01.corp.example.internal"
+          },
+          "os": {
+            "fullString": "Microsoft Windows Server 2019 Standard"
+          },
+          "ramBytes": 34359738368,
+          "recommendedInstanceType": "m6i.xlarge",
+          "lastUpdatedDateTime": "2026-11-09T21:30:00Z"
+        },
+        "dataReplicationInfo": {
+          "dataReplicationState": "CONTINUOUS",
+          "replicatedDisks": [
+            {
+              "deviceName": "C:",
+              "totalStorageBytes": 128849018880,
+              "replicatedStorageBytes": 128849018880,
+              "rescannedStorageBytes": 0,
+              "backloggedStorageBytes": 0,
+              "volumeStatus": "REGULAR"
+            },
+            {
+              "deviceName": "D:",
+              "totalStorageBytes": 536870912000,
+              "replicatedStorageBytes": 536870912000,
+              "rescannedStorageBytes": 0,
+              "backloggedStorageBytes": 0,
+              "volumeStatus": "REGULAR"
+            }
+          ],
+          "stagingAvailabilityZone": "us-west-2a",
+          "lagDuration": "PT4S"
+        },
+        "stagingArea": {
+          "status": "NOT_EXTENDED"
+        },
+        "tags": {}
+      }
+    ],
+    "nextToken": "page-1"
+  },
+  {
+    "items": [
+      {
+        "sourceServerID": "s-0a1b2c3d4e5f60003",
+        "arn": "arn:aws:drs:us-west-2:111122223333:source-server/s-0a1b2c3d4e5f60003",
+        "agentVersion": "4.5.1",
+        "lastLaunchResult": "NOT_STARTED",
+        "replicationDirection": "FAILOVER",
+        "lifeCycle": {
+          "addedToServiceDateTime": "2026-10-01T15:04:11Z",
+          "firstByteDateTime": "2026-10-01T15:06:52Z",
+          "lastSeenByServiceDateTime": "2026-11-09T21:59:40Z",
+          "elapsedReplicationDuration": "P39DT6H52M"
+        },
+        "sourceProperties": {
+          "identificationHints": {
+            "hostname": "file-server-01",
+            "fqdn": "file-server-01.corp.example.internal"
+          },
+          "os": {
+            "fullString": "Microsoft Windows Server 2019 Standard"
+          },
+          "ramBytes": 34359738368,
+          "recommendedInstanceType": "m6i.xlarge",
+          "lastUpdatedDateTime": "2026-11-09T21:30:00Z"
+        },
+        "dataReplicationInfo": {
+          "dataReplicationState": "CREATING_SNAPSHOT",
+          "replicatedDisks": [
+            {
+              "deviceName": "C:",
+              "totalStorageBytes": 107374182400,
+              "replicatedStorageBytes": 107374182400,
+              "rescannedStorageBytes": 0,
+              "backloggedStorageBytes": 0,
+              "volumeStatus": "REGULAR"
+            },
+            {
+              "deviceName": "E:",
+              "totalStorageBytes": 2147483648000,
+              "replicatedStorageBytes": 2147483648000,
+              "rescannedStorageBytes": 0,
+              "backloggedStorageBytes": 0,
+              "volumeStatus": "REGULAR"
+            }
+          ],
+          "stagingAvailabilityZone": "us-west-2a",
+          "lagDuration": "PT1S"
+        },
+        "stagingArea": {
+          "status": "NOT_EXTENDED"
+        },
+        "tags": {}
+      }
+    ]
+  }
+]
