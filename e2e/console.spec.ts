@@ -422,3 +422,53 @@ test('replication: admin connects a collector; pushed AWS DRS status appears, la
   expect(admin.errors).toEqual([]);
   await admin.close();
 });
+
+test('runbook: admin starts from the template; an operator ticks a step on a drill; evidence shows it', async ({
+  browser,
+}) => {
+  // Earlier tests may leave a drill running until the per-minute scheduler records it.
+  sqlAsOwner(`select public.run_drill_scheduler(now() + interval '10 seconds')`);
+
+  const admin = await signIn(browser, 'admin@aethervault.local');
+  await admin.page.getByRole('button', { name: 'Runbook', exact: true }).click();
+  await admin.page.getByRole('button', { name: 'Start from template' }).click();
+  await admin.page.getByLabel('Title of step 8').fill('Confirm field engineers can connect');
+  await admin.page.getByRole('button', { name: 'Save runbook' }).click();
+  await expect(admin.page.getByText(/^v1 · updated/)).toBeVisible();
+  await expect(admin.page.getByText('Confirm field engineers can connect')).toBeVisible();
+
+  const operator = await signIn(browser, 'operator@aethervault.local');
+  await operator.page.getByRole('button', { name: 'Runbook', exact: true }).click();
+  await expect(operator.page.getByRole('button', { name: 'Edit runbook' })).toHaveCount(0);
+  await operator.page.getByRole('button', { name: 'Drills', exact: true }).click();
+  await operator.page.getByRole('button', { name: 'Run drill now' }).click();
+  await expect(
+    operator.page
+      .locator('tr', { hasText: 'isolated · no approval needed' })
+      .first()
+      .getByText(/· PASS/),
+  ).toBeVisible({ timeout: 15_000 });
+
+  await operator.page.getByRole('button', { name: 'Runbook', exact: true }).click();
+  await expect(operator.page.getByText(/0 of 10 steps done · runbook v1/)).toBeVisible();
+  await operator.page.getByLabel('Note for Check replication health').fill('worst lag 4 s');
+  await operator.page.getByRole('button', { name: 'Mark done: Check replication health' }).click();
+  await expect(operator.page.getByText(/1 of 10 steps done/)).toBeVisible();
+  await expect(operator.page.getByText(/Done by operator@aethervault.local/)).toContainText(
+    'worst lag 4 s',
+  );
+
+  await operator.page.getByRole('button', { name: 'Drills', exact: true }).click();
+  await operator.page
+    .getByRole('button', { name: /Evidence report for drill/ })
+    .first()
+    .click();
+  const report = operator.page.getByRole('dialog');
+  await expect(report.getByText('Runbook (v1): 1 of 10 steps done')).toBeVisible();
+  await expect(report.getByText(/operator@aethervault.local · .* · worst lag 4 s/)).toBeVisible();
+
+  expect(admin.errors).toEqual([]);
+  expect(operator.errors).toEqual([]);
+  await admin.close();
+  await operator.close();
+});

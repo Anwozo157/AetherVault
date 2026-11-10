@@ -69,6 +69,46 @@ describe('auditFormat', () => {
       ),
     ).toBe('passed: 5.5 s vs 900 s target (simulated)');
     expect(
+      describeDetail(
+        rec(70, {
+          action: 'drill.completed',
+          detail: {
+            result: 'failed',
+            recovery_seconds: 5.5,
+            rto_target_seconds: 900,
+            rpo_met: false,
+            rpo_seconds: 130,
+            rpo_target_seconds: 60,
+            replication_source: 'aws-drs',
+          },
+        }),
+      ),
+    ).toBe('failed: 5.5 s vs 900 s target (simulated); data loss 130 s vs 60 s MISSED');
+    expect(
+      describeDetail(
+        rec(71, {
+          action: 'drill.completed',
+          detail: {
+            result: 'passed',
+            recovery_seconds: 5.5,
+            rto_target_seconds: 900,
+            rpo_met: null,
+          },
+        }),
+      ),
+    ).toBe('passed: 5.5 s vs 900 s target (simulated); data loss not measured');
+    expect(
+      describeDetail(
+        rec(72, {
+          action: 'runbook.step_checked',
+          detail: { title: 'Verify lag', note: 'all 4 s' },
+        }),
+      ),
+    ).toBe('Verify lag (all 4 s)');
+    expect(
+      describeDetail(rec(73, { action: 'runbook.updated', detail: { version: 2, steps: 9 } })),
+    ).toBe('version 2, 9 steps');
+    expect(
       describeDetail(rec(8, { action: 'drill.completed', detail: { result: 'aborted' } })),
     ).toBe('aborted');
     expect(

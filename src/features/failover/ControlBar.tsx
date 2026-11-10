@@ -1,7 +1,16 @@
-import { Bell, ClipboardCheck, Flame, HardDrive, Layers, ScrollText, Users } from 'lucide-react';
+import {
+  Bell,
+  BookOpenCheck,
+  ClipboardCheck,
+  Flame,
+  HardDrive,
+  Layers,
+  ScrollText,
+  Users,
+} from 'lucide-react';
 import { TARGET_REGIONS } from '../../config/regions';
 
-export type CommandTab = 'hud' | 'drs' | 'drills' | 'alerts' | 'audit' | 'team';
+export type CommandTab = 'hud' | 'drs' | 'drills' | 'runbook' | 'alerts' | 'audit' | 'team';
 
 interface ControlBarProps {
   tab: CommandTab;
@@ -19,6 +28,8 @@ interface ControlBarProps {
   showDrills?: boolean;
   /** Show the Alerts tab (server-backed providers only). */
   showAlerts?: boolean;
+  /** Show the Runbook tab (server-backed providers only). */
+  showRunbook?: boolean;
 }
 
 export default function ControlBar({
@@ -33,6 +44,7 @@ export default function ControlBar({
   showTeam = false,
   showDrills = false,
   showAlerts = false,
+  showRunbook = false,
 }: ControlBarProps) {
   const tabClass = (active: boolean) =>
     `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
@@ -66,6 +78,16 @@ export default function ControlBar({
           >
             <ClipboardCheck className="w-3.5 h-3.5 text-aether-green" />
             <span>Drills</span>
+          </button>
+        )}
+        {showRunbook && (
+          <button
+            onClick={() => onTabChange('runbook')}
+            aria-pressed={tab === 'runbook'}
+            className={tabClass(tab === 'runbook')}
+          >
+            <BookOpenCheck className="w-3.5 h-3.5 text-aether-cyan" />
+            <span>Runbook</span>
           </button>
         )}
         {showAlerts && (

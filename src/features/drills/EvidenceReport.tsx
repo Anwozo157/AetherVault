@@ -149,6 +149,38 @@ export default function EvidenceReport({
           </dl>
         </section>
 
+        {evidence.runbook && (
+          <section className="mt-4">
+            <h3 className="text-[10px] uppercase tracking-widest text-zinc-500 mb-1 print:text-black/60">
+              Runbook (v{evidence.runbook.version}): {evidence.runbook.completed} of{' '}
+              {evidence.runbook.total} steps done
+            </h3>
+            <ol className="flex flex-col">
+              {evidence.runbook.steps.map((s) => (
+                <li
+                  key={s.id}
+                  className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-1 py-1 border-b border-white/5 print:border-black/10"
+                >
+                  <span
+                    className={s.done ? 'text-aether-green print:text-black' : 'text-zinc-600'}
+                    aria-label={s.done ? 'done' : 'not done'}
+                  >
+                    {s.done ? '✓' : '○'}
+                  </span>
+                  <span className="min-w-0 break-words">
+                    <span className="text-zinc-200 print:text-black">{s.title}</span>
+                    <span className="block text-zinc-500 print:text-black/70">
+                      {s.done
+                        ? `${s.checked_by ?? 'unknown'} · ${time(s.checked_at)}${s.note ? ` · ${s.note}` : ''}`
+                        : 'not done'}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+
         {evidence.timeline.length > 0 && (
           <section className="mt-4">
             <h3 className="text-[10px] uppercase tracking-widest text-zinc-500 mb-1 print:text-black/60">

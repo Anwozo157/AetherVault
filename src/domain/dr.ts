@@ -206,6 +206,52 @@ export interface RunSummary {
   replicationSource: 'aws-drs' | 'fixture' | null;
 }
 
+export type RunbookPhase = 'before' | 'during' | 'after';
+
+export interface RunbookStep {
+  id: string;
+  phase: RunbookPhase;
+  title: string;
+  detail: string | null;
+}
+
+/** The organization's DR runbook (versioned; each run keeps the version it started with). */
+export interface Runbook {
+  version: number;
+  steps: RunbookStep[];
+  updatedBy: string | null;
+  updatedAt: string;
+}
+
+export interface ChecklistStep extends RunbookStep {
+  done: boolean;
+  checkedBy: string | null;
+  checkedAt: string | null;
+  note: string | null;
+}
+
+/** One run's copy of the runbook, with who ticked what. */
+export interface RunChecklist {
+  runId: string;
+  version: number;
+  /** Ticks are accepted for 7 days after the run started (not for withdrawn requests). */
+  open: boolean;
+  steps: ChecklistStep[];
+}
+
+/** A step being edited: no id yet means a new step. */
+export type RunbookStepDraft = Omit<RunbookStep, 'id'> & { id?: string };
+
+export interface RunbooksCapability {
+  get(): Promise<Runbook | null>;
+  /** Admins only. Replaces the whole runbook; returns the new version. */
+  save(steps: RunbookStepDraft[]): Promise<number>;
+  /** null when the run started before the organization had a runbook. */
+  checklist(runId: string): Promise<RunChecklist | null>;
+  /** Operators and above. Permanent and audited. */
+  check(runId: string, stepId: string, note?: string): Promise<void>;
+}
+
 /** Replication snapshot summary copied onto a run when it launched. */
 export interface ReplicationAtLaunch {
   snapshot_id: number;
@@ -260,6 +306,21 @@ export interface DrillEvidence {
   };
   /** From report_version 3: replication snapshot received in the 5 minutes before launch. */
   replication_at_launch?: ReplicationAtLaunch | null;
+  /** From report_version 4: the run's runbook checklist (null: no runbook when it started). */
+  runbook?: {
+    version: number;
+    total: number;
+    completed: number;
+    steps: Array<{
+      id: string;
+      phase: RunbookPhase;
+      title: string;
+      done: boolean;
+      checked_by: string | null;
+      checked_at: string | null;
+      note: string | null;
+    }>;
+  } | null;
   audit_entries: Array<{
     id: number;
     at: string;
@@ -423,6 +484,8 @@ export interface DrProvider {
   readonly drills?: DrillsCapability;
   /** Present when events can be sent to Slack / PagerDuty. */
   readonly alerts?: AlertsCapability;
+  /** Present when the organization can keep a DR runbook and tick it off per run. */
+  readonly runbooks?: RunbooksCapability;
   /** Present when real replication status can be connected (AWS DRS collector). */
   readonly replication?: ReplicationCapability;
 

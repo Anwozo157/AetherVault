@@ -72,6 +72,10 @@ describe('createSupabaseConsoleApi', () => {
     await api.ingestTokenStatus('o');
     await api.createIngestToken('o');
     await api.revokeIngestToken('o');
+    await api.getRunbook('o');
+    await api.setRunbook('o', [{ phase: 'before', title: 'Declare', detail: null }]);
+    await api.runChecklist('r');
+    await api.checkRunbookStep('r', 's', null);
     expect(raw.rpc.mock.calls).toEqual([
       ['get_failover_status', { p_org: 'o' }],
       ['org_audit_feed', { p_org: 'o', p_limit: 50 }],
@@ -121,6 +125,13 @@ describe('createSupabaseConsoleApi', () => {
       ['ingest_token_status', { p_org: 'o' }],
       ['create_ingest_token', { p_org: 'o' }],
       ['revoke_ingest_token', { p_org: 'o' }],
+      ['get_runbook', { p_org: 'o' }],
+      [
+        'set_runbook',
+        { p_org: 'o', p_steps: [{ phase: 'before', title: 'Declare', detail: null }] },
+      ],
+      ['run_checklist', { p_run: 'r' }],
+      ['check_runbook_step', { p_run: 'r', p_step: 's', p_note: null }],
     ]);
   });
 

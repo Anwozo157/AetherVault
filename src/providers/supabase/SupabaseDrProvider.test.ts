@@ -248,6 +248,31 @@ class FakeServer {
       ingestTokenStatus: async () => null,
       createIngestToken: vi.fn(async () => 'avi_' + '0'.repeat(48)),
       revokeIngestToken: vi.fn(async () => {}),
+      getRunbook: async () => ({
+        version: 2,
+        steps: [{ id: 's1', phase: 'before' as const, title: 'Declare', detail: null }],
+        updated_by: 'admin@test',
+        updated_at: '2026-11-10T00:00:00Z',
+      }),
+      setRunbook: vi.fn(async () => 3),
+      runChecklist: async (runId: string) => ({
+        run_id: runId,
+        version: 2,
+        open: true,
+        steps: [
+          {
+            id: 's1',
+            phase: 'before' as const,
+            title: 'Declare',
+            detail: null,
+            done: true,
+            checked_by: 'op@test',
+            checked_at: '2026-11-10T00:01:00Z',
+            note: null,
+          },
+        ],
+      }),
+      checkRunbookStep: vi.fn(async () => {}),
       subscribe: (_org, onChange) => {
         this.listeners.add(onChange);
         return () => this.listeners.delete(onChange);
@@ -694,6 +719,50 @@ describe('SupabaseDrProvider', () => {
     expect(api.createIngestToken).toHaveBeenCalledWith(ORG);
     await admin.replication.revokeToken();
     expect(api.revokeIngestToken).toHaveBeenCalledWith(ORG);
+  });
+
+  test('runbooks: runbook and checklist mapped; save and tick pass through (blank note -> null)', async () => {
+    const api = server.apiFor(USERS.op);
+    const p = new SupabaseDrProvider(api, {
+      orgId: ORG,
+      orgName: 'Acme',
+      userId: USERS.op,
+      role: 'admin',
+    });
+    providers.push(p);
+    await expect(p.runbooks.get()).resolves.toEqual({
+      version: 2,
+      steps: [{ id: 's1', phase: 'before', title: 'Declare', detail: null }],
+      updatedBy: 'admin@test',
+      updatedAt: '2026-11-10T00:00:00Z',
+    });
+    await expect(p.runbooks.checklist('run-1')).resolves.toEqual({
+      runId: 'run-1',
+      version: 2,
+      open: true,
+      steps: [
+        {
+          id: 's1',
+          phase: 'before',
+          title: 'Declare',
+          detail: null,
+          done: true,
+          checkedBy: 'op@test',
+          checkedAt: '2026-11-10T00:01:00Z',
+          note: null,
+        },
+      ],
+    });
+    await expect(
+      p.runbooks.save([{ phase: 'after', title: 'Review', detail: null }]),
+    ).resolves.toBe(3);
+    expect(api.setRunbook).toHaveBeenCalledWith(ORG, [
+      { phase: 'after', title: 'Review', detail: null },
+    ]);
+    await p.runbooks.check('run-1', 's1', '   ');
+    await p.runbooks.check('run-1', 's1', ' ok ');
+    expect(api.checkRunbookStep).toHaveBeenNthCalledWith(1, 'run-1', 's1', null);
+    expect(api.checkRunbookStep).toHaveBeenNthCalledWith(2, 'run-1', 's1', 'ok');
   });
 
   test('replication audit entries read as sentences, sample data marked', async () => {
