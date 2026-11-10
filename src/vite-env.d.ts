@@ -13,3 +13,5 @@ interface ImportMeta {
 declare const __APP_VERSION__: string;
 /** UTC build date, YYYY-MM-DD. */
 declare const __BUILD_DATE__: string;
+/** True when VITE_SUPABASE_URL points at a local database (fixed at build time). */
+declare const __LOCAL_BACKEND__: boolean;

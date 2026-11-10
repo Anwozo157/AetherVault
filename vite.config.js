@@ -56,6 +56,11 @@ export default defineConfig(({ mode }) => {
     define: {
       __APP_VERSION__: JSON.stringify(VERSION),
       __BUILD_DATE__: JSON.stringify(BUILD_DATE),
+      // Build-time constant so production bundles drop local-only code (demo accounts,
+      // local mail inbox) entirely; deploy-pages.sh refuses builds that mention a local URL.
+      __LOCAL_BACKEND__: JSON.stringify(
+        /^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(env.VITE_SUPABASE_URL ?? ''),
+      ),
     },
     plugins: [react(), versionFile(), securityMeta(env.VITE_SUPABASE_URL)],
     build: {

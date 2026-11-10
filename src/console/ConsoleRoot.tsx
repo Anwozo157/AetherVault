@@ -4,7 +4,7 @@
 import { createClient, type Session, type SupabaseClient } from '@supabase/supabase-js';
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import App from '../App';
-import { SUPABASE_ANON_KEY, SUPABASE_URL, hasBackend, isLocalBackend } from '../config/backend';
+import { SUPABASE_ANON_KEY, SUPABASE_URL, hasBackend } from '../config/backend';
 import SignInForm from '../features/console/SignInForm';
 import { DrProviderRoot } from '../providers/DrProviderContext';
 import { SupabaseDrProvider } from '../providers/supabase/SupabaseDrProvider';
@@ -188,11 +188,11 @@ export default function ConsoleRoot() {
     return (
       <Screen>
         <SignInForm
-          demoAccounts={isLocalBackend ? DEMO_ACCOUNTS : undefined}
+          demoAccounts={__LOCAL_BACKEND__ ? DEMO_ACCOUNTS : undefined}
           // Local Supabase captures auth emails in Mailpit ([inbucket] port in supabase/config.toml).
-          localInboxUrl={isLocalBackend ? 'http://127.0.0.1:54324' : undefined}
+          localInboxUrl={__LOCAL_BACKEND__ ? 'http://127.0.0.1:54324' : undefined}
           onPasswordSignIn={
-            isLocalBackend
+            __LOCAL_BACKEND__
               ? async (email, password) => {
                   const { error } = await supabase.auth.signInWithPassword({ email, password });
                   if (error) throw new Error(error.message);
