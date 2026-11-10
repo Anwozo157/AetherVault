@@ -32,16 +32,18 @@ src/
 │   ├── console/SignInForm.tsx   Email + password / magic-link sign-in
 │   ├── telemetry/               MetricCard, MetricsOverview, TelemetrySparkline, AwsDrsHud
 │   ├── topology/                GlobalTopologyCanvas (Three.js globe, lazy-loaded)
-│   └── pitch/                   InvestorPitchDeck (lazy-loaded)
+│   ├── pitch/                   InvestorPitchDeck (lazy-loaded)
+│   └── landing/                 LandingPage, HeroMissionControl (looping globe failover), ReplicationScene3D (lazy, on scroll)
 ├── components/                  AppHeader, AppFooter, AmbientBackground, ShareModal, ErrorBoundary
 ├── lib/audioEffects.ts          Web Audio synth (no audio files)
 ├── App.tsx                      App shell: header, mode switch, chaos + sound state
-└── main.tsx                     Routes: public demo (MockDrProvider) or lazy ConsoleRoot
+├── DemoRoot.tsx                 Composition root for the public demo (MockDrProvider), lazy on #/demo
+└── main.tsx                     Routes: landing page (root), lazy DemoRoot (#/demo), lazy ConsoleRoot (#/console)
 ```
 
 **Dependency rule:** UI code depends on `domain/dr.ts` and `useDrProvider()`, never on a concrete
-provider. Concrete providers are constructed only in composition roots (`main.tsx`,
-`console/ConsoleRoot.tsx`). Adding `SupabaseDrProvider` needed no changes to the failover UI beyond
+provider. Concrete providers are constructed only in composition roots (`DemoRoot.tsx`,
+`console/ConsoleRoot.tsx`). The landing page uses no provider. Adding `SupabaseDrProvider` needed no changes to the failover UI beyond
 the optional approval panel.
 
 ## Failover state machine

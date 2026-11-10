@@ -45,3 +45,70 @@ body {
     break-inside: avoid;
   }
 }
+
+/* ---------- Landing page ---------- */
+
+/* Engineering grid that fades out toward the edges. */
+.landing-grid {
+  background-image:
+    linear-gradient(to right, theme('colors.white / 5%') 1px, transparent 1px),
+    linear-gradient(to bottom, theme('colors.white / 5%') 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%);
+}
+
+/* Soft brand glow behind the hero. */
+.landing-glow {
+  background:
+    radial-gradient(ellipse 50% 40% at 50% 0%, theme('colors.aether.cyan / 18%'), transparent 70%),
+    radial-gradient(ellipse 35% 30% at 80% 20%, theme('colors.aether.green / 10%'), transparent 70%);
+}
+
+.landing-gradient-text {
+  background-image: linear-gradient(
+    90deg,
+    theme('colors.aether.green'),
+    theme('colors.aether.cyan')
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Status beacon. */
+.landing-beacon {
+  animation: landing-beacon 2.4s ease-out infinite;
+}
+@keyframes landing-beacon {
+  0% {
+    box-shadow: 0 0 0 0 theme('colors.aether.green / 55%');
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 10px theme('colors.aether.green / 0%');
+  }
+}
+
+/* A hairline border with a brand gradient, for highlighted panels. */
+.landing-ring {
+  position: relative;
+}
+.landing-ring::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    theme('colors.aether.cyan / 55%'),
+    theme('colors.white / 6%') 40%,
+    theme('colors.aether.green / 45%')
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}

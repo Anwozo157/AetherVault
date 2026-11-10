@@ -8,6 +8,17 @@ export const hasBackend = SUPABASE_URL !== '' && SUPABASE_ANON_KEY !== '';
 export const isLocalBackend = /^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(SUPABASE_URL);
 
 export const CONSOLE_HASH = '#/console';
+/** The public simulated demo (3D command center + investor deck). The site root is the landing page. */
+export const DEMO_HASH = '#/demo';
+
+export type SiteRoute = 'landing' | 'demo' | 'console';
+
+/** Which top-level screen a URL shows. Unknown hashes (e.g. in-page anchors) stay on the landing page. */
+export function routeFor(loc: Pick<Location, 'hash' | 'search'>): SiteRoute {
+  if (isConsoleRoute(loc)) return 'console';
+  if (loc.hash.startsWith(DEMO_HASH)) return 'demo';
+  return 'landing';
+}
 
 /** True when the URL points at the signed-in console (hash route or magic-link return). */
 export function isConsoleRoute(loc: Pick<Location, 'hash' | 'search'>): boolean {

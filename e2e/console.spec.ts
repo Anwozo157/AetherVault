@@ -39,7 +39,7 @@ test.describe.configure({ mode: 'serial' });
 test('the public demo route still shows the simulated demo, with a sign-in link', async ({
   page,
 }) => {
-  await page.goto('/');
+  await page.goto('/#/demo');
   await expect(page.getByText('SIMULATED DATA')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '#/console');
 });

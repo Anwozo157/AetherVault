@@ -7,10 +7,36 @@ function trackErrors(page: Page) {
   return errors;
 }
 
+test.describe('Landing page', () => {
+  test('loads without errors, links to the demo, no horizontal scroll', async ({ page }) => {
+    const errors = trackErrors(page);
+    await page.goto('/');
+    await expect(
+      page.getByRole('heading', { level: 1, name: /Disaster recovery you can prove/ }),
+    ).toBeVisible();
+    await expect(page.getByText('SIMULATED', { exact: true })).toBeVisible();
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow).toBeLessThanOrEqual(0);
+    await page.getByRole('link', { name: 'Launch the live demo' }).first().click();
+    await expect(page).toHaveURL(/#\/demo$/);
+    await expect(page.getByText('SIMULATED DATA')).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test('in-page anchors stay on the landing page', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('link', { name: 'How it works' }).first().click();
+    await expect(page.getByRole('heading', { name: /Replicate\. Drill\. Prove\./ })).toBeVisible();
+    await expect(page.getByText('SIMULATED DATA', { exact: true })).toHaveCount(0);
+  });
+});
+
 test.describe('Mission Control', () => {
   test('loads with the simulated-data badge and the 3D globe', async ({ page }) => {
     const errors = trackErrors(page);
-    await page.goto('/');
+    await page.goto('/#/demo');
     await expect(page.getByText('SIMULATED DATA')).toBeVisible();
     await expect(page.locator('canvas')).toBeVisible();
     await expect(page.getByText('ACTIVE SYNC', { exact: true })).toBeVisible();
@@ -18,7 +44,7 @@ test.describe('Mission Control', () => {
   });
 
   test('press-and-hold starts a failover that can be aborted', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/#/demo');
     const button = page.getByRole('button', { name: /1-CLICK FAILOVER/ });
     await button.hover();
     await page.mouse.down();
@@ -30,14 +56,14 @@ test.describe('Mission Control', () => {
   });
 
   test('a short click does not start a failover', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/#/demo');
     await page.getByRole('button', { name: /1-CLICK FAILOVER/ }).click();
     await page.waitForTimeout(1500);
     await expect(page.getByRole('button', { name: 'Abort Failover' })).toHaveCount(0);
   });
 
   test('keyboard: holding Space runs the failover to completion', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/#/demo');
     await page.getByRole('button', { name: /1-CLICK FAILOVER/ }).focus();
     await page.keyboard.down(' ');
     await page.waitForTimeout(1400);
@@ -51,7 +77,7 @@ test.describe('Mission Control', () => {
   });
 
   test('chaos mode label stays inside its card', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/#/demo');
     await page.getByRole('button', { name: /Chaos/ }).click();
     const label = page.getByText('DEGRADED JITTER');
     await expect(label).toBeVisible();
@@ -63,7 +89,7 @@ test.describe('Mission Control', () => {
   });
 
   test('no horizontal page scroll', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/#/demo');
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
@@ -71,7 +97,7 @@ test.describe('Mission Control', () => {
   });
 
   test('AWS DRS tab shows telemetry and the audit log', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/#/demo');
     await page.getByRole('button', { name: /AWS DRS & Telemetry/ }).click();
     await expect(page.getByText('Live Replication & Audit Stream')).toBeVisible();
   });
@@ -79,7 +105,7 @@ test.describe('Mission Control', () => {
   test('honors reduced motion', async ({ page }) => {
     const errors = trackErrors(page);
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/');
+    await page.goto('/#/demo');
     await expect(page.locator('canvas')).toBeVisible();
     expect(errors).toEqual([]);
   });
@@ -88,7 +114,7 @@ test.describe('Mission Control', () => {
 test.describe('Investor deck', () => {
   test('all 7 slides render without errors', async ({ page }) => {
     const errors = trackErrors(page);
-    await page.goto('/');
+    await page.goto('/#/demo');
     await page.getByRole('button', { name: /Investor Deck/ }).click();
     for (let slide = 1; slide <= 7; slide++) {
       await expect(page.getByText(`Slide ${slide} of 7`)).toBeVisible();
@@ -98,7 +124,7 @@ test.describe('Investor deck', () => {
   });
 
   test('cites sources on the problem and market slides', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/#/demo');
     await page.getByRole('button', { name: /Investor Deck/ }).click();
     await page.getByRole('button', { name: 'Go to slide 2' }).click();
     await expect(page.getByText(/EMA 2024/)).toBeVisible();
@@ -122,6 +148,9 @@ test.describe('Security', () => {
     });
     await page.goto('/');
     await expect(page.locator('meta[http-equiv="Content-Security-Policy"]')).toHaveCount(1);
+    await page.locator('#how').scrollIntoViewIfNeeded();
+    await expect(page.locator('canvas').first()).toBeVisible();
+    await page.goto('/#/demo');
     await expect(page.locator('canvas')).toBeVisible();
     await page.getByRole('button', { name: /AWS DRS & Telemetry/ }).click();
     await expect(page.getByText('Live Replication & Audit Stream')).toBeVisible();
