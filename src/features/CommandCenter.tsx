@@ -213,6 +213,7 @@ export default function CommandCenter({
               >
                 <ReplicationPanel
                   replication={provider.replication}
+                  orgId={orgId ?? undefined}
                   myRole={provider.team?.myRole ?? 'viewer'}
                   refreshKey={activityKey}
                 />

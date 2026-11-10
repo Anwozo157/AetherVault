@@ -1,17 +1,17 @@
 # Project Status
 
 > Living handoff document. **Every agent or contributor updates this at the end of a session.**
-> Last updated: 2026-11-10 (4.2 scheduled drills, 4.3 alerts, 4.4 AWS DRS collector, 4.5 measured RPO, 4.6 runbooks) by Claude Code (Opus 5.5).
+> Last updated: 2026-11-10 (4.2 scheduled drills, 4.3 alerts, 4.4 AWS DRS collector, 4.5 measured RPO, 4.6 runbooks, 4.7 connect-AWS guide + DR docs) by Claude Code (Opus 5.5).
 
 ## Where we are
 
-| Phase           | Scope                                                                         | Status                                                                                                            |
-| --------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| 0. Foundation   | Strict TS, ESLint/Prettier, compiled Tailwind + brand tokens, docs            | ✅ Done (2026-11-08)                                                                                              |
-| 1. Architecture | `DrProvider` interface, feature folders, abort, lazy loading, simulated badge | ✅ Done (2026-11-08)                                                                                              |
-| 2. Quality bar  | Playwright E2E, WCAG 2.2 AA, Lighthouse 90+, GitHub Actions CI                | ✅ Done (2026-11-08)                                                                                              |
-| 3. Backend MVP  | Free-tier only until funded (see `AGENTS.md` rule 1)                          | 🚧 3.1–3.5, 3.7 done; 3.6 CI done, hosting waits on founder                                                       |
-| 4. Productize   | Multi-tenant, DR drills, compliance reports                                   | 🚧 Team invites, 4.1 evidence, 4.2 drills, 4.3 alerts, 4.4 AWS DRS collector, 4.5 measured RPO, 4.6 runbooks done |
+| Phase           | Scope                                                                         | Status                                                                                                                           |
+| --------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| 0. Foundation   | Strict TS, ESLint/Prettier, compiled Tailwind + brand tokens, docs            | ✅ Done (2026-11-08)                                                                                                             |
+| 1. Architecture | `DrProvider` interface, feature folders, abort, lazy loading, simulated badge | ✅ Done (2026-11-08)                                                                                                             |
+| 2. Quality bar  | Playwright E2E, WCAG 2.2 AA, Lighthouse 90+, GitHub Actions CI                | ✅ Done (2026-11-08)                                                                                                             |
+| 3. Backend MVP  | Free-tier only until funded (see `AGENTS.md` rule 1)                          | 🚧 3.1–3.5, 3.7 done; 3.6 CI done, hosting waits on founder                                                                      |
+| 4. Productize   | Multi-tenant, DR drills, compliance reports                                   | 🚧 Team invites, 4.1 evidence, 4.2 drills, 4.3 alerts, 4.4 AWS DRS collector, 4.5 measured RPO, 4.6 runbooks, 4.7 AWS guide done |
 
 Phase 3 milestones (`docs/PHASE_3_PLAN.md`):
 
@@ -38,7 +38,7 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 ## Next steps (in order)
 
 1. **Founder (free, no card):** create a Supabase account (sign up with GitHub). Then 3.6 hosting: link the project, push migrations, create the GitHub OAuth app, disable password sign-ups, set the console env in the deploy.
-2. **Phase 4, free parts:** next: connect-your-AWS-account wizard (DRS setup + collector in one guided flow). Pilot day: deploy `collector/terraform` in the customer's account and run `--record` to replace the hand-built sample responses. ✅ Done 2026-11-10: 4.6 DR runbooks (versioned runbook, AWS DRS template, per-run checklist in evidence); 4.5 measured RPO in drill/failover evidence (replication snapshot captured at launch; drills fail on a missed RPO); 4.4 AWS DRS collector (read-only Lambda, ingest token, live Replication panel, RPO-breach alerts); 4.3 Slack/PagerDuty alerts (Vault-encrypted secrets, delivery log); 4.2 scheduled, non-disruptive drills (`pg_cron`, weekly/monthly/quarterly, Run drill now, drill evidence). ✅ Done 2026-11-09: team invites/roles + onboarding checklist; 4.1 drill evidence reports (RTO/RPO targets, PASS/FAIL drill history, Print/Save as PDF, SHA-256-fingerprinted JSON; deployed as `89c4e1b`).
+2. **Phase 4, free parts:** all free items done. Pilot day: follow `docs/PILOT_DAY.md` (blocker B1 is hosting, item 1 above); run `--record` to replace the hand-built sample responses. Possible next: AetherVault launching DRS drills itself (needs a write-capable role; design with the customer first), GCP/Azure providers, email alerts (needs a mail provider). ✅ Done 2026-11-10: 4.7 Connect-your-AWS-account guide + `docs/AWS_DR_BEST_PRACTICES.md`, `docs/TERRAFORM.md`, `docs/PILOT_DAY.md`; 4.6 DR runbooks (versioned runbook, AWS DRS template, per-run checklist in evidence); 4.5 measured RPO in drill/failover evidence (replication snapshot captured at launch; drills fail on a missed RPO); 4.4 AWS DRS collector (read-only Lambda, ingest token, live Replication panel, RPO-breach alerts); 4.3 Slack/PagerDuty alerts (Vault-encrypted secrets, delivery log); 4.2 scheduled, non-disruptive drills (`pg_cron`, weekly/monthly/quarterly, Run drill now, drill evidence). ✅ Done 2026-11-09: team invites/roles + onboarding checklist; 4.1 drill evidence reports (RTO/RPO targets, PASS/FAIL drill history, Print/Save as PDF, SHA-256-fingerprinted JSON; deployed as `89c4e1b`).
 3. **Requires funding (founder approves):** AWS account + Elastic Disaster Recovery for real replication data (~$40–60/mo), Supabase Pro ($25/mo), custom domain (~$1/mo), which also enables HTTP security headers (`frame-ancestors`).
 
 4. **SOC 2 readiness (free):** checklist started in `docs/SOC2_READINESS.md`. Branch protection on `main` enabled 2026-11-09. Founder: FileVault/auto-updates/2FA check. Agent: write the core policy set, risk register, vendor inventory.

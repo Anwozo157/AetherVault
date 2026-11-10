@@ -28,6 +28,11 @@ Customer AWS account                                           AetherVault
 
 ## Pilot day: deploy
 
+Full checklist (blockers, network, agent, first drill, removal, troubleshooting):
+[`docs/PILOT_DAY.md`](../docs/PILOT_DAY.md). Background: [`docs/AWS_DR_BEST_PRACTICES.md`](../docs/AWS_DR_BEST_PRACTICES.md),
+[`docs/TERRAFORM.md`](../docs/TERRAFORM.md) (remote state, secrets, day-2 operations). The console's
+**Connect your AWS account** guide walks through the same steps with your Region filled in.
+
 1. Console → **AWS DRS & Telemetry** → **Create collector token** (admin). Copy it.
 2. Build the Lambda package (SDK bundled, single file):
    ```sh
@@ -37,7 +42,9 @@ Customer AWS account                                           AetherVault
    ```sh
    cd collector/terraform
    cp terraform.tfvars.example terraform.tfvars   # fill in; never commit it
-   terraform init && terraform apply
+   terraform init
+   terraform plan -out tfplan    # review: 8 resources on first deploy
+   terraform apply tfplan
    ```
 4. Within a minute the console shows **LIVE · AWS DRS**. If nothing arrives, check the
    Lambda's CloudWatch logs (`/aws/lambda/aethervault-drs-collector`).
