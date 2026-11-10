@@ -153,7 +153,7 @@ export default function SignInForm({
       )}
 
       <a
-        href="#/"
+        href="#/demo"
         className="block mt-5 text-center text-[11px] font-mono text-zinc-500 hover:text-white"
       >
         ← Back to the simulated demo

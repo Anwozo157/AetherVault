@@ -1,7 +1,7 @@
 # Project Status
 
 > Living handoff document. **Every agent or contributor updates this at the end of a session.**
-> Last updated: 2026-11-09 (Phase 4.1 drill evidence reports) by Claude Code (Opus 5.5).
+> Last updated: 2026-11-09 (landing page) by Claude Code (Opus 5.5).
 
 ## Where we are
 
@@ -42,6 +42,8 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 3. **Requires funding (founder approves):** AWS account + Elastic Disaster Recovery for real replication data (~$40–60/mo), Supabase Pro ($25/mo), custom domain (~$1/mo), which also enables HTTP security headers (`frame-ancestors`).
 
 4. **SOC 2 readiness (free):** checklist started in `docs/SOC2_READINESS.md`. Branch protection on `main` enabled 2026-11-09. Founder: FileVault/auto-updates/2FA check. Agent: write the core policy set, risk register, vendor inventory.
+
+5. **Landing page** built (2026-11-09) on `feat/landing-page`: set `CONTACT_EMAIL` in `src/config/site.ts` once a company address exists (pilot buttons appear automatically); add real console screenshots and the NewConnect case study when available.
 
 ## Open decisions for the founder
 

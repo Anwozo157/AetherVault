@@ -102,9 +102,9 @@ describe('live version (Share QR always points at the newest deploy)', () => {
 
 describe('shareUrl', () => {
   test('adds the build version so phones fetch the newest deploy', () => {
-    expect(shareUrl('abc1234')).toBe(`${LIVE_URL}?v=abc1234`);
+    expect(shareUrl('abc1234')).toBe(`${LIVE_URL}?v=abc1234#/demo`);
   });
-  test('dev builds share the plain live URL', () => {
-    expect(shareUrl('dev')).toBe(LIVE_URL);
+  test('dev builds share the plain live demo URL', () => {
+    expect(shareUrl('dev')).toBe(`${LIVE_URL}#/demo`);
   });
 });

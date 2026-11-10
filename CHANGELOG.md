@@ -5,6 +5,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Landing page (2026-11-09)
+
+- **New front page** at the site root for buyers and engineers: what AetherVault does, how it works (replicate, drill, prove), evidence reports, console controls, security model and founding-customer pilots.
+- **Hero:** the real 3D globe plays a simulated failover on loop (active sync, quiesce + snapshot, hydrate, DNS cutover, target secured) with a synced stage tracker; labeled SIMULATED.
+- **3D replication scene** (three.js): a legacy server rack streams data blocks into a glass vault (your AWS account) and a recovery server materializes on demand; labeled ILLUSTRATIVE, loads only near the viewport and animates only while visible. Reduced-motion users get still frames.
+- **Honesty:** every visual is labeled simulated or illustrative; RPO/RTO wording follows AWS's documented ranges; SOC 2 stated as not yet. Contact buttons stay hidden until `CONTACT_EMAIL` (`src/config/site.ts`) is set.
+- **Routes:** the demo moved to `#/demo`; the Share QR now opens `#/demo` directly; console "back" links point to the demo.
+- **Performance:** the demo and all 3D code are lazy-loaded, so the first JavaScript download fell from 102.3 kB to 51.6 kB gzip.
+- Tests: landing unit tests (headline, demo links, honesty labels, lazy 3D, contact and sign-in visibility), route tests, landing E2E (no errors, demo link, anchors, no horizontal scroll) and the CSP check now covers the landing page and its 3D scene.
+
 ### SOC 2 readiness checklist (2026-11-09)
 
 - `docs/SOC2_READINESS.md`: self-assessment against the Trust Services Criteria (Security CC1–CC9 + Availability), with evidence and gaps per control, free next steps and items that need funding. Explicitly not an audit or certification.

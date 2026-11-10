@@ -44,7 +44,7 @@ function Message({ title, children }: { title: string; children?: ReactNode }) {
         <h1 className="text-lg font-bold">{title}</h1>
         <div className="mt-2 text-xs font-mono text-zinc-400">{children}</div>
         <a
-          href="#/"
+          href="#/demo"
           className="inline-block mt-5 text-xs font-mono text-aether-cyan hover:text-white"
         >
           ← Back to the simulated demo
