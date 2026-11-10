@@ -5,6 +5,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Phase 4.5: Measured data loss (RPO) in drill and failover evidence (2026-11-10)
+
+- **Measured RPO:** when a drill launches or a failover is approved, the latest replication snapshot received in the 5 minutes before is copied onto the run. Its worst replication lag is the measured data-loss window. The copy lives on the run, so evidence outlives the 7-day snapshot retention. No snapshot in the window means "not measured", as before.
+- **Verdict:** a drill now passes only if recovery met the RTO **and** the measured RPO (when there is one) was not missed. The scheduler's drill result, alerts, Drills table, evidence report and activity log all use the same rule.
+- **Evidence report v3:** the RPO line says met or MISSED, the worst lag vs target, how many servers were replicating, and where the number came from (AWS DRS region, last 4 digits of the account, collection time). Sample data is labeled `SAMPLE DATA (not a real account)`. Recovery time is labeled simulated. Older reports keep their original wording.
+- **Alerts:** drill messages add the data-loss result ("Data-loss target MISSED: worst lag 130 s (target 60 s, measured from AWS DRS)") or say it was not measured.
+- Tests: 22 pgTAP (capture at launch/approval only, stale data ignored, pass/fail rule, list and evidence fields, alert wording, sample-data label, clients cannot write or call the capture), unit tests for the verdict and the RPO sentence, and a browser check of a drill against sample data.
+
 ### Phase 4.4: Real replication status from AWS Elastic Disaster Recovery (2026-11-10)
 
 - **Collector** (`collector/`, core in `src/integrations/awsDrs/`): a read-only Lambda for the customer's AWS account calls `drs:DescribeSourceServers` every minute and pushes replication status only (state, lag, backlog/total/replicated bytes, ETA, last seen, error code). AWS managed policy `AWSElasticDisasterRecoveryReadOnlyAccess`; push model, so AetherVault needs no access to the customer's account. Terraform module (`collector/terraform`, validated), single-file Lambda package (`npm run collector:package`), CLI with `--fixture`, `--dry-run`, `--record` and `--watch`.

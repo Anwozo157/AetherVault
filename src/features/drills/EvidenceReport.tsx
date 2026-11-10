@@ -9,6 +9,8 @@ import {
   evidenceFileName,
   fingerprint,
   formatSeconds,
+  rpoSummary,
+  runPassed,
 } from './evidence';
 
 const time = (iso: string | null) => (iso ? new Date(iso).toLocaleString() : 'n/a');
@@ -48,11 +50,12 @@ export default function EvidenceReport({
     URL.revokeObjectURL(href);
   };
 
-  const verdict = results.rto_met === null ? 'NOT COMPLETED' : results.rto_met ? 'PASS' : 'FAIL';
+  const passed = runPassed(results.rto_met, results.rpo_met);
+  const verdict = passed === null ? 'NOT COMPLETED' : passed ? 'PASS' : 'FAIL';
   const verdictClass =
-    results.rto_met === null
+    passed === null
       ? 'text-zinc-300 border-white/20'
-      : results.rto_met
+      : passed
         ? 'text-aether-green border-aether-green/40'
         : 'text-red-300 border-aether-red/50';
 
@@ -108,13 +111,10 @@ export default function EvidenceReport({
               'Recovery time',
               results.recovery_seconds === null
                 ? 'Not measured (drill did not complete)'
-                : `${formatSeconds(results.recovery_seconds)} (target ${formatSeconds(objectives.rto_seconds)})`,
+                : `${formatSeconds(results.recovery_seconds)} (target ${formatSeconds(objectives.rto_seconds)}). Simulated: recovery is not yet run against real infrastructure.`,
             )}
             {!isDrill && row('Time to approval', formatSeconds(results.decision_seconds))}
-            {row(
-              'Data-loss target (RPO)',
-              `${formatSeconds(objectives.rpo_seconds)}. Not measured: replication telemetry is simulated until a cloud account is connected.`,
-            )}
+            {row('Data-loss target (RPO)', rpoSummary(evidence))}
           </dl>
         </section>
 

@@ -3,7 +3,29 @@ import { describe, expect, test, vi } from 'vitest';
 import type { DrillEvidence, DrillsCapability, RunSummary } from '../../domain/dr';
 import DrillsPanel from './DrillsPanel';
 import EvidenceReport from './EvidenceReport';
-import { canonicalJson, evidenceFileName, fingerprint, formatSeconds } from './evidence';
+import {
+  canonicalJson,
+  evidenceFileName,
+  fingerprint,
+  formatSeconds,
+  rpoSummary,
+  runPassed,
+} from './evidence';
+
+const REP: NonNullable<DrillEvidence['replication_at_launch']> = {
+  snapshot_id: 1,
+  source: 'aws-drs',
+  collected_at: '2026-11-09T08:59:40Z',
+  received_at: '2026-11-09T08:59:41Z',
+  aws_account_id: '111122223333',
+  aws_region: 'us-west-2',
+  server_count: 3,
+  healthy_count: 3,
+  problem_count: 0,
+  max_lag_seconds: 4,
+  rpo_target_seconds: 30,
+  rpo_met: true,
+};
 
 const evidence = (over: Partial<DrillEvidence> = {}): DrillEvidence => ({
   report_version: 1,
@@ -89,7 +111,11 @@ describe('EvidenceReport', () => {
   test('shows PASS, the people, the timeline, the chain status and a fingerprint', async () => {
     render(<EvidenceReport evidence={evidence()} onClose={vi.fn()} />);
     expect(screen.getByText('PASS')).toBeInTheDocument();
-    expect(screen.getByText('5.5 s (target 5 min)')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        '5.5 s (target 5 min). Simulated: recovery is not yet run against real infrastructure.',
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByText('Met (different requester and approver)')).toBeInTheDocument();
     expect(screen.getByText('TARGET SECURED')).toBeInTheDocument();
     expect(screen.getByText(/Audit chain intact: 8 entries verified/)).toBeInTheDocument();
@@ -99,7 +125,7 @@ describe('EvidenceReport', () => {
       ),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Not measured: replication telemetry is simulated/),
+      screen.getByText(/Not measured: replication telemetry was simulated when this run happened/),
     ).toBeInTheDocument();
   });
 
@@ -176,6 +202,10 @@ describe('DrillsPanel', () => {
       outcome: 'secured',
       recoverySeconds: 5.5,
       rtoTargetSeconds: 300,
+      rpoMet: null,
+      rpoSeconds: null,
+      rpoTargetSeconds: null,
+      replicationSource: null,
     },
     {
       id: 'r2',
@@ -190,6 +220,10 @@ describe('DrillsPanel', () => {
       outcome: 'withdrawn',
       recoverySeconds: null,
       rtoTargetSeconds: 300,
+      rpoMet: null,
+      rpoSeconds: null,
+      rpoTargetSeconds: null,
+      replicationSource: null,
     },
   ];
   const fake = (): DrillsCapability => ({
@@ -208,7 +242,11 @@ describe('DrillsPanel', () => {
     render(<DrillsPanel drills={drills} myRole="operator" refreshKey={0} />);
     expect(await screen.findByText('5.5 s · PASS')).toBeInTheDocument();
     expect(screen.getByText('Withdrawn')).toBeInTheDocument();
-    expect(screen.getByText('1 of 1 completed drills met the 5 min target.')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        '1 of 1 completed drills passed: recovered within 5 min, and data loss within 30 s where measured.',
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByText('Only admins change targets.')).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole('button', { name: /Evidence report for failover/ })[0]);
     expect(
@@ -346,11 +384,25 @@ describe('Drill schedule', () => {
           outcome: 'secured',
           recoverySeconds: 5.5,
           rtoTargetSeconds: 900,
+          rpoMet: false,
+          rpoSeconds: 130,
+          rpoTargetSeconds: 60,
+          replicationSource: 'aws-drs',
         },
       ]),
       evidence: vi.fn(async () =>
         evidence({
-          report_version: 2,
+          report_version: 3,
+          results: {
+            decision_seconds: null,
+            recovery_seconds: 5.5,
+            recovery_simulated: true,
+            rto_met: true,
+            rpo_measured: true,
+            rpo_seconds: 130,
+            rpo_met: false,
+          },
+          replication_at_launch: { ...REP, max_lag_seconds: 130, problem_count: 1, rpo_met: false },
           run: {
             ...evidence().run,
             kind: 'drill',
@@ -366,6 +418,9 @@ describe('Drill schedule', () => {
     render(<DrillsPanel drills={drills} myRole="viewer" refreshKey={0} />);
     expect(await screen.findByText('Scheduler')).toBeInTheDocument();
     expect(screen.getByText('isolated · no approval needed')).toBeInTheDocument();
+    // Recovery met the RTO, but measured replication missed the RPO: the drill fails.
+    expect(screen.getByText('5.5 s · FAIL')).toBeInTheDocument();
+    expect(screen.getByText('data loss 2 min · missed')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Evidence report for drill/ }));
     const dialog = await screen.findByRole('dialog');
     expect(dialog).toHaveTextContent('Scheduled drill evidence (isolated, no production cutover)');
@@ -373,6 +428,49 @@ describe('Drill schedule', () => {
     expect(dialog).toHaveTextContent(/Not required: drills run in an isolated network/);
     expect(dialog).not.toHaveTextContent('Time to approval');
     expect(dialog).toHaveTextContent('DRILL COMPLETE');
+    expect(dialog).toHaveTextContent('FAIL');
+    expect(dialog).toHaveTextContent(
+      'MISSED: 2 min worst replication lag at launch (target 30 s); 1 of 3 servers not replicating normally. Measured from AWS DRS us-west-2, account …3333',
+    );
+  });
+});
+
+describe('measured RPO', () => {
+  test('a run passes only if RTO is met and the measured RPO was not missed', () => {
+    expect(runPassed(null, true)).toBeNull();
+    expect(runPassed(true, null)).toBe(true);
+    expect(runPassed(true, undefined)).toBe(true);
+    expect(runPassed(true, false)).toBe(false);
+    expect(runPassed(false, true)).toBe(false);
+  });
+
+  test('the RPO sentence is honest about where the number came from', () => {
+    expect(rpoSummary(evidence({ report_version: 2 }))).toBe(
+      '30 s. Not measured: replication telemetry was simulated when this run happened.',
+    );
+    expect(rpoSummary(evidence({ report_version: 3, replication_at_launch: null }))).toBe(
+      '30 s. Not measured: no replication data was received in the 5 minutes before launch.',
+    );
+    expect(
+      rpoSummary(
+        evidence({ report_version: 3, replication_at_launch: { ...REP, source: 'fixture' } }),
+      ),
+    ).toMatch(
+      /^SAMPLE DATA \(not a real account\): Met: 4 s worst replication lag at launch \(target 30 s\); all 3 servers replicating\./,
+    );
+    expect(
+      rpoSummary(
+        evidence({
+          report_version: 3,
+          replication_at_launch: {
+            ...REP,
+            max_lag_seconds: null,
+            problem_count: 1,
+            rpo_met: false,
+          },
+        }),
+      ),
+    ).toMatch(/^MISSED: worst lag unknown at launch/);
   });
 });
 

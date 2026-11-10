@@ -84,6 +84,11 @@ export interface RunRow {
   outcome: RunOutcome;
   recovery_seconds: number | null;
   rto_target_seconds: number;
+  /** Replication captured at launch (null: none within 5 min, so RPO not measured). */
+  rpo_met: boolean | null;
+  rpo_seconds: number | string | null;
+  rpo_target_seconds: number | null;
+  replication_source: 'aws-drs' | 'fixture' | null;
 }
 
 export interface ScheduleRow {
