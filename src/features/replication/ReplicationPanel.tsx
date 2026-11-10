@@ -8,7 +8,9 @@ import type {
   ReplicationStatus,
   ServerHealth,
 } from '../../domain/dr';
+import { SUPABASE_ANON_KEY, SUPABASE_URL, isLocalBackend } from '../../config/backend';
 import TelemetrySparkline from '../telemetry/TelemetrySparkline';
+import ConnectAwsWizard from './ConnectAwsWizard';
 
 const errText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
@@ -266,14 +268,22 @@ function ConnectAws({
   );
 }
 
+const DEFAULT_ENDPOINT = { url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY, isLocal: isLocalBackend };
+
 export default function ReplicationPanel({
   replication,
   myRole,
   refreshKey,
+  orgId = 'default',
+  endpoint = DEFAULT_ENDPOINT,
 }: {
   replication: ReplicationCapability;
   myRole: MemberRole;
   refreshKey: number | string;
+  /** Scopes the setup guide's per-browser progress. */
+  orgId?: string;
+  /** Where a deployed collector sends reports (this console's backend). */
+  endpoint?: { url: string; anonKey: string; isLocal: boolean };
 }) {
   const isAdmin = myRole === 'admin';
   const [status, setStatus] = useState<ReplicationStatus | null | undefined>(undefined);
@@ -465,6 +475,20 @@ export default function ReplicationPanel({
             </table>
           </div>
         </>
+      )}
+
+      {status !== undefined && (
+        <ConnectAwsWizard
+          key={orgId}
+          orgId={orgId}
+          replication={replication}
+          isAdmin={isAdmin}
+          token={token}
+          status={status}
+          live={fresh === 'live'}
+          endpoint={endpoint}
+          onChanged={() => void load()}
+        />
       )}
 
       <ConnectAws
