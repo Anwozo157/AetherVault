@@ -5,3 +5,5 @@ coverage
 playwright-report
 test-results
 dist-console
+dist-collector
+**/.terraform

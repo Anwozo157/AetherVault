@@ -88,6 +88,25 @@ describe('auditFormat', () => {
     expect(describeDetail(rec(11, { action: 'alert.test_sent', detail: { name: 'Ops' } }))).toBe(
       'Ops',
     );
+    expect(
+      describeDetail(
+        rec(12, {
+          action: 'replication.rpo_breached',
+          detail: { max_lag_seconds: null, rpo_target_seconds: 60, source: 'fixture' },
+        }),
+      ),
+    ).toBe('worst lag unknown, target 60 s (sample data)');
+    expect(
+      describeDetail(
+        rec(13, {
+          action: 'replication.rpo_recovered',
+          detail: { max_lag_seconds: 3, rpo_target_seconds: 60, source: 'aws-drs' },
+        }),
+      ),
+    ).toBe('worst lag 3 s, target 60 s');
+    expect(
+      describeDetail(rec(14, { action: 'replication.token_created', detail: { hint: 'abcd' } })),
+    ).toBe('…abcd');
   });
 
   test('CSV quotes fields, records the chain status, and neutralizes spreadsheet formulas', () => {

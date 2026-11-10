@@ -2,6 +2,8 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { expect, test, type Browser, type Page } from '@playwright/test';
+import type { DescribeSourceServersResponse } from '@aws-sdk/client-drs';
+import { collectSnapshot, pushSnapshot, recordedApi } from '../src/integrations/awsDrs/collect';
 
 // Two real browser sessions against local Supabase: the Phase 3.4 "done when" check.
 // Accounts come from supabase/seed.sql (local only).
@@ -22,7 +24,7 @@ async function signIn(browser: Browser, email: string) {
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(PASSWORD);
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-  await expect(page.getByText(ORG)).toBeVisible();
+  await expect(page.getByRole('banner').getByText(ORG)).toBeVisible();
   return { page, errors, close: () => context.close() };
 }
 
@@ -367,4 +369,56 @@ test('alerts: an admin adds a Slack channel (secret masked), viewers see it read
   expect(viewer.errors).toEqual([]);
   await admin.close();
   await viewer.close();
+});
+
+test('replication: admin connects a collector; pushed AWS DRS status appears, labeled sample data', async ({
+  browser,
+}) => {
+  const target = {
+    url: process.env.VITE_SUPABASE_URL!,
+    anonKey: process.env.VITE_SUPABASE_ANON_KEY!,
+  };
+  const admin = await signIn(browser, 'admin@aethervault.local');
+  admin.page.on('dialog', (d) => void d.accept());
+  await admin.page.getByRole('button', { name: 'AWS DRS & Telemetry' }).click();
+  await expect(admin.page.getByText('No replication data received yet.')).toBeVisible();
+  await admin.page.getByRole('button', { name: 'Create collector token' }).click();
+  const token = (await admin.page.getByTestId('new-token').textContent())!.trim();
+  expect(token).toMatch(/^avi_[0-9a-f]{48}$/);
+
+  // The real collector code, fed recorded DescribeSourceServers pages, pushes to the database.
+  const degraded = JSON.parse(
+    readFileSync('src/integrations/awsDrs/fixtures/describe-source-servers.degraded.json', 'utf8'),
+  ) as DescribeSourceServersResponse[];
+  const snapshot = await collectSnapshot(recordedApi(degraded), {
+    region: 'us-west-2',
+    source: 'fixture',
+  });
+  await expect(
+    pushSnapshot({ ...target, token: 'avi_' + '0'.repeat(48) }, snapshot),
+  ).rejects.toThrow('invalid ingest token');
+  await expect(pushSnapshot({ ...target, token }, snapshot)).resolves.toMatchObject({
+    accepted: true,
+    rpo_met: false,
+    servers: 4,
+  });
+
+  await admin.page.getByRole('button', { name: 'Refresh replication status' }).click();
+  await expect(admin.page.getByTestId('replication-badge')).toHaveText(
+    'SAMPLE DATA · NOT A REAL ACCOUNT',
+  );
+  await expect(admin.page.getByText('At risk', { exact: true })).toBeVisible();
+  await expect(admin.page.getByTestId('server-file-server-01')).toContainText('UNSTABLE_NETWORK');
+  await expect(admin.page.getByTestId('server-db-server-01')).toContainText('2 min 10 s');
+  await expect(admin.page.getByTestId('token-status')).toContainText('last used');
+
+  // Revoking the token locks the collector out.
+  await admin.page.getByRole('button', { name: 'Revoke' }).click();
+  await expect(admin.page.getByTestId('token-status')).toHaveText('No collector token yet.');
+  await expect(pushSnapshot({ ...target, token }, snapshot)).rejects.toThrow(
+    'invalid ingest token',
+  );
+
+  expect(admin.errors).toEqual([]);
+  await admin.close();
 });

@@ -20,6 +20,7 @@ export const EVENT_LABEL: Record<AlertEvent, string> = {
   failover: 'Failovers',
   drill_failed: 'Failed drills',
   drill_passed: 'Passed drills',
+  replication: 'Replication at risk',
 };
 
 const SECRET_HELP: Record<AlertChannelKind, { label: string; placeholder: string; help: string }> =
@@ -37,8 +38,8 @@ const SECRET_HELP: Record<AlertChannelKind, { label: string; placeholder: string
   };
 
 const DEFAULT_EVENTS: Record<AlertChannelKind, AlertEvent[]> = {
-  slack: ['failover', 'drill_failed', 'drill_passed'],
-  pagerduty: ['failover', 'drill_failed'],
+  slack: ['failover', 'drill_failed', 'drill_passed', 'replication'],
+  pagerduty: ['failover', 'drill_failed', 'replication'],
 };
 
 const STATUS_CLASS: Record<AlertDelivery['status'], string> = {
@@ -133,8 +134,8 @@ export default function AlertsPanel({
         <p className="text-[11px] font-mono text-zinc-400 mt-1 max-w-2xl">
           Send failover requests, approvals, aborts and drill results to Slack or PagerDuty. Secrets
           are encrypted in the database and never shown again; only the last 4 characters are
-          displayed. Replication-lag alerts arrive once real replication data is connected
-          (telemetry is simulated today).
+          displayed. Replication alerts fire when the AWS collector reports that the data-loss
+          target is at risk, and again when it recovers.
         </p>
       </div>
 

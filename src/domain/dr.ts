@@ -271,7 +271,7 @@ export interface DrillsCapability {
 
 export type AlertChannelKind = 'slack' | 'pagerduty';
 /** failover: requested/approved/aborted/reset; drill_failed also covers aborted drills. */
-export type AlertEvent = 'failover' | 'drill_failed' | 'drill_passed';
+export type AlertEvent = 'failover' | 'drill_failed' | 'drill_passed' | 'replication';
 
 export interface AlertChannel {
   id: string;
@@ -313,6 +313,70 @@ export interface AlertsCapability {
   sendTest(id: string): Promise<void>;
 }
 
+/** Health the database derives from the AWS DRS dataReplicationState and error. */
+export type ServerHealth = 'healthy' | 'lagging' | 'syncing' | 'stalled' | 'stopped' | 'unknown';
+
+export interface ReplicatedServer {
+  id: string;
+  hostname: string;
+  /** AWS DRS dataReplicationState, e.g. CONTINUOUS, BACKLOG, STALLED. */
+  state: string;
+  health: ServerHealth;
+  lagSeconds: number | null;
+  lagRaw: string | null;
+  backlogBytes: number;
+  totalBytes: number;
+  replicatedBytes: number;
+  etaAt: string | null;
+  lastSeenAt: string | null;
+  error: string | null;
+  lastLaunchResult: string | null;
+}
+
+/** Latest replication status pushed by the collector in the customer's AWS account. */
+export interface ReplicationStatus {
+  /** 'fixture' = sample data from the collector's --fixture mode, never real. */
+  source: 'aws-drs' | 'fixture';
+  collectedAt: string;
+  receivedAt: string;
+  serverNow: string;
+  awsAccountId: string | null;
+  awsRegion: string;
+  collectorVersion: string | null;
+  serverCount: number;
+  healthyCount: number;
+  problemCount: number;
+  maxLagSeconds: number | null;
+  backlogBytes: number;
+  rpoTargetSeconds: number;
+  /** null when unknown (no lag reported, or no servers). */
+  rpoMet: boolean | null;
+  servers: ReplicatedServer[];
+}
+
+export interface LagPoint {
+  collectedAt: string;
+  maxLagSeconds: number | null;
+  rpoMet: boolean | null;
+}
+
+export interface IngestTokenStatus {
+  hint: string;
+  createdAt: string;
+  lastUsedAt: string | null;
+}
+
+/** Optional capability: real replication status from AWS Elastic Disaster Recovery. */
+export interface ReplicationCapability {
+  latest(): Promise<ReplicationStatus | null>;
+  history(): Promise<LagPoint[]>;
+  tokenStatus(): Promise<IngestTokenStatus | null>;
+  /** Admins only. Returns the token once; only its hash is stored. Replaces any old token. */
+  createToken(): Promise<string>;
+  /** Admins only. */
+  revokeToken(): Promise<void>;
+}
+
 /** Contract every disaster-recovery data source must implement. */
 export interface DrProvider {
   /** Human-readable provider name, shown in the UI. */
@@ -331,6 +395,8 @@ export interface DrProvider {
   readonly drills?: DrillsCapability;
   /** Present when events can be sent to Slack / PagerDuty. */
   readonly alerts?: AlertsCapability;
+  /** Present when real replication status can be connected (AWS DRS collector). */
+  readonly replication?: ReplicationCapability;
 
   getState(): SystemState;
   getMetrics(): BasicMetrics;
