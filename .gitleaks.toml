@@ -1,0 +1,10 @@
+# Secret-scan config (CI runs gitleaks over full history). Default rules, plus ONE exception:
+# the hosted project's public anon key, which ships in every browser bundle by design.
+# Only this exact value is allowed; any other key (e.g. service_role) is still flagged.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Public Supabase anon key for project yvcejahygubzbbbooxas (not a secret)"
+regexTarget = "match"
+regexes = ['''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2Y2VqYWh5Z3ViemJiYm9veGFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQzMzQ2NTUsImV4cCI6MjEwOTkxMDY1NX0\.K8A02NLk74If4kAF-U6siD58uuZtAr1U_vq0H3aLlUA''']
