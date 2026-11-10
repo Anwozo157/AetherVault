@@ -84,18 +84,25 @@ function describeAudit(entry: AuditEntry): { level: LogEvent['level']; message: 
             ? `Scheduled drill started: ${String(d.source)} → ${String(d.target)} (isolated, no production cutover).`
             : `Drill started by ${actor}: ${String(d.source)} → ${String(d.target)} (isolated, no production cutover).`,
       };
-    case 'drill.completed':
+    case 'drill.completed': {
+      const rpo =
+        d.rpo_met === undefined
+          ? ''
+          : d.rpo_met === null
+            ? ' Data loss not measured.'
+            : ` Data loss ${d.rpo_seconds === null ? 'unknown' : `${String(d.rpo_seconds)} s`} (target ${String(d.rpo_target_seconds)} s${d.replication_source === 'fixture' ? ', sample data' : ''})${d.rpo_met ? '' : ': MISSED'}.`;
       return d.result === 'passed'
         ? {
             level: 'SUCCESS',
-            message: `Drill passed: recovered in ${String(d.recovery_seconds)} s (target ${String(d.rto_target_seconds)} s).`,
+            message: `Drill passed: recovered in ${String(d.recovery_seconds)} s (target ${String(d.rto_target_seconds)} s).${rpo}`,
           }
         : d.result === 'failed'
           ? {
               level: 'CRIT',
-              message: `Drill failed: recovery took ${String(d.recovery_seconds)} s (target ${String(d.rto_target_seconds)} s).`,
+              message: `Drill failed: recovery took ${String(d.recovery_seconds)} s (target ${String(d.rto_target_seconds)} s).${rpo}`,
             }
           : { level: 'WARN', message: 'Drill aborted before completion.' };
+    }
     case 'drill.schedule_set':
       return {
         level: 'INFO',
@@ -228,6 +235,11 @@ export class SupabaseDrProvider implements DrProvider {
           outcome: r.outcome,
           recoverySeconds: r.recovery_seconds === null ? null : Number(r.recovery_seconds),
           rtoTargetSeconds: r.rto_target_seconds,
+          rpoMet: r.rpo_met ?? null,
+          rpoSeconds:
+            r.rpo_seconds === null || r.rpo_seconds === undefined ? null : Number(r.rpo_seconds),
+          rpoTargetSeconds: r.rpo_target_seconds ?? null,
+          replicationSource: r.replication_source ?? null,
         })),
       evidence: (runId) => api.drillEvidence(runId),
       getSchedule: async () => {

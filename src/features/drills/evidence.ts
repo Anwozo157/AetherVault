@@ -40,3 +40,38 @@ export const OUTCOME_LABEL: Record<DrillEvidence['run']['outcome'], string> = {
 export function evidenceFileName(e: DrillEvidence): string {
   return `aethervault-drill-evidence-${e.run.requested_at.slice(0, 10)}-${e.run.id.slice(0, 8)}.json`;
 }
+
+/**
+ * Overall verdict for a run: null until recovery completes; otherwise it passes only if recovery
+ * met the RTO and the measured RPO (when there is one) was not missed.
+ */
+export function runPassed(
+  rtoMet: boolean | null,
+  rpoMet: boolean | null | undefined,
+): boolean | null {
+  if (rtoMet === null) return null;
+  return rtoMet && rpoMet !== false;
+}
+
+/** One sentence on the data-loss target, for the evidence report. */
+export function rpoSummary(e: DrillEvidence): string {
+  const target = formatSeconds(e.objectives.rpo_seconds);
+  const rep = e.replication_at_launch;
+  if (e.report_version < 3) {
+    return `${target}. Not measured: replication telemetry was simulated when this run happened.`;
+  }
+  if (!rep || rep.rpo_met === null) {
+    return `${target}. Not measured: no replication data was received in the 5 minutes before launch.`;
+  }
+  const sample = rep.source === 'fixture' ? 'SAMPLE DATA (not a real account): ' : '';
+  const lag =
+    rep.max_lag_seconds === null
+      ? 'worst lag unknown'
+      : `${formatSeconds(rep.max_lag_seconds)} worst replication lag`;
+  const servers =
+    rep.problem_count > 0
+      ? `${rep.problem_count} of ${rep.server_count} servers not replicating normally`
+      : `all ${rep.server_count} servers replicating`;
+  const where = `AWS DRS ${rep.aws_region}${rep.aws_account_id ? `, account …${rep.aws_account_id.slice(-4)}` : ''}`;
+  return `${sample}${rep.rpo_met ? 'Met' : 'MISSED'}: ${lag} at launch (target ${target}); ${servers}. Measured from ${where}, collected ${new Date(rep.collected_at).toLocaleString()}.`;
+}

@@ -101,7 +101,7 @@ reset role;
 select public.run_drill_scheduler(now() + interval '10 seconds');
 select is((select count(*)::int from net.http_request_queue), 3, 'a failed drill reaches all three channels');
 select is((select q->>'text' from pg_temp.queued('https://hooks.slack.com/services/T2/') q),
-  E'*AetherVault · Alert Org*\nDrill FAILED (simulated telemetry): recovery took 5.5 s, target 3 s.',
+  E'*AetherVault · Alert Org*\nDrill FAILED: recovery took 5.5 s (simulated), target 3 s. Data-loss target not measured (no replication data at launch).',
   'drill failure is labeled simulated');
 
 -- Sweep records HTTP results

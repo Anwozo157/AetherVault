@@ -9,7 +9,7 @@ import type {
 } from '../../domain/dr';
 import DrillSchedule from './DrillSchedule';
 import EvidenceReport from './EvidenceReport';
-import { OUTCOME_LABEL, formatSeconds } from './evidence';
+import { OUTCOME_LABEL, formatSeconds, runPassed } from './evidence';
 
 const errText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
@@ -76,8 +76,11 @@ export default function DrillsPanel({
     'bg-aether-panel border border-white/10 rounded-lg px-2.5 py-2 text-zinc-200 font-mono text-xs focus:outline-none focus:border-aether-cyan/50 w-24';
 
   const completed = runs?.filter((r) => r.outcome === 'secured') ?? [];
-  const passed = completed.filter(
-    (r) => r.recoverySeconds !== null && r.recoverySeconds <= r.rtoTargetSeconds,
+  const passed = completed.filter((r) =>
+    runPassed(
+      r.recoverySeconds === null ? null : r.recoverySeconds <= r.rtoTargetSeconds,
+      r.rpoMet,
+    ),
   );
 
   return (
@@ -145,7 +148,7 @@ export default function DrillsPanel({
         {objectives && (
           <span className="basis-full text-[11px] font-mono text-zinc-500">
             {completed.length
-              ? `${passed.length} of ${completed.length} completed drills met the ${formatSeconds(objectives.rtoSeconds)} target.`
+              ? `${passed.length} of ${completed.length} completed drills passed: recovered within ${formatSeconds(objectives.rtoSeconds)}, and data loss within ${formatSeconds(objectives.rpoSeconds)} where measured.`
               : 'No completed drills yet. Run one now or set a schedule below.'}
           </span>
         )}
@@ -207,8 +210,10 @@ export default function DrillsPanel({
               </tr>
             ) : (
               runs.map((r) => {
-                const met =
-                  r.recoverySeconds !== null ? r.recoverySeconds <= r.rtoTargetSeconds : null;
+                const met = runPassed(
+                  r.recoverySeconds !== null ? r.recoverySeconds <= r.rtoTargetSeconds : null,
+                  r.rpoMet,
+                );
                 return (
                   <tr
                     key={r.id}
@@ -255,6 +260,15 @@ export default function DrillsPanel({
                       ) : (
                         <span className={met ? 'text-aether-green' : 'text-red-300'}>
                           {formatSeconds(r.recoverySeconds)} · {met ? 'PASS' : 'FAIL'}
+                        </span>
+                      )}
+                      {r.approvedAt !== null && (
+                        <span
+                          className={`block ${r.rpoMet === false ? 'text-red-300' : 'text-zinc-500'}`}
+                        >
+                          {r.rpoMet === null
+                            ? 'data loss not measured'
+                            : `data loss ${r.rpoSeconds === null ? 'unknown' : formatSeconds(r.rpoSeconds)}${r.rpoMet ? '' : ' · missed'}${r.replicationSource === 'fixture' ? ' · sample' : ''}`}
                         </span>
                       )}
                     </td>

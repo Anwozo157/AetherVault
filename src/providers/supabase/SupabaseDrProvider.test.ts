@@ -158,6 +158,10 @@ class FakeServer {
           outcome: 'secured' as const,
           recovery_seconds: '5.5' as unknown as number, // Postgres numeric arrives as a string
           rto_target_seconds: this.rto,
+          rpo_met: true,
+          rpo_seconds: '4' as unknown as number,
+          rpo_target_seconds: 60,
+          replication_source: 'aws-drs' as const,
         },
       ],
       drillEvidence: vi.fn(async (runId: string) => ({ run: { id: runId } }) as never),
@@ -595,6 +599,10 @@ describe('SupabaseDrProvider', () => {
       outcome: 'secured',
       recoverySeconds: 5.5,
       rtoTargetSeconds: 300,
+      rpoMet: true,
+      rpoSeconds: 4,
+      rpoTargetSeconds: 60,
+      replicationSource: 'aws-drs',
     });
     await expect(op.drills.evidence('run-9')).resolves.toMatchObject({ run: { id: 'run-9' } });
   });
@@ -753,6 +761,15 @@ describe('SupabaseDrProvider', () => {
       recovery_seconds: 5.5,
       rto_target_seconds: 3,
     });
+    server.pushAudit('drill.completed', null, {
+      result: 'failed',
+      recovery_seconds: 5.5,
+      rto_target_seconds: 900,
+      rpo_met: false,
+      rpo_seconds: 130,
+      rpo_target_seconds: 60,
+      replication_source: 'fixture',
+    });
     server.pushAudit('drill.completed', null, { result: 'aborted' });
     server.pushAudit('drill.schedule_disabled', USERS.op, {});
     await vi.advanceTimersByTimeAsync(5000);
@@ -760,6 +777,9 @@ describe('SupabaseDrProvider', () => {
     const text = logs.map((l) => l.message).join(' | ');
     expect(text).toContain('Scheduled drill started: us-east-1 → aws-us-west-2');
     expect(text).toContain('Drill passed: recovered in 5.5 s (target 900 s).');
+    expect(text).toContain(
+      'Drill failed: recovery took 5.5 s (target 900 s). Data loss 130 s (target 60 s, sample data): MISSED.',
+    );
     expect(text).toContain('Drill failed: recovery took 5.5 s (target 3 s).');
     expect(text).toContain('Drill aborted before completion.');
     expect(text).toContain('op@test turned off scheduled drills.');

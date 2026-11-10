@@ -199,6 +199,27 @@ export interface RunSummary {
   outcome: RunOutcome;
   recoverySeconds: number | null;
   rtoTargetSeconds: number;
+  /** Measured from the replication snapshot at launch; null when none (RPO not measured). */
+  rpoMet: boolean | null;
+  rpoSeconds: number | null;
+  rpoTargetSeconds: number | null;
+  replicationSource: 'aws-drs' | 'fixture' | null;
+}
+
+/** Replication snapshot summary copied onto a run when it launched. */
+export interface ReplicationAtLaunch {
+  snapshot_id: number;
+  source: 'aws-drs' | 'fixture';
+  collected_at: string;
+  received_at: string;
+  aws_account_id: string | null;
+  aws_region: string;
+  server_count: number;
+  healthy_count: number;
+  problem_count: number;
+  max_lag_seconds: number | null;
+  rpo_target_seconds: number;
+  rpo_met: boolean | null;
 }
 
 /** Evidence record for one failover drill (server-generated; see drill_evidence()). */
@@ -231,7 +252,14 @@ export interface DrillEvidence {
     recovery_seconds: number | null;
     rto_met: boolean | null;
     rpo_measured: boolean;
+    /** From report_version 3: recovery time comes from the simulated stage model. */
+    recovery_simulated?: boolean;
+    /** From report_version 3: worst replication lag at launch (null: unknown). */
+    rpo_seconds?: number | null;
+    rpo_met?: boolean | null;
   };
+  /** From report_version 3: replication snapshot received in the 5 minutes before launch. */
+  replication_at_launch?: ReplicationAtLaunch | null;
   audit_entries: Array<{
     id: number;
     at: string;
