@@ -18,6 +18,7 @@ const AwsDrsHud = lazy(() => import('./telemetry/AwsDrsHud'));
 const AuditLogPanel = lazy(() => import('./audit/AuditLogPanel'));
 const TeamPanel = lazy(() => import('./team/TeamPanel'));
 const DrillsPanel = lazy(() => import('./drills/DrillsPanel'));
+const AlertsPanel = lazy(() => import('./alerts/AlertsPanel'));
 const OnboardingChecklist = lazy(() => import('./onboarding/OnboardingChecklist'));
 
 function PanelPlaceholder({ label, height = 'h-[320px]' }: { label: string; height?: string }) {
@@ -70,6 +71,7 @@ export default function CommandCenter({
         showAudit={!!provider.audit}
         showTeam={!!provider.team}
         showDrills={!!provider.drills}
+        showAlerts={!!provider.alerts}
       />
 
       {provider.team && provider.audit && provider.team.myRole === 'admin' && orgId && (
@@ -133,6 +135,16 @@ export default function CommandCenter({
           <Suspense fallback={<PanelPlaceholder label="Loading drills…" />}>
             <DrillsPanel
               drills={provider.drills}
+              myRole={provider.team?.myRole ?? 'viewer'}
+              refreshKey={activityKey}
+            />
+          </Suspense>
+        </ErrorBoundary>
+      ) : tab === 'alerts' && provider.alerts ? (
+        <ErrorBoundary fallback={<PanelPlaceholder label="Alerts panel failed to load." />}>
+          <Suspense fallback={<PanelPlaceholder label="Loading alerts…" />}>
+            <AlertsPanel
+              alerts={provider.alerts}
               myRole={provider.team?.myRole ?? 'viewer'}
               refreshKey={activityKey}
             />

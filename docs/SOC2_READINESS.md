@@ -81,13 +81,13 @@
 
 ## CC7: System operations (detection and response)
 
-| Control                             | Status | Evidence / gap                                                                    |
-| ----------------------------------- | ------ | --------------------------------------------------------------------------------- |
-| Vulnerability management            | ✅     | Dependabot, `npm audit`, CodeQL, GitHub secret scanning with push protection      |
-| Logging of security-relevant events | ✅     | Product audit log (hash-chained, tamper detection tested end-to-end)              |
-| Monitoring and alerting             | ❌     | Uptime/error alerts once hosted; Slack/PagerDuty webhooks are on the Phase 4 list |
-| Incident response plan              | 🟡     | Runbook in `docs/SECURITY.md`; needs severity levels, contacts and a yearly test  |
-| Incident records                    | 🟡     | `docs/incidents/` named in the runbook; folder not created (no incidents so far)  |
+| Control                             | Status | Evidence / gap                                                                                                                                           |
+| ----------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vulnerability management            | ✅     | Dependabot, `npm audit`, CodeQL, GitHub secret scanning with push protection                                                                             |
+| Logging of security-relevant events | ✅     | Product audit log (hash-chained, tamper detection tested end-to-end)                                                                                     |
+| Monitoring and alerting             | 🟡     | Customer-facing Slack/PagerDuty alerts for failovers and drills (Phase 4.3), with a delivery log; uptime/error alerts for AetherVault itself once hosted |
+| Incident response plan              | 🟡     | Runbook in `docs/SECURITY.md`; needs severity levels, contacts and a yearly test                                                                         |
+| Incident records                    | 🟡     | `docs/incidents/` named in the runbook; folder not created (no incidents so far)                                                                         |
 
 ## CC8: Change management
 

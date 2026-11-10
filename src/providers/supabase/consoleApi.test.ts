@@ -60,6 +60,13 @@ describe('createSupabaseConsoleApi', () => {
     );
     await api.disableDrillSchedule('o');
     await api.startDrill('o', 'us-east-1', 'gcp-us-central1');
+    await api.listAlertChannels('o');
+    await api.listAlertDeliveries('o');
+    await api.addAlertChannel('o', 'slack', 'Ops', 'https://hooks.slack.com/services/a/b/c', [
+      'failover',
+    ]);
+    await api.removeAlertChannel('c');
+    await api.sendTestAlert('c');
     expect(raw.rpc.mock.calls).toEqual([
       ['get_failover_status', { p_org: 'o' }],
       ['org_audit_feed', { p_org: 'o', p_limit: 50 }],
@@ -90,6 +97,20 @@ describe('createSupabaseConsoleApi', () => {
       ],
       ['disable_drill_schedule', { p_org: 'o' }],
       ['start_drill', { p_org: 'o', p_source: 'us-east-1', p_target: 'gcp-us-central1' }],
+      ['list_alert_channels', { p_org: 'o' }],
+      ['list_alert_deliveries', { p_org: 'o', p_limit: 30 }],
+      [
+        'add_alert_channel',
+        {
+          p_org: 'o',
+          p_kind: 'slack',
+          p_name: 'Ops',
+          p_secret: 'https://hooks.slack.com/services/a/b/c',
+          p_events: ['failover'],
+        },
+      ],
+      ['remove_alert_channel', { p_channel: 'c' }],
+      ['send_test_alert', { p_channel: 'c' }],
     ]);
   });
 

@@ -18,6 +18,9 @@ export const ACTION_LABEL: Record<string, string> = {
   'drill.completed': 'Drill completed',
   'drill.schedule_set': 'Drill schedule set',
   'drill.schedule_disabled': 'Drill schedule turned off',
+  'alert.channel_added': 'Alert channel added',
+  'alert.channel_removed': 'Alert channel removed',
+  'alert.test_sent': 'Test alert sent',
 };
 
 export function describeDetail(r: AuditRecord): string {
@@ -38,6 +41,9 @@ export function describeDetail(r: AuditRecord): string {
       : `${s('result') ?? '?'}: ${String(d.recovery_seconds)} s vs ${String(d.rto_target_seconds)} s target (simulated)`;
   if (r.action === 'drill.schedule_set')
     return `${s('cadence') ?? '?'}, next ${s('next_run_at') ? new Date(s('next_run_at')!).toISOString().slice(0, 16).replace('T', ' ') + ' UTC' : '?'}`;
+  if (r.action === 'alert.channel_added' || r.action === 'alert.channel_removed')
+    return `${s('kind') ?? '?'}: ${s('name') ?? '?'}`;
+  if (r.action === 'alert.test_sent') return s('name') ?? '';
   if (r.action === 'member.invited' || r.action === 'member.joined')
     return `${s('email') ?? '?'} as ${s('role') ?? '?'}`;
   if (r.action === 'member.invite_revoked' || r.action === 'member.removed')

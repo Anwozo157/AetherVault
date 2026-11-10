@@ -1,7 +1,7 @@
-import { ClipboardCheck, Flame, HardDrive, Layers, ScrollText, Users } from 'lucide-react';
+import { Bell, ClipboardCheck, Flame, HardDrive, Layers, ScrollText, Users } from 'lucide-react';
 import { TARGET_REGIONS } from '../../config/regions';
 
-export type CommandTab = 'hud' | 'drs' | 'drills' | 'audit' | 'team';
+export type CommandTab = 'hud' | 'drs' | 'drills' | 'alerts' | 'audit' | 'team';
 
 interface ControlBarProps {
   tab: CommandTab;
@@ -17,6 +17,8 @@ interface ControlBarProps {
   showTeam?: boolean;
   /** Show the Drills tab (server-backed providers only). */
   showDrills?: boolean;
+  /** Show the Alerts tab (server-backed providers only). */
+  showAlerts?: boolean;
 }
 
 export default function ControlBar({
@@ -30,6 +32,7 @@ export default function ControlBar({
   showAudit = false,
   showTeam = false,
   showDrills = false,
+  showAlerts = false,
 }: ControlBarProps) {
   const tabClass = (active: boolean) =>
     `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
@@ -63,6 +66,16 @@ export default function ControlBar({
           >
             <ClipboardCheck className="w-3.5 h-3.5 text-aether-green" />
             <span>Drills</span>
+          </button>
+        )}
+        {showAlerts && (
+          <button
+            onClick={() => onTabChange('alerts')}
+            aria-pressed={tab === 'alerts'}
+            className={tabClass(tab === 'alerts')}
+          >
+            <Bell className="w-3.5 h-3.5 text-aether-amber" />
+            <span>Alerts</span>
           </button>
         )}
         {showAudit && (

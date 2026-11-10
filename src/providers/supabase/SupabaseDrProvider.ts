@@ -3,6 +3,7 @@
 // telemetry is still simulated (no AWS account until funded) and labeled as such.
 
 import {
+  type AlertsCapability,
   type ApprovalCapability,
   type AuditCapability,
   type TeamCapability,
@@ -101,6 +102,15 @@ function describeAudit(entry: AuditEntry): { level: LogEvent['level']; message: 
       };
     case 'drill.schedule_disabled':
       return { level: 'WARN', message: `${actor} turned off scheduled drills.` };
+    case 'alert.channel_added':
+      return {
+        level: 'INFO',
+        message: `${actor} added ${d.kind === 'pagerduty' ? 'PagerDuty' : 'Slack'} alerts: ${String(d.name)}.`,
+      };
+    case 'alert.channel_removed':
+      return { level: 'INFO', message: `${actor} removed alert channel ${String(d.name)}.` };
+    case 'alert.test_sent':
+      return { level: 'INFO', message: `${actor} sent a test alert to ${String(d.name)}.` };
     case 'org.objectives_set':
       return {
         level: 'INFO',
@@ -121,6 +131,7 @@ export class SupabaseDrProvider implements DrProvider {
   readonly audit: AuditCapability;
   readonly team: TeamCapability;
   readonly drills: DrillsCapability;
+  readonly alerts: AlertsCapability;
   /** Resolves after the first sync with the server (useful in tests). */
   readonly ready: Promise<void>;
 
@@ -217,6 +228,35 @@ export class SupabaseDrProvider implements DrProvider {
         api.setDrillSchedule(org, cadence, firstRunAt, SOURCE_REGION, targetRegion),
       disableSchedule: () => api.disableDrillSchedule(org),
       startDrill: (targetRegion) => api.startDrill(org, SOURCE_REGION, targetRegion),
+    };
+    this.alerts = {
+      listChannels: async () =>
+        (await api.listAlertChannels(org)).map((c) => ({
+          id: c.id,
+          kind: c.kind,
+          name: c.name,
+          hint: c.hint,
+          events: c.events,
+          createdByEmail: c.created_by_email,
+          createdAt: c.created_at,
+        })),
+      listDeliveries: async () =>
+        (await api.listAlertDeliveries(org)).map((d) => ({
+          id: d.id,
+          channelName: d.channel_name,
+          kind: d.kind,
+          event: d.event,
+          title: d.title,
+          status: d.status,
+          httpStatus: d.http_status,
+          error: d.error,
+          createdAt: d.created_at,
+        })),
+      addChannel: async ({ kind, name, secret, events }) => {
+        await api.addAlertChannel(org, kind, name, secret, events);
+      },
+      removeChannel: (id) => api.removeAlertChannel(id),
+      sendTest: (id) => api.sendTestAlert(id),
     };
     this.audit = {
       list: async ({ limit = 100, before } = {}) =>

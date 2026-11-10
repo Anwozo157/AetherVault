@@ -80,6 +80,14 @@ describe('auditFormat', () => {
       ),
     ).toBe('monthly, next 2026-12-01 17:00 UTC');
     expect(ACTION_LABEL['drill.schedule_disabled']).toBe('Drill schedule turned off');
+    expect(
+      describeDetail(
+        rec(10, { action: 'alert.channel_added', detail: { kind: 'slack', name: 'Ops' } }),
+      ),
+    ).toBe('slack: Ops');
+    expect(describeDetail(rec(11, { action: 'alert.test_sent', detail: { name: 'Ops' } }))).toBe(
+      'Ops',
+    );
   });
 
   test('CSV quotes fields, records the chain status, and neutralizes spreadsheet formulas', () => {
