@@ -153,7 +153,7 @@ test('drill evidence: a completed drill reports PASS, and the downloaded file ma
   await operator.page.getByRole('button', { name: 'Drills', exact: true }).click();
   await expect(operator.page.getByText(/· PASS/).first()).toBeVisible({ timeout: 10_000 });
   await operator.page
-    .getByRole('button', { name: /Evidence report for drill/ })
+    .getByRole('button', { name: /Evidence report for failover/ })
     .first()
     .click();
 
@@ -295,4 +295,41 @@ test('new customer: signs up, creates an organization, invites a teammate who jo
   expect(hire.errors).toEqual([]);
   await founder.close();
   await hire.close();
+});
+
+test('drills: an operator runs an isolated drill without approval; it passes with evidence', async ({
+  browser,
+}) => {
+  const admin = await signIn(browser, 'admin@aethervault.local');
+  await admin.page.getByRole('button', { name: 'Drills', exact: true }).click();
+  await expect(admin.page.getByTestId('schedule-status')).toHaveText('No drills scheduled.');
+  await admin.page.getByLabel('Repeat').selectOption('weekly');
+  await admin.page.getByRole('button', { name: 'Save schedule' }).click();
+  await expect(admin.page.getByTestId('schedule-status')).toContainText(
+    'Weekly to AWS us-west-2 (Oregon)',
+  );
+
+  const operator = await signIn(browser, 'operator@aethervault.local');
+  await operator.page.getByRole('button', { name: 'Drills', exact: true }).click();
+  await expect(operator.page.getByTestId('schedule-status')).toContainText('Weekly');
+  await operator.page.getByRole('button', { name: 'Run drill now' }).click();
+  const row = operator.page.locator('tr', { hasText: 'isolated · no approval needed' }).first();
+  await expect(row.getByText(/· PASS/)).toBeVisible({ timeout: 15_000 });
+  // A drill never becomes the live failover.
+  await operator.page.getByRole('button', { name: '3D Global HUD' }).click();
+  await expect(operator.page.getByRole('button', { name: /1-CLICK FAILOVER/ })).toBeVisible();
+  await operator.page.getByRole('button', { name: 'Drills', exact: true }).click();
+  await operator.page
+    .getByRole('button', { name: /Evidence report for drill/ })
+    .first()
+    .click();
+  const report = operator.page.getByRole('dialog');
+  await expect(report.getByText('PASS', { exact: true })).toBeVisible();
+  await expect(report.getByText(/On-demand drill evidence/)).toBeVisible();
+  await expect(report.getByText(/Not required: drills run in an isolated network/)).toBeVisible();
+
+  expect(admin.errors).toEqual([]);
+  expect(operator.errors).toEqual([]);
+  await admin.close();
+  await operator.close();
 });

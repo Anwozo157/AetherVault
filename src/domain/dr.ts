@@ -172,8 +172,24 @@ export interface RecoveryObjectives {
 
 export type RunOutcome = 'pending' | 'in_progress' | 'secured' | 'aborted' | 'withdrawn';
 
+/** A real failover (two-person approval) or a non-disruptive drill (isolated, no cutover). */
+export type RunKind = 'failover' | 'drill';
+export type DrillTrigger = 'scheduled' | 'manual';
+export type DrillCadence = 'weekly' | 'monthly' | 'quarterly';
+
+export interface DrillSchedule {
+  cadence: DrillCadence;
+  nextRunAt: string;
+  lastRunAt: string | null;
+  sourceRegion: string;
+  targetRegion: string;
+  enabled: boolean;
+}
+
 export interface RunSummary {
   id: string;
+  kind: RunKind;
+  trigger: DrillTrigger | null;
   sourceRegion: string;
   targetRegion: string;
   requestedByEmail: string | null;
@@ -194,6 +210,9 @@ export interface DrillEvidence {
   objectives: { rto_seconds: number; rpo_seconds: number };
   run: {
     id: string;
+    /** Present from report_version 2. */
+    kind?: RunKind;
+    trigger?: DrillTrigger | null;
     source_region: string;
     target_region: string;
     requested_by: string | null;
@@ -203,7 +222,8 @@ export interface DrillEvidence {
     aborted_at: string | null;
     reset_at: string | null;
     outcome: RunOutcome;
-    two_person_rule_met: boolean;
+    /** null for drills: not required, nothing in production changes. */
+    two_person_rule_met: boolean | null;
   };
   timeline: Array<{ stage: string; at: string }>;
   results: {
@@ -235,6 +255,18 @@ export interface DrillsCapability {
   setObjectives(objectives: RecoveryObjectives): Promise<void>;
   listRuns(): Promise<RunSummary[]>;
   evidence(runId: string): Promise<DrillEvidence>;
+  /** The organization's drill schedule, or null if none was ever set. */
+  getSchedule(): Promise<DrillSchedule | null>;
+  /** Admins only. Returns the next run time (ISO). */
+  setSchedule(schedule: {
+    cadence: DrillCadence;
+    firstRunAt: string;
+    targetRegion: string;
+  }): Promise<string>;
+  /** Admins only. */
+  disableSchedule(): Promise<void>;
+  /** Operators and above. Starts a non-disruptive drill now; returns its run id. */
+  startDrill(targetRegion: string): Promise<string>;
 }
 
 /** Contract every disaster-recovery data source must implement. */

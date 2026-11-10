@@ -2,7 +2,15 @@
 // this interface (not on supabase-js directly) so it can be unit-tested with a fake.
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { DrillEvidence, MemberRole, RunOutcome, Unsubscribe } from '../../domain/dr';
+import type {
+  DrillCadence,
+  DrillEvidence,
+  DrillTrigger,
+  MemberRole,
+  RunKind,
+  RunOutcome,
+  Unsubscribe,
+} from '../../domain/dr';
 
 export interface ServerRun {
   id: string;
@@ -60,6 +68,8 @@ export interface InviteRow {
 
 export interface RunRow {
   id: string;
+  kind: RunKind;
+  trigger: DrillTrigger | null;
   source_region: string;
   target_region: string;
   requested_by_email: string | null;
@@ -71,6 +81,15 @@ export interface RunRow {
   outcome: RunOutcome;
   recovery_seconds: number | null;
   rto_target_seconds: number;
+}
+
+export interface ScheduleRow {
+  cadence: DrillCadence;
+  next_run_at: string;
+  last_run_at: string | null;
+  source_region: string;
+  target_region: string;
+  enabled: boolean;
 }
 
 export interface Membership {
@@ -98,6 +117,16 @@ export interface ConsoleApi {
   setObjectives(orgId: string, rtoSeconds: number, rpoSeconds: number): Promise<void>;
   listRuns(orgId: string): Promise<RunRow[]>;
   drillEvidence(runId: string): Promise<DrillEvidence>;
+  getDrillSchedule(orgId: string): Promise<ScheduleRow | null>;
+  setDrillSchedule(
+    orgId: string,
+    cadence: DrillCadence,
+    firstRunAt: string,
+    source: string,
+    target: string,
+  ): Promise<string>;
+  disableDrillSchedule(orgId: string): Promise<void>;
+  startDrill(orgId: string, source: string, target: string): Promise<string>;
   /** Calls back whenever runs or audit entries for the org change. */
   subscribe(orgId: string, onChange: () => void): Unsubscribe;
 }
@@ -154,6 +183,28 @@ export function createSupabaseConsoleApi(client: SupabaseClient): ConsoleApi {
     listRuns: (orgId) =>
       call<RunRow[]>(client.rpc('list_failover_runs', { p_org: orgId, p_limit: 50 })),
     drillEvidence: (runId) => call<DrillEvidence>(client.rpc('drill_evidence', { p_run: runId })),
+    getDrillSchedule: (orgId) =>
+      call<ScheduleRow | null>(
+        client
+          .from('drill_schedules')
+          .select('cadence, next_run_at, last_run_at, source_region, target_region, enabled')
+          .eq('org_id', orgId)
+          .maybeSingle(),
+      ),
+    setDrillSchedule: (orgId, cadence, firstRunAt, source, target) =>
+      call<string>(
+        client.rpc('set_drill_schedule', {
+          p_org: orgId,
+          p_cadence: cadence,
+          p_first_run: firstRunAt,
+          p_source: source,
+          p_target: target,
+        }),
+      ),
+    disableDrillSchedule: (orgId) =>
+      call<void>(client.rpc('disable_drill_schedule', { p_org: orgId })),
+    startDrill: (orgId, source, target) =>
+      call<string>(client.rpc('start_drill', { p_org: orgId, p_source: source, p_target: target })),
     subscribe(orgId, onChange) {
       const filter = `org_id=eq.${orgId}`;
       const channel = client
@@ -161,6 +212,11 @@ export function createSupabaseConsoleApi(client: SupabaseClient): ConsoleApi {
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'failover_runs', filter },
+          onChange,
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'drill_schedules', filter },
           onChange,
         )
         .on(

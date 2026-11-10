@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Phase 4.2: Scheduled drills (2026-11-10)
+
+- **Non-disruptive drills:** a drill launches recovery in an isolated network and never cuts production over (the AWS Elastic Disaster Recovery drill model), so it runs without a second approver. Drills never show as the live failover and never block a real one; one drill runs at a time per organization.
+- **Drill schedule** (Drills tab): admins choose weekly, monthly or quarterly, the first drill time and the recovery region; operators and above can **Run drill now**. Monthly and quarterly drills are anchored to the first date, so they don't drift. The panel shows the next drill and warns if a schedule is overdue (scheduler not running).
+- **Scheduler:** `run_drill_scheduler()` runs every minute through `pg_cron` (free, included in Supabase). It records finished drills as `drill.completed` (passed / failed against the recovery-time target, or aborted) and launches due drills as the system (no actor). Telemetry is still simulated and labeled so.
+- **Evidence reports v2:** add the run type and trigger; drill reports show who or what started the drill, state that the two-person rule is not required, use drill stage names (no DNS cutover) and omit time-to-approval. The runs table gains a Type column.
+- Audit log and live log describe drill events in plain words.
+- Tests: 31 pgTAP tests (cadence maths, permissions, one drill at a time, drills invisible to live status, pass/fail, system actor, evidence), unit tests for the schedule UI and provider mapping, and a console E2E (admin schedules, operator runs a drill that passes, evidence report).
+
 ### Landing page (2026-11-09)
 
 - **New front page** at the site root for buyers and engineers: what AetherVault does, how it works (replicate, drill, prove), evidence reports, console controls, security model and founding-customer pilots.
