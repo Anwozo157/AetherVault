@@ -33,6 +33,13 @@ class FakeServer {
     return Date.now() + this.clockSkewMs;
   }
 
+  schedule: Awaited<ReturnType<ConsoleApi['getDrillSchedule']>> = null;
+
+  /** Appends an audit entry as the database would (tests use it for server-side events). */
+  pushAudit(action: string, actor: string | null, detail: Record<string, unknown> = {}) {
+    this.log(actor, action, detail);
+  }
+
   private log(actor: string | null, action: string, detail: Record<string, unknown> = {}) {
     this.audit.unshift({
       id: this.audit.length + 1,
@@ -138,6 +145,8 @@ class FakeServer {
       listRuns: async () => [
         {
           id: 'run-9',
+          kind: 'failover' as const,
+          trigger: null,
           source_region: 'us-east-1',
           target_region: 'aws-us-west-2',
           requested_by_email: 'op@test',
@@ -152,6 +161,22 @@ class FakeServer {
         },
       ],
       drillEvidence: vi.fn(async (runId: string) => ({ run: { id: runId } }) as never),
+      getDrillSchedule: async () => this.schedule,
+      setDrillSchedule: vi.fn(async (_org: string, cadence, firstRunAt: string, source, target) => {
+        this.schedule = {
+          cadence,
+          next_run_at: firstRunAt,
+          last_run_at: null,
+          source_region: source,
+          target_region: target,
+          enabled: true,
+        };
+        return firstRunAt;
+      }),
+      disableDrillSchedule: vi.fn(async () => {
+        if (this.schedule) this.schedule = { ...this.schedule, enabled: false };
+      }),
+      startDrill: vi.fn(async () => 'drill-1'),
       subscribe: (_org, onChange) => {
         this.listeners.add(onChange);
         return () => this.listeners.delete(onChange);
@@ -505,5 +530,59 @@ describe('SupabaseDrProvider', () => {
       rtoTargetSeconds: 300,
     });
     await expect(op.drills.evidence('run-9')).resolves.toMatchObject({ run: { id: 'run-9' } });
+  });
+
+  test('drills: schedule round-trip and on-demand drills use the fixed source region', async () => {
+    const admin = connect(server, USERS.op, 'admin');
+    await expect(admin.drills.getSchedule()).resolves.toBeNull();
+    await expect(
+      admin.drills.setSchedule({
+        cadence: 'weekly',
+        firstRunAt: '2026-11-16T09:00:00.000Z',
+        targetRegion: 'aws-us-west-2',
+      }),
+    ).resolves.toBe('2026-11-16T09:00:00.000Z');
+    await expect(admin.drills.getSchedule()).resolves.toEqual({
+      cadence: 'weekly',
+      nextRunAt: '2026-11-16T09:00:00.000Z',
+      lastRunAt: null,
+      sourceRegion: 'us-east-1',
+      targetRegion: 'aws-us-west-2',
+      enabled: true,
+    });
+    await admin.drills.disableSchedule();
+    await expect(admin.drills.getSchedule()).resolves.toMatchObject({ enabled: false });
+    await expect(admin.drills.startDrill('gcp-us-central1')).resolves.toBe('drill-1');
+  });
+
+  test('drill audit entries become readable log lines', async () => {
+    const op = connect(server, USERS.op, 'operator');
+    await op.ready;
+    server.pushAudit('drill.started', null, {
+      trigger: 'scheduled',
+      source: 'us-east-1',
+      target: 'aws-us-west-2',
+    });
+    server.pushAudit('drill.completed', null, {
+      result: 'passed',
+      recovery_seconds: 5.5,
+      rto_target_seconds: 900,
+    });
+    server.pushAudit('drill.completed', null, {
+      result: 'failed',
+      recovery_seconds: 5.5,
+      rto_target_seconds: 3,
+    });
+    server.pushAudit('drill.completed', null, { result: 'aborted' });
+    server.pushAudit('drill.schedule_disabled', USERS.op, {});
+    await vi.advanceTimersByTimeAsync(5000);
+    const logs = op.getRecentLogs();
+    const text = logs.map((l) => l.message).join(' | ');
+    expect(text).toContain('Scheduled drill started: us-east-1 → aws-us-west-2');
+    expect(text).toContain('Drill passed: recovered in 5.5 s (target 900 s).');
+    expect(text).toContain('Drill failed: recovery took 5.5 s (target 3 s).');
+    expect(text).toContain('Drill aborted before completion.');
+    expect(text).toContain('op@test turned off scheduled drills.');
+    expect(logs.find((l) => l.message.startsWith('Drill failed'))?.level).toBe('CRIT');
   });
 });

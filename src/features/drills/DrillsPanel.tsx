@@ -7,6 +7,7 @@ import type {
   RecoveryObjectives,
   RunSummary,
 } from '../../domain/dr';
+import DrillSchedule from './DrillSchedule';
 import EvidenceReport from './EvidenceReport';
 import { OUTCOME_LABEL, formatSeconds } from './evidence';
 
@@ -89,9 +90,9 @@ export default function DrillsPanel({
           Drills & evidence
         </h2>
         <p className="text-[11px] font-mono text-zinc-400 mt-1 max-w-2xl">
-          Every failover drill produces an evidence report: who requested and approved it, the
-          timeline, and whether recovery met your target. AWS recommends testing failover regularly
-          to confirm recovery objectives are met.
+          Every drill and failover produces an evidence report: who started or approved it, the
+          timeline, and whether recovery met your target. AWS recommends testing recovery regularly
+          to confirm your objectives are met.
         </p>
       </div>
 
@@ -145,10 +146,17 @@ export default function DrillsPanel({
           <span className="basis-full text-[11px] font-mono text-zinc-500">
             {completed.length
               ? `${passed.length} of ${completed.length} completed drills met the ${formatSeconds(objectives.rtoSeconds)} target.`
-              : 'No completed drills yet. Run one from Mission Control.'}
+              : 'No completed drills yet. Run one now or set a schedule below.'}
           </span>
         )}
       </form>
+
+      <DrillSchedule
+        drills={drills}
+        myRole={myRole}
+        refreshKey={refreshKey}
+        onChanged={() => void load()}
+      />
 
       {error && (
         <p role="alert" className="text-xs font-mono text-red-300">
@@ -157,12 +165,15 @@ export default function DrillsPanel({
       )}
 
       <div className="relative overflow-x-auto rounded-xl border border-white/10">
-        <table className="w-full min-w-[640px] text-left text-xs font-mono">
-          <caption className="sr-only">Failover drills, newest first</caption>
+        <table className="w-full min-w-[720px] text-left text-xs font-mono">
+          <caption className="sr-only">Drills and failovers, newest first</caption>
           <thead className="text-[10px] uppercase tracking-widest text-zinc-500 bg-white/[0.02]">
             <tr>
               <th scope="col" className="px-3 py-2">
                 Requested
+              </th>
+              <th scope="col" className="px-3 py-2">
+                Type
               </th>
               <th scope="col" className="px-3 py-2">
                 Route
@@ -184,13 +195,13 @@ export default function DrillsPanel({
           <tbody>
             {runs === null ? (
               <tr>
-                <td colSpan={6} className="px-3 py-6 text-center text-zinc-500">
+                <td colSpan={7} className="px-3 py-6 text-center text-zinc-500">
                   Loading drills…
                 </td>
               </tr>
             ) : runs.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-3 py-6 text-center text-zinc-500">
+                <td colSpan={7} className="px-3 py-6 text-center text-zinc-500">
                   No drills yet.
                 </td>
               </tr>
@@ -208,13 +219,34 @@ export default function DrillsPanel({
                       {new Date(r.requestedAt).toLocaleString()}
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap">
+                      {r.kind === 'drill' ? (
+                        <span className="text-aether-cyan">
+                          Drill
+                          <span className="block text-zinc-500">{r.trigger}</span>
+                        </span>
+                      ) : (
+                        <span className="text-aether-amber">Failover</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 whitespace-nowrap">
                       {r.sourceRegion} → {r.targetRegion}
                     </td>
                     <td className="px-3 py-2 text-zinc-400">
-                      {r.requestedByEmail ?? '?'}
-                      <span className="block text-zinc-500">
-                        {r.approvedByEmail ? `approved by ${r.approvedByEmail}` : 'not approved'}
-                      </span>
+                      {r.kind === 'drill' ? (
+                        <>
+                          {r.trigger === 'scheduled' ? 'Scheduler' : (r.requestedByEmail ?? '?')}
+                          <span className="block text-zinc-500">isolated · no approval needed</span>
+                        </>
+                      ) : (
+                        <>
+                          {r.requestedByEmail ?? '?'}
+                          <span className="block text-zinc-500">
+                            {r.approvedByEmail
+                              ? `approved by ${r.approvedByEmail}`
+                              : 'not approved'}
+                          </span>
+                        </>
+                      )}
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap">{OUTCOME_LABEL[r.outcome]}</td>
                     <td className="px-3 py-2 whitespace-nowrap">
@@ -230,7 +262,7 @@ export default function DrillsPanel({
                       <button
                         type="button"
                         onClick={() => void open(r.id)}
-                        aria-label={`Evidence report for drill ${new Date(r.requestedAt).toLocaleString()}`}
+                        aria-label={`Evidence report for ${r.kind === 'drill' ? 'drill' : 'failover'} ${new Date(r.requestedAt).toLocaleString()}`}
                         className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.1] text-zinc-200"
                       >
                         <FileText className="w-3.5 h-3.5" aria-hidden="true" />

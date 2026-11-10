@@ -18,6 +18,7 @@ import {
   isAbortable,
 } from '../../domain/dr';
 import { stageAfterApproval } from '../../domain/failoverStage';
+import { SOURCE_REGION } from '../../config/regions';
 import { MockDrProvider } from '../MockDrProvider';
 import type { AuditEntry, ConsoleApi, ServerRun } from './consoleApi';
 
@@ -73,6 +74,33 @@ function describeAudit(entry: AuditEntry): { level: LogEvent['level']; message: 
         level: 'WARN',
         message: `${actor} removed ${String(d.email)} from the organization.`,
       };
+    case 'drill.started':
+      return {
+        level: 'INFO',
+        message:
+          d.trigger === 'scheduled'
+            ? `Scheduled drill started: ${String(d.source)} → ${String(d.target)} (isolated, no production cutover).`
+            : `Drill started by ${actor}: ${String(d.source)} → ${String(d.target)} (isolated, no production cutover).`,
+      };
+    case 'drill.completed':
+      return d.result === 'passed'
+        ? {
+            level: 'SUCCESS',
+            message: `Drill passed: recovered in ${String(d.recovery_seconds)} s (target ${String(d.rto_target_seconds)} s).`,
+          }
+        : d.result === 'failed'
+          ? {
+              level: 'CRIT',
+              message: `Drill failed: recovery took ${String(d.recovery_seconds)} s (target ${String(d.rto_target_seconds)} s).`,
+            }
+          : { level: 'WARN', message: 'Drill aborted before completion.' };
+    case 'drill.schedule_set':
+      return {
+        level: 'INFO',
+        message: `${actor} scheduled ${String(d.cadence)} drills; next ${new Date(String(d.next_run_at)).toLocaleString()}.`,
+      };
+    case 'drill.schedule_disabled':
+      return { level: 'WARN', message: `${actor} turned off scheduled drills.` };
     case 'org.objectives_set':
       return {
         level: 'INFO',
@@ -159,6 +187,8 @@ export class SupabaseDrProvider implements DrProvider {
       listRuns: async () =>
         (await api.listRuns(org)).map((r) => ({
           id: r.id,
+          kind: r.kind,
+          trigger: r.trigger,
           sourceRegion: r.source_region,
           targetRegion: r.target_region,
           requestedByEmail: r.requested_by_email,
@@ -170,6 +200,23 @@ export class SupabaseDrProvider implements DrProvider {
           rtoTargetSeconds: r.rto_target_seconds,
         })),
       evidence: (runId) => api.drillEvidence(runId),
+      getSchedule: async () => {
+        const s = await api.getDrillSchedule(org);
+        return s
+          ? {
+              cadence: s.cadence,
+              nextRunAt: s.next_run_at,
+              lastRunAt: s.last_run_at,
+              sourceRegion: s.source_region,
+              targetRegion: s.target_region,
+              enabled: s.enabled,
+            }
+          : null;
+      },
+      setSchedule: ({ cadence, firstRunAt, targetRegion }) =>
+        api.setDrillSchedule(org, cadence, firstRunAt, SOURCE_REGION, targetRegion),
+      disableSchedule: () => api.disableDrillSchedule(org),
+      startDrill: (targetRegion) => api.startDrill(org, SOURCE_REGION, targetRegion),
     };
     this.audit = {
       list: async ({ limit = 100, before } = {}) =>

@@ -165,6 +165,8 @@ describe('DrillsPanel', () => {
   const runs: RunSummary[] = [
     {
       id: 'r1',
+      kind: 'failover',
+      trigger: null,
       sourceRegion: 'us-east-1',
       targetRegion: 'aws-us-west-2',
       requestedByEmail: 'op@co.com',
@@ -177,6 +179,8 @@ describe('DrillsPanel', () => {
     },
     {
       id: 'r2',
+      kind: 'failover',
+      trigger: null,
       sourceRegion: 'us-east-1',
       targetRegion: 'gcp-us-central1',
       requestedByEmail: 'op@co.com',
@@ -193,6 +197,10 @@ describe('DrillsPanel', () => {
     setObjectives: vi.fn(async () => {}),
     listRuns: vi.fn(async () => runs),
     evidence: vi.fn(async () => evidence()),
+    getSchedule: vi.fn(async () => null),
+    setSchedule: vi.fn(async () => '2026-11-10T17:00:00.000Z'),
+    disableSchedule: vi.fn(async () => {}),
+    startDrill: vi.fn(async () => 'd1'),
   });
 
   test('lists drills with pass/fail and a summary; opens the evidence report', async () => {
@@ -202,7 +210,7 @@ describe('DrillsPanel', () => {
     expect(screen.getByText('Withdrawn')).toBeInTheDocument();
     expect(screen.getByText('1 of 1 completed drills met the 5 min target.')).toBeInTheDocument();
     expect(screen.getByText('Only admins change targets.')).toBeInTheDocument();
-    fireEvent.click(screen.getAllByRole('button', { name: /Evidence report for drill/ })[0]);
+    fireEvent.click(screen.getAllByRole('button', { name: /Evidence report for failover/ })[0]);
     expect(
       await screen.findByRole('dialog', { name: /us-east-1 → aws-us-west-2/ }),
     ).toBeInTheDocument();
@@ -231,5 +239,152 @@ describe('DrillsPanel', () => {
     const drills = { ...fake(), listRuns: vi.fn(async () => Promise.reject(new Error('boom'))) };
     render(<DrillsPanel drills={drills} myRole="viewer" refreshKey={0} />);
     expect(await screen.findByRole('alert')).toHaveTextContent('boom');
+  });
+});
+
+describe('Drill schedule', () => {
+  const base = (over: Partial<DrillsCapability> = {}): DrillsCapability => ({
+    getObjectives: vi.fn(async () => ({ rtoSeconds: 900, rpoSeconds: 60 })),
+    setObjectives: vi.fn(async () => {}),
+    listRuns: vi.fn(async () => []),
+    evidence: vi.fn(async () => evidence()),
+    getSchedule: vi.fn(async () => null),
+    setSchedule: vi.fn(async () => '2026-12-01T17:00:00.000Z'),
+    disableSchedule: vi.fn(async () => {}),
+    startDrill: vi.fn(async () => 'd1'),
+    ...over,
+  });
+  const weekly = {
+    cadence: 'weekly' as const,
+    nextRunAt: new Date(Date.now() + 3 * 86_400_000).toISOString(),
+    lastRunAt: '2026-11-02T17:00:00Z',
+    sourceRegion: 'us-east-1',
+    targetRegion: 'aws-us-west-2',
+    enabled: true,
+  };
+
+  test('admins save a schedule; the local time is sent as ISO', async () => {
+    const drills = base();
+    render(<DrillsPanel drills={drills} myRole="admin" refreshKey={0} />);
+    expect(await screen.findByTestId('schedule-status')).toHaveTextContent('No drills scheduled.');
+    fireEvent.change(screen.getByLabelText('Repeat'), { target: { value: 'quarterly' } });
+    fireEvent.change(screen.getByLabelText('First drill'), {
+      target: { value: '2026-12-01T09:00' },
+    });
+    fireEvent.change(screen.getByLabelText('Recovery region'), {
+      target: { value: 'gcp-us-central1' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save schedule' }));
+    await waitFor(() =>
+      expect(drills.setSchedule).toHaveBeenCalledWith({
+        cadence: 'quarterly',
+        firstRunAt: new Date('2026-12-01T09:00').toISOString(),
+        targetRegion: 'gcp-us-central1',
+      }),
+    );
+    expect(await screen.findByText(/Scheduled\. Next drill/)).toBeInTheDocument();
+  });
+
+  test('shows the active schedule; admins can turn it off', async () => {
+    const drills = base({ getSchedule: vi.fn(async () => weekly) });
+    render(<DrillsPanel drills={drills} myRole="admin" refreshKey={0} />);
+    expect(await screen.findByTestId('schedule-status')).toHaveTextContent(
+      /Weekly to AWS us-west-2 \(Oregon\)\. Next drill .* \(in 3 days\)\./,
+    );
+    expect(screen.getByText(/Last scheduled drill/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Update schedule' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Turn off' }));
+    await waitFor(() => expect(drills.disableSchedule).toHaveBeenCalled());
+    expect(await screen.findByText('Scheduled drills turned off.')).toBeInTheDocument();
+  });
+
+  test('flags an overdue schedule (scheduler not running)', async () => {
+    const drills = base({
+      getSchedule: vi.fn(async () => ({
+        ...weekly,
+        nextRunAt: new Date(Date.now() - 3_600_000).toISOString(),
+      })),
+    });
+    render(<DrillsPanel drills={drills} myRole="viewer" refreshKey={0} />);
+    expect(
+      await screen.findByText(/Overdue: the scheduler checks every minute/),
+    ).toBeInTheDocument();
+  });
+
+  test('operators run a drill now but cannot change the schedule', async () => {
+    const drills = base();
+    render(<DrillsPanel drills={drills} myRole="operator" refreshKey={0} />);
+    await screen.findByText('No drills scheduled.');
+    expect(screen.queryByLabelText('Repeat')).not.toBeInTheDocument();
+    expect(screen.getByText(/Only admins change the schedule/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Run drill now' }));
+    await waitFor(() => expect(drills.startDrill).toHaveBeenCalledWith('aws-us-west-2'));
+    expect(await screen.findByText(/Drill started in an isolated network/)).toBeInTheDocument();
+  });
+
+  test('viewers cannot run drills; errors are shown', async () => {
+    const drills = base({ getSchedule: vi.fn(async () => Promise.reject(new Error('nope'))) });
+    render(<DrillsPanel drills={drills} myRole="viewer" refreshKey={0} />);
+    expect(await screen.findByRole('alert')).toHaveTextContent('nope');
+    expect(screen.queryByRole('button', { name: 'Run drill now' })).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Recovery region')).toBeDisabled();
+  });
+
+  test('drill rows and drill evidence read as drills', async () => {
+    const drills = base({
+      listRuns: vi.fn(async (): Promise<RunSummary[]> => [
+        {
+          id: 'd1',
+          kind: 'drill',
+          trigger: 'scheduled',
+          sourceRegion: 'us-east-1',
+          targetRegion: 'aws-us-west-2',
+          requestedByEmail: null,
+          requestedAt: '2026-11-09T09:00:00Z',
+          approvedByEmail: null,
+          approvedAt: '2026-11-09T09:00:00Z',
+          outcome: 'secured',
+          recoverySeconds: 5.5,
+          rtoTargetSeconds: 900,
+        },
+      ]),
+      evidence: vi.fn(async () =>
+        evidence({
+          report_version: 2,
+          run: {
+            ...evidence().run,
+            kind: 'drill',
+            trigger: 'scheduled',
+            requested_by: null,
+            approved_by: null,
+            two_person_rule_met: null,
+          },
+          timeline: [{ stage: 'DRILL_COMPLETE', at: '2026-11-09T09:00:05.5Z' }],
+        }),
+      ),
+    });
+    render(<DrillsPanel drills={drills} myRole="viewer" refreshKey={0} />);
+    expect(await screen.findByText('Scheduler')).toBeInTheDocument();
+    expect(screen.getByText('isolated · no approval needed')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Evidence report for drill/ }));
+    const dialog = await screen.findByRole('dialog');
+    expect(dialog).toHaveTextContent('Scheduled drill evidence (isolated, no production cutover)');
+    expect(dialog).toHaveTextContent('Drill scheduler');
+    expect(dialog).toHaveTextContent(/Not required: drills run in an isolated network/);
+    expect(dialog).not.toHaveTextContent('Time to approval');
+    expect(dialog).toHaveTextContent('DRILL COMPLETE');
+  });
+});
+
+describe('schedule helpers', () => {
+  test('relative time, default first run, local input format', async () => {
+    const { relativeTime, defaultFirstRun, toLocalInput } = await import('./DrillSchedule');
+    const now = Date.parse('2026-11-09T12:00:00Z');
+    expect(relativeTime('2026-11-09T12:00:30Z', now)).toBe('now');
+    expect(relativeTime('2026-11-09T12:20:00Z', now)).toBe('in 20 min');
+    expect(relativeTime('2026-11-09T17:00:00Z', now)).toBe('in 5 hours');
+    expect(relativeTime('2026-11-12T12:00:00Z', now)).toBe('in 3 days');
+    expect(defaultFirstRun(new Date(2026, 10, 9, 15, 30))).toBe('2026-11-10T09:00');
+    expect(toLocalInput(new Date(2026, 0, 5, 7, 4))).toBe('2026-01-05T07:04');
   });
 });

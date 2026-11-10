@@ -56,6 +56,7 @@ export default function EvidenceReport({
         ? 'text-aether-green border-aether-green/40'
         : 'text-red-300 border-aether-red/50';
 
+  const isDrill = run.kind === 'drill';
   const row = (label: string, value: string) => (
     <div className="grid grid-cols-[10rem_minmax(0,1fr)] gap-3 py-1.5 border-b border-white/5 print:border-black/10">
       <dt className="text-zinc-500 print:text-black/60">{label}</dt>
@@ -75,7 +76,10 @@ export default function EvidenceReport({
         <header className="flex flex-wrap items-start justify-between gap-3 border-b border-white/10 pb-4 print:border-black/20">
           <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-widest text-zinc-500 print:text-black/60">
-              AetherVault · Failover drill evidence
+              AetherVault ·{' '}
+              {isDrill
+                ? `${run.trigger === 'scheduled' ? 'Scheduled' : 'On-demand'} drill evidence (isolated, no production cutover)`
+                : 'Failover evidence'}
             </p>
             <h2
               id="evidence-title"
@@ -106,7 +110,7 @@ export default function EvidenceReport({
                 ? 'Not measured (drill did not complete)'
                 : `${formatSeconds(results.recovery_seconds)} (target ${formatSeconds(objectives.rto_seconds)})`,
             )}
-            {row('Time to approval', formatSeconds(results.decision_seconds))}
+            {!isDrill && row('Time to approval', formatSeconds(results.decision_seconds))}
             {row(
               'Data-loss target (RPO)',
               `${formatSeconds(objectives.rpo_seconds)}. Not measured: replication telemetry is simulated until a cloud account is connected.`,
@@ -119,11 +123,26 @@ export default function EvidenceReport({
             Controls
           </h3>
           <dl>
-            {row('Requested by', run.requested_by ?? 'n/a')}
-            {row('Approved by', run.approved_by ?? 'not approved')}
-            {row(
-              'Two-person rule',
-              run.two_person_rule_met ? 'Met (different requester and approver)' : 'Not met',
+            {isDrill ? (
+              <>
+                {row(
+                  'Started by',
+                  run.trigger === 'scheduled' ? 'Drill scheduler' : (run.requested_by ?? 'n/a'),
+                )}
+                {row(
+                  'Two-person rule',
+                  'Not required: drills run in an isolated network and change nothing in production',
+                )}
+              </>
+            ) : (
+              <>
+                {row('Requested by', run.requested_by ?? 'n/a')}
+                {row('Approved by', run.approved_by ?? 'not approved')}
+                {row(
+                  'Two-person rule',
+                  run.two_person_rule_met ? 'Met (different requester and approver)' : 'Not met',
+                )}
+              </>
             )}
             {row('Aborted', time(run.aborted_at))}
             {row('Reset to standby', time(run.reset_at))}

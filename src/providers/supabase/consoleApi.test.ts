@@ -11,12 +11,16 @@ function fakeClient(result: { data: unknown; error: { message: string } | null }
   const channel = { on: vi.fn(), subscribe: vi.fn() };
   channel.on.mockReturnValue(channel);
   channel.subscribe.mockReturnValue(channel);
-  const query = { select: vi.fn(), eq: vi.fn(), single: vi.fn() };
+  const query = { select: vi.fn(), eq: vi.fn(), single: vi.fn(), maybeSingle: vi.fn() };
   query.select.mockReturnValue(query);
   // eq() is awaited directly (memberships) or followed by single() (objectives).
-  const eqResult = Object.assign(Promise.resolve(result), { single: query.single });
+  const eqResult = Object.assign(Promise.resolve(result), {
+    single: query.single,
+    maybeSingle: query.maybeSingle,
+  });
   query.eq.mockReturnValue(eqResult);
   query.single.mockResolvedValue(result);
+  query.maybeSingle.mockResolvedValue(result);
   const client = {
     rpc: vi.fn().mockResolvedValue(result),
     from: vi.fn().mockReturnValue(query),
@@ -47,6 +51,15 @@ describe('createSupabaseConsoleApi', () => {
     await api.setObjectives('o', 300, 30);
     await api.listRuns('o');
     await api.drillEvidence('r');
+    await api.setDrillSchedule(
+      'o',
+      'monthly',
+      '2026-12-01T09:00:00.000Z',
+      'us-east-1',
+      'aws-us-west-2',
+    );
+    await api.disableDrillSchedule('o');
+    await api.startDrill('o', 'us-east-1', 'gcp-us-central1');
     expect(raw.rpc.mock.calls).toEqual([
       ['get_failover_status', { p_org: 'o' }],
       ['org_audit_feed', { p_org: 'o', p_limit: 50 }],
@@ -65,6 +78,18 @@ describe('createSupabaseConsoleApi', () => {
       ['set_recovery_objectives', { p_org: 'o', p_rto: 300, p_rpo: 30 }],
       ['list_failover_runs', { p_org: 'o', p_limit: 50 }],
       ['drill_evidence', { p_run: 'r' }],
+      [
+        'set_drill_schedule',
+        {
+          p_org: 'o',
+          p_cadence: 'monthly',
+          p_first_run: '2026-12-01T09:00:00.000Z',
+          p_source: 'us-east-1',
+          p_target: 'aws-us-west-2',
+        },
+      ],
+      ['disable_drill_schedule', { p_org: 'o' }],
+      ['start_drill', { p_org: 'o', p_source: 'us-east-1', p_target: 'gcp-us-central1' }],
     ]);
   });
 
@@ -81,6 +106,7 @@ describe('createSupabaseConsoleApi', () => {
     expect(raw.channel).toHaveBeenCalledWith('org-o');
     expect(channel.on.mock.calls.map((c) => c[1])).toEqual([
       { event: '*', schema: 'public', table: 'failover_runs', filter: 'org_id=eq.o' },
+      { event: '*', schema: 'public', table: 'drill_schedules', filter: 'org_id=eq.o' },
       { event: 'INSERT', schema: 'public', table: 'audit_log', filter: 'org_id=eq.o' },
     ]);
     off();
@@ -115,6 +141,24 @@ describe('acceptPendingInvites', () => {
     const { client, raw } = fakeClient({ data: 2, error: null });
     await expect(acceptPendingInvites(client)).resolves.toBe(2);
     expect(raw.rpc).toHaveBeenCalledWith('accept_pending_invites');
+  });
+});
+
+describe('drill schedule read', () => {
+  test('reads the schedule row, or null when none exists', async () => {
+    const row = {
+      cadence: 'weekly',
+      next_run_at: '2026-11-16T09:00:00Z',
+      last_run_at: null,
+      source_region: 'us-east-1',
+      target_region: 'aws-us-west-2',
+      enabled: true,
+    };
+    const { client, raw, query } = fakeClient({ data: row, error: null });
+    await expect(createSupabaseConsoleApi(client).getDrillSchedule('o')).resolves.toEqual(row);
+    expect(raw.from).toHaveBeenCalledWith('drill_schedules');
+    expect(query.eq).toHaveBeenCalledWith('org_id', 'o');
+    expect(query.maybeSingle).toHaveBeenCalled();
   });
 });
 

@@ -51,6 +51,37 @@ describe('auditFormat', () => {
     ).toBe('x@co.com');
   });
 
+  test('describes drill events', () => {
+    expect(
+      describeDetail(
+        rec(6, {
+          action: 'drill.started',
+          detail: { trigger: 'scheduled', source: 'us-east-1', target: 'aws-us-west-2' },
+        }),
+      ),
+    ).toBe('scheduled: us-east-1 → aws-us-west-2');
+    expect(
+      describeDetail(
+        rec(7, {
+          action: 'drill.completed',
+          detail: { result: 'passed', recovery_seconds: 5.5, rto_target_seconds: 900 },
+        }),
+      ),
+    ).toBe('passed: 5.5 s vs 900 s target (simulated)');
+    expect(
+      describeDetail(rec(8, { action: 'drill.completed', detail: { result: 'aborted' } })),
+    ).toBe('aborted');
+    expect(
+      describeDetail(
+        rec(9, {
+          action: 'drill.schedule_set',
+          detail: { cadence: 'monthly', next_run_at: '2026-12-01T17:00:00+00:00' },
+        }),
+      ),
+    ).toBe('monthly, next 2026-12-01 17:00 UTC');
+    expect(ACTION_LABEL['drill.schedule_disabled']).toBe('Drill schedule turned off');
+  });
+
   test('CSV quotes fields, records the chain status, and neutralizes spreadsheet formulas', () => {
     const csv = toCsv(
       [rec(1, { actorEmail: '=HYPERLINK("http://evil")', detail: { note: 'say "hi"' } })],
