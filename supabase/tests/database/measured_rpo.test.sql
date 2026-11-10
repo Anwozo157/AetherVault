@@ -49,7 +49,7 @@ select is((select replication_at_launch from public.failover_runs where id = (se
 select is((select pg_temp.completed(id)->>'result' from d1), 'passed', 'no snapshot: drill passes on recovery time');
 select is((select (public.drill_evidence(id)->'results'->>'rpo_measured')::boolean from d1), false,
   'no snapshot: evidence says RPO not measured');
-select is((select public.drill_evidence(id)->>'report_version' from d1), '3', 'evidence is report v3');
+select ok((select (public.drill_evidence(id)->>'report_version')::int >= 3 from d1), 'evidence is report v3 or later');
 
 -- 2. Healthy live snapshot 30 s before launch: RPO measured and met
 select pg_temp.snapshot(4, true, 0);

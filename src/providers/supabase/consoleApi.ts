@@ -11,6 +11,8 @@ import type {
   MemberRole,
   RunKind,
   RunOutcome,
+  RunbookStep,
+  RunbookStepDraft,
   ServerHealth,
   Unsubscribe,
 } from '../../domain/dr';
@@ -89,6 +91,27 @@ export interface RunRow {
   rpo_seconds: number | string | null;
   rpo_target_seconds: number | null;
   replication_source: 'aws-drs' | 'fixture' | null;
+}
+
+export interface RunbookRow {
+  version: number;
+  steps: RunbookStep[];
+  updated_by: string | null;
+  updated_at: string;
+}
+
+export interface ChecklistRow {
+  run_id: string;
+  version: number;
+  open: boolean;
+  steps: Array<
+    RunbookStep & {
+      done: boolean;
+      checked_by: string | null;
+      checked_at: string | null;
+      note: string | null;
+    }
+  >;
 }
 
 export interface ScheduleRow {
@@ -220,6 +243,10 @@ export interface ConsoleApi {
   ingestTokenStatus(orgId: string): Promise<IngestTokenRow | null>;
   createIngestToken(orgId: string): Promise<string>;
   revokeIngestToken(orgId: string): Promise<void>;
+  getRunbook(orgId: string): Promise<RunbookRow | null>;
+  setRunbook(orgId: string, steps: RunbookStepDraft[]): Promise<number>;
+  runChecklist(runId: string): Promise<ChecklistRow | null>;
+  checkRunbookStep(runId: string, stepId: string, note: string | null): Promise<void>;
   /** Calls back whenever runs or audit entries for the org change. */
   subscribe(orgId: string, onChange: () => void): Unsubscribe;
 }
@@ -326,6 +353,13 @@ export function createSupabaseConsoleApi(client: SupabaseClient): ConsoleApi {
       call<IngestTokenRow | null>(client.rpc('ingest_token_status', { p_org: orgId })),
     createIngestToken: (orgId) => call<string>(client.rpc('create_ingest_token', { p_org: orgId })),
     revokeIngestToken: (orgId) => call<void>(client.rpc('revoke_ingest_token', { p_org: orgId })),
+    getRunbook: (orgId) => call<RunbookRow | null>(client.rpc('get_runbook', { p_org: orgId })),
+    setRunbook: (orgId, steps) =>
+      call<number>(client.rpc('set_runbook', { p_org: orgId, p_steps: steps })),
+    runChecklist: (runId) =>
+      call<ChecklistRow | null>(client.rpc('run_checklist', { p_run: runId })),
+    checkRunbookStep: (runId, stepId, note) =>
+      call<void>(client.rpc('check_runbook_step', { p_run: runId, p_step: stepId, p_note: note })),
     subscribe(orgId, onChange) {
       const filter = `org_id=eq.${orgId}`;
       const channel = client

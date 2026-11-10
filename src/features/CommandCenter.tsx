@@ -19,6 +19,7 @@ const AuditLogPanel = lazy(() => import('./audit/AuditLogPanel'));
 const TeamPanel = lazy(() => import('./team/TeamPanel'));
 const DrillsPanel = lazy(() => import('./drills/DrillsPanel'));
 const AlertsPanel = lazy(() => import('./alerts/AlertsPanel'));
+const RunbookPanel = lazy(() => import('./runbooks/RunbookPanel'));
 const ReplicationPanel = lazy(() => import('./replication/ReplicationPanel'));
 const OnboardingChecklist = lazy(() => import('./onboarding/OnboardingChecklist'));
 
@@ -73,6 +74,7 @@ export default function CommandCenter({
         showTeam={!!provider.team}
         showDrills={!!provider.drills}
         showAlerts={!!provider.alerts}
+        showRunbook={!!provider.runbooks}
       />
 
       {provider.team && provider.audit && provider.team.myRole === 'admin' && orgId && (
@@ -139,6 +141,20 @@ export default function CommandCenter({
         >
           <Suspense fallback={<PanelPlaceholder label="Loading drills…" />}>
             <DrillsPanel
+              drills={provider.drills}
+              myRole={provider.team?.myRole ?? 'viewer'}
+              refreshKey={activityKey}
+            />
+          </Suspense>
+        </ErrorBoundary>
+      ) : tab === 'runbook' && provider.runbooks ? (
+        <ErrorBoundary
+          key="runbook"
+          fallback={<PanelPlaceholder label="Runbook failed to load." />}
+        >
+          <Suspense fallback={<PanelPlaceholder label="Loading runbook…" />}>
+            <RunbookPanel
+              runbooks={provider.runbooks}
               drills={provider.drills}
               myRole={provider.team?.myRole ?? 'viewer'}
               refreshKey={activityKey}

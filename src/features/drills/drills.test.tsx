@@ -403,6 +403,31 @@ describe('Drill schedule', () => {
             rpo_met: false,
           },
           replication_at_launch: { ...REP, max_lag_seconds: 130, problem_count: 1, rpo_met: false },
+          runbook: {
+            version: 2,
+            total: 2,
+            completed: 1,
+            steps: [
+              {
+                id: 's1',
+                phase: 'before',
+                title: 'Declare the incident',
+                done: true,
+                checked_by: 'op@co.com',
+                checked_at: '2026-11-09T09:00:30Z',
+                note: null,
+              },
+              {
+                id: 's2',
+                phase: 'after',
+                title: 'Plan failback',
+                done: false,
+                checked_by: null,
+                checked_at: null,
+                note: null,
+              },
+            ],
+          },
           run: {
             ...evidence().run,
             kind: 'drill',
@@ -429,6 +454,9 @@ describe('Drill schedule', () => {
     expect(dialog).not.toHaveTextContent('Time to approval');
     expect(dialog).toHaveTextContent('DRILL COMPLETE');
     expect(dialog).toHaveTextContent('FAIL');
+    expect(dialog).toHaveTextContent('Runbook (v2): 1 of 2 steps done');
+    expect(dialog).toHaveTextContent('Declare the incident' + 'op@co.com');
+    expect(dialog).toHaveTextContent('Plan failback' + 'not done');
     expect(dialog).toHaveTextContent(
       'MISSED: 2 min worst replication lag at launch (target 30 s); 1 of 3 servers not replicating normally. Measured from AWS DRS us-west-2, account …3333',
     );

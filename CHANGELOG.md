@@ -5,6 +5,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Phase 4.6: DR runbooks (2026-11-10)
+
+- **Runbook tab** (console): each organization keeps one versioned runbook of steps for before, during and after recovery. Admins edit it (add, reorder, remove; up to 50 steps) or start from a generic AWS Elastic Disaster Recovery template; everyone else reads it.
+- **Per-run checklist:** every drill and failover copies the runbook version in force when it starts, so later edits never rewrite history. Operators and above tick steps off with an optional note for 7 days after the run. Ticks are permanent and audited (who, when, note).
+- **Evidence report v4** adds the checklist: "Runbook (v1): 7 of 10 steps done", with who did each step and when. Activity log and audit log describe runbook edits and ticks; drill results in the audit log now include the measured data loss.
+- Tests: 28 pgTAP (admin-only edits, validation, ids kept, versioning, copy at launch, tick rules, closed after 7 days, no direct table access, evidence), panel and provider tests, and a console E2E (template → drill → tick → evidence).
+
 ### Phase 4.5: Measured data loss (RPO) in drill and failover evidence (2026-11-10)
 
 - **Measured RPO:** when a drill launches or a failover is approved, the latest replication snapshot received in the 5 minutes before is copied onto the run. Its worst replication lag is the measured data-loss window. The copy lives on the run, so evidence outlives the 7-day snapshot retention. No snapshot in the window means "not measured", as before.

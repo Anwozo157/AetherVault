@@ -4,6 +4,7 @@
 
 import {
   type AlertsCapability,
+  type RunbooksCapability,
   type ReplicationCapability,
   type ApprovalCapability,
   type AuditCapability,
@@ -108,6 +109,16 @@ function describeAudit(entry: AuditEntry): { level: LogEvent['level']; message: 
         level: 'INFO',
         message: `${actor} scheduled ${String(d.cadence)} drills; next ${new Date(String(d.next_run_at)).toLocaleString()}.`,
       };
+    case 'runbook.updated':
+      return {
+        level: 'INFO',
+        message: `${actor} updated the DR runbook (version ${String(d.version)}, ${String(d.steps)} steps).`,
+      };
+    case 'runbook.step_checked':
+      return {
+        level: 'INFO',
+        message: `${actor} completed runbook step: ${String(d.title)}${d.note ? ` (${String(d.note)})` : ''}.`,
+      };
     case 'drill.schedule_disabled':
       return { level: 'WARN', message: `${actor} turned off scheduled drills.` };
     case 'alert.channel_added':
@@ -157,6 +168,7 @@ export class SupabaseDrProvider implements DrProvider {
   readonly team: TeamCapability;
   readonly drills: DrillsCapability;
   readonly alerts: AlertsCapability;
+  readonly runbooks: RunbooksCapability;
   readonly replication: ReplicationCapability;
   /** Resolves after the first sync with the server (useful in tests). */
   readonly ready: Promise<void>;
@@ -259,6 +271,36 @@ export class SupabaseDrProvider implements DrProvider {
         api.setDrillSchedule(org, cadence, firstRunAt, SOURCE_REGION, targetRegion),
       disableSchedule: () => api.disableDrillSchedule(org),
       startDrill: (targetRegion) => api.startDrill(org, SOURCE_REGION, targetRegion),
+    };
+    this.runbooks = {
+      get: async () => {
+        const b = await api.getRunbook(org);
+        return b
+          ? { version: b.version, steps: b.steps, updatedBy: b.updated_by, updatedAt: b.updated_at }
+          : null;
+      },
+      save: (steps) => api.setRunbook(org, steps),
+      checklist: async (runId) => {
+        const c = await api.runChecklist(runId);
+        return c
+          ? {
+              runId: c.run_id,
+              version: c.version,
+              open: c.open,
+              steps: c.steps.map((s) => ({
+                id: s.id,
+                phase: s.phase,
+                title: s.title,
+                detail: s.detail,
+                done: s.done,
+                checkedBy: s.checked_by,
+                checkedAt: s.checked_at,
+                note: s.note,
+              })),
+            }
+          : null;
+      },
+      check: (runId, stepId, note) => api.checkRunbookStep(runId, stepId, note?.trim() || null),
     };
     this.alerts = {
       listChannels: async () =>

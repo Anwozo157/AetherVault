@@ -17,6 +17,8 @@ export const ACTION_LABEL: Record<string, string> = {
   'drill.started': 'Drill started',
   'drill.completed': 'Drill completed',
   'drill.schedule_set': 'Drill schedule set',
+  'runbook.updated': 'Runbook updated',
+  'runbook.step_checked': 'Runbook step done',
   'drill.schedule_disabled': 'Drill schedule turned off',
   'alert.channel_added': 'Alert channel added',
   'alert.channel_removed': 'Alert channel removed',
@@ -42,12 +44,22 @@ export function describeDetail(r: AuditRecord): string {
   if (r.action === 'drill.completed')
     return s('result') === 'aborted'
       ? 'aborted'
-      : `${s('result') ?? '?'}: ${String(d.recovery_seconds)} s vs ${String(d.rto_target_seconds)} s target (simulated)`;
+      : `${s('result') ?? '?'}: ${String(d.recovery_seconds)} s vs ${String(d.rto_target_seconds)} s target (simulated)${
+          d.rpo_met === undefined
+            ? ''
+            : d.rpo_met === null
+              ? '; data loss not measured'
+              : `; data loss ${d.rpo_seconds === null ? 'unknown' : `${String(d.rpo_seconds)} s`} vs ${String(d.rpo_target_seconds)} s${d.rpo_met ? '' : ' MISSED'}${s('replication_source') === 'fixture' ? ' (sample data)' : ''}`
+        }`;
   if (r.action === 'drill.schedule_set')
     return `${s('cadence') ?? '?'}, next ${s('next_run_at') ? new Date(s('next_run_at')!).toISOString().slice(0, 16).replace('T', ' ') + ' UTC' : '?'}`;
   if (r.action === 'alert.channel_added' || r.action === 'alert.channel_removed')
     return `${s('kind') ?? '?'}: ${s('name') ?? '?'}`;
   if (r.action === 'alert.test_sent') return s('name') ?? '';
+  if (r.action === 'runbook.updated')
+    return `version ${String(d.version)}, ${String(d.steps)} steps`;
+  if (r.action === 'runbook.step_checked')
+    return `${s('title') ?? '?'}${s('note') ? ` (${s('note')})` : ''}`;
   if (r.action === 'replication.rpo_breached' || r.action === 'replication.rpo_recovered')
     return `worst lag ${d.max_lag_seconds === null || d.max_lag_seconds === undefined ? 'unknown' : `${String(d.max_lag_seconds)} s`}, target ${String(d.rpo_target_seconds)} s${s('source') === 'fixture' ? ' (sample data)' : ''}`;
   if (r.action === 'replication.token_created') return `…${s('hint') ?? ''}`;
