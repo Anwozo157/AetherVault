@@ -54,7 +54,7 @@ Open `http://localhost:5174` in your browser.
 ## 📱 Live Production Mobile & Web Demo for Stakeholders
 
 - **Live URL:** [https://getaethervault.com/](https://getaethervault.com/)
-- **Zero Infrastructure Cost:** Hosted permanently via GitHub Pages ($0.00/mo).
+- **Low cost:** hosted on GitHub Pages ($0/mo); the `getaethervault.com` domain is about $11/year.
 - **Mobile Optimized:** Full touch support on iOS & Android browsers for 3D globe gesture rotation and hold-to-failover haptics (Android; iOS browsers do not support vibration).
 
 <div align="center">

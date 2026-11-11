@@ -96,10 +96,10 @@ Store every password in one password manager (Apple Passwords/iCloud Keychain is
 
 ## Reporting a vulnerability
 
-Use GitHub's private vulnerability reporting on this repository (Security tab → "Report a vulnerability"). Please do not open a public issue. We aim to acknowledge within 3 business days.
+Use GitHub's private vulnerability reporting on this repository (Security tab → "Report a vulnerability") or email **security@getaethervault.com**. Please do not open a public issue. We aim to acknowledge within 3 business days.
 
 ## Known gaps (tracked)
 
-- `frame-ancestors` / other HTTP security headers need a host that sends headers (custom domain on a CDN; requires funding).
-- Hosted backend not yet created (Phase 3.6); its dashboard settings must match `supabase/config.toml` (disable password sign-ups, enable leaked-password protection, rate limits).
+- `frame-ancestors` / other HTTP security headers need a host that sends headers. The site is on `getaethervault.com` (2026-11-11) but still served by GitHub Pages, which can't send them; options: Cloudflare proxy with a header rule, or a host such as Cloudflare Pages.
+- Hosted backend (created 2026-11-10): keep its dashboard settings matched to `supabase/config.toml` (magic link only, email confirmation on, rate limits).
 - No third-party penetration test or SOC 2 yet (when customers require it). Readiness self-assessment and free next steps: `docs/SOC2_READINESS.md`.

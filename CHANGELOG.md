@@ -5,6 +5,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Company email on the site (2026-11-11)
+
+- Landing page: `CONTACT_EMAIL` set to `antonio@getaethervault.com`, so the "Ask about a pilot" button appears (it was hidden until a professional address existed).
+- Security policy (`SECURITY.md`, `docs/SECURITY.md`): reports can also go to `security@getaethervault.com`. Known gaps updated (custom domain live but GitHub Pages still can't send `frame-ancestors`; hosted backend exists).
+- README cost line now mentions the domain (~$11/year). `docs/PILOT_DAY.md` B1 done, B9 half done; `docs/AWS_LIVE_POC.md` records the AWS account status and the IAM-user + `aws login` route; `docs/CUSTOM_DOMAIN.md` marked live, with the email and Resend next steps.
+
 ### Custom domain: getaethervault.com (2026-11-11)
 
 - Domain `getaethervault.com` registered at Cloudflare and verified with GitHub Pages. DNS: GitHub Pages A/AAAA records and `www` CNAME (DNS only). Email Routing forwards antonio@, support@, security@ and billing@ to the founder's inbox (MX, SPF, DKIM by Cloudflare).

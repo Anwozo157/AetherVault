@@ -28,8 +28,17 @@ with measured data loss and a runbook in its evidence, and failback rehearsed.
 
 ## Steps (option 1)
 
-1. Founder: create the AWS account, enable MFA, create a **Budgets alert** ($25), set up IAM
-   Identity Center with an admin user; then `aws sso login` on this Mac.
+1. Founder: create the AWS account, enable MFA, create a **Budgets alert** ($25) and a spend limit;
+   create IAM user `antonio-admin` (AdministratorAccess, console password, MFA, **no access keys**);
+   then `aws login --profile aegis --region us-east-1` on this Mac (AWS CLI 2.40+, short-lived
+   credentials). IAM Identity Center needs AWS Organizations, which a new account can't enable until
+   AWS finishes verifying it.
+
+   **Status 2026-11-11:** account 305815657680 created and upgraded to the paid plan; verification
+   pending (blocks Organizations, CloudShell and console access for IAM users). AWS CLI 2.40.0
+   installed. Next: after verification, give `antonio-admin` a console password from CloudShell
+   (`aws iam create-login-profile`), add MFA, `aws login`.
+
 2. Agent: initialize DRS in `us-west-2`; default replication settings (encrypted staging,
    t3.small, 7-day point in time).
 3. Agent: launch a t3.micro Amazon Linux source in `us-east-1` with a small web page and a file
