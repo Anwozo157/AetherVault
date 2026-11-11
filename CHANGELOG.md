@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Customer sign-in email via Resend (2026-11-11)
+
+- Supabase Auth now sends through Resend (free plan) as `AetherVault <no-reply@getaethervault.com>`, so magic links reach customer addresses (pilot blocker B9 done). DKIM, sending and DMARC (report-only) records added on Cloudflare; details in `docs/CUSTOM_DOMAIN.md`.
+
 ### Company email on the site (2026-11-11)
 
 - Landing page: `CONTACT_EMAIL` set to `antonio@getaethervault.com`, so the "Ask about a pilot" button appears (it was hidden until a professional address existed).
