@@ -13,12 +13,13 @@ the allow list), checked in a browser on desktop and phone.
 Cloudflare Email Routing forwards `antonio@`, `support@`, `security@` and `billing@` to the
 founder's inbox (MX, SPF and DKIM records added by Cloudflare). Receiving only.
 
-Next, **Resend** (free tier) for sending: customer magic-link emails from Supabase (pilot blocker
-B9) and replies from the company address. Founder creates the Resend account and an API key;
-Resend gives DNS records for a sending subdomain (e.g. `send.getaethervault.com`, so they don't
-clash with Cloudflare's MX on the root); then Supabase → Auth → SMTP: host `smtp.resend.com`,
-port 465, user `resend`, password = the API key, sender `AetherVault <no-reply@getaethervault.com>`.
-Also add a DMARC record (`_dmarc` TXT `v=DMARC1; p=none`) and tighten it later.
+**Sending: Resend (free plan, 3,000/month, 100/day), connected 2026-11-11.** Domain verified in
+Resend (us-east-1). DNS: DKIM TXT `resend._domainkey`, CNAMEs `send` → `send.forge.rmta.net` and
+`rsend` → `rsend.forge.rmta.net` (DNS only), DMARC `_dmarc` TXT `v=DMARC1; p=none;` (report-only;
+tighten later). Resend's "receiving" stays off (Cloudflare handles incoming mail). Supabase Auth SMTP:
+`smtp.resend.com:465`, user `resend`, password = a sending-only Resend key (Keychain "Resend API
+key (aethervault)"), sender `AetherVault <no-reply@getaethervault.com>`, email rate limit 30/hour.
+Magic links now reach any address, not just Supabase team members (pilot blocker B9).
 
 ## Order matters
 
