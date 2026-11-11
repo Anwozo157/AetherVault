@@ -2,7 +2,7 @@
 
 export const APP_VERSION = __APP_VERSION__;
 export const BUILD_DATE = __BUILD_DATE__;
-export const LIVE_URL = 'https://anwozo157.github.io/AetherVault/';
+export const LIVE_URL = 'https://getaethervault.com/';
 
 /**
  * Link for sharing: the live demo plus this build's version. GitHub Pages ignores the

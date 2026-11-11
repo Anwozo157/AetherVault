@@ -13,7 +13,7 @@ describe('ShareModal', () => {
     const qr = await screen.findByTestId('share-qr');
     // Generated in the browser: an inline SVG, never a third-party QR service.
     expect(qr.getAttribute('src')).toMatch(/^data:image\/svg\+xml/);
-    expect(qr).toHaveAccessibleName(expect.stringContaining('anwozo157.github.io/AetherVault/'));
+    expect(qr).toHaveAccessibleName(expect.stringContaining('getaethervault.com/'));
     expect(screen.getByText(`Build ${APP_VERSION} · ${BUILD_DATE}`)).toBeInTheDocument();
     fireEvent.click(screen.getByText('Close'));
     expect(onClose).toHaveBeenCalled();
