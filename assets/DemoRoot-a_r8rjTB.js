@@ -1,1 +1,0 @@
-import{n as e,o as t,t as n}from"./MockDrProvider-CYb3FSMk.js";import{t as r}from"./jsx-runtime-NmdJFA-0.js";function i(){return new n}var a=r(),o=null;function s({signInHref:n}){return o??=i(),(0,a.jsx)(t,{provider:o,children:(0,a.jsx)(e,{signInHref:n})})}export{s as default};
