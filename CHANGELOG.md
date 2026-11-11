@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Weekly database backup (2026-11-11)
+
+- `scripts/backup-db.sh` + a launchd schedule (Sundays 10:00): `supabase db dump` of roles, schema and data (including `auth` and every `public` table) to `~/Backups/AetherVault` on the founder's Mac, owner-only permissions, newest 8 kept, failure notification. Free stand-in until Supabase Pro's managed backups; `docs/BACKUPS.md` has the restore steps (not yet rehearsed).
+
 ### Customer sign-in email via Resend (2026-11-11)
 
 - Supabase Auth now sends through Resend (free plan) as `AetherVault <no-reply@getaethervault.com>`, so magic links reach customer addresses (pilot blocker B9 done). DKIM, sending and DMARC (report-only) records added on Cloudflare; details in `docs/CUSTOM_DOMAIN.md`.
