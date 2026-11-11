@@ -5,9 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
-### Custom domain: getaethervault.com (prepared, not live; 2026-11-11)
+### Custom domain: getaethervault.com (2026-11-11)
 
-- Domain `getaethervault.com` registered at Cloudflare. `public/CNAME` and `LIVE_URL` (share links and QR) now point at it; README and the deploy message too.
+- Domain `getaethervault.com` registered at Cloudflare and verified with GitHub Pages. DNS: GitHub Pages A/AAAA records and `www` CNAME (DNS only). Email Routing forwards antonio@, support@, security@ and billing@ to the founder's inbox (MX, SPF, DKIM by Cloudflare).
+- `public/CNAME` and `LIVE_URL` (share links and QR) now point at it; README and the deploy message too. Supabase auth redirects updated to the new address (old address kept during the move).
 - `docs/CUSTOM_DOMAIN.md`: go-live order (DNS first, then deploy), GitHub domain verification, the GitHub Pages DNS records (DNS only), Supabase auth redirect update, and checks.
 
 ### Docs: multicloud research and live AWS proof of concept (2026-11-10)
