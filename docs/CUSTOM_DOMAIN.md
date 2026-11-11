@@ -4,6 +4,22 @@ The site moves from `https://anwozo157.github.io/AetherVault/` to `https://getae
 Domain registered 2026-11-11 at Cloudflare Registrar (DNS on Cloudflare). Hosting stays on GitHub
 Pages (free). The old URL keeps working: GitHub redirects it to the custom domain.
 
+**Status: live 2026-11-11.** Steps 1–5 below are done: domain verified on GitHub, DNS records added,
+HTTPS certificate issued and enforced, Supabase auth points at the new address (github.io kept in
+the allow list), checked in a browser on desktop and phone.
+
+## Email
+
+Cloudflare Email Routing forwards `antonio@`, `support@`, `security@` and `billing@` to the
+founder's inbox (MX, SPF and DKIM records added by Cloudflare). Receiving only.
+
+Next, **Resend** (free tier) for sending: customer magic-link emails from Supabase (pilot blocker
+B9) and replies from the company address. Founder creates the Resend account and an API key;
+Resend gives DNS records for a sending subdomain (e.g. `send.getaethervault.com`, so they don't
+clash with Cloudflare's MX on the root); then Supabase → Auth → SMTP: host `smtp.resend.com`,
+port 465, user `resend`, password = the API key, sender `AetherVault <no-reply@getaethervault.com>`.
+Also add a DMARC record (`_dmarc` TXT `v=DMARC1; p=none`) and tighten it later.
+
 ## Order matters
 
 Ship the code (`public/CNAME`, `LIVE_URL`) **only after** the DNS records below resolve. If the CNAME
@@ -18,17 +34,17 @@ record (`_github-pages-challenge-anwozo157` = a code). Add it in Cloudflare DNS,
 
 GitHub must see its own IPs to issue the HTTPS certificate, so the Cloudflare proxy stays off.
 
-| Type  | Name  | Value                  |
-| ----- | ----- | ---------------------- |
-| A     | `@`   | `185.199.108.153`      |
-| A     | `@`   | `185.199.109.153`      |
-| A     | `@`   | `185.199.110.153`      |
-| A     | `@`   | `185.199.111.153`      |
-| AAAA  | `@`   | `2606:50c0:8000::153`  |
-| AAAA  | `@`   | `2606:50c0:8001::153`  |
-| AAAA  | `@`   | `2606:50c0:8002::153`  |
-| AAAA  | `@`   | `2606:50c0:8003::153`  |
-| CNAME | `www` | `anwozo157.github.io`  |
+| Type  | Name  | Value                 |
+| ----- | ----- | --------------------- |
+| A     | `@`   | `185.199.108.153`     |
+| A     | `@`   | `185.199.109.153`     |
+| A     | `@`   | `185.199.110.153`     |
+| A     | `@`   | `185.199.111.153`     |
+| AAAA  | `@`   | `2606:50c0:8000::153` |
+| AAAA  | `@`   | `2606:50c0:8001::153` |
+| AAAA  | `@`   | `2606:50c0:8002::153` |
+| AAAA  | `@`   | `2606:50c0:8003::153` |
+| CNAME | `www` | `anwozo157.github.io` |
 
 Check: `dig +short getaethervault.com A` returns the four IPs.
 
