@@ -46,4 +46,4 @@ if [[ "${DRY_RUN:-}" == "1" ]]; then
 fi
 
 git -C "$WORKTREE" push -q origin gh-pages
-echo "Deployed $REV to https://anwozo157.github.io/AetherVault/ (allow ~1 minute to go live)."
+echo "Deployed $REV to https://getaethervault.com/ (allow ~1 minute to go live)."

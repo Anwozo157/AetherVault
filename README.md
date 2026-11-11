@@ -53,12 +53,12 @@ Open `http://localhost:5174` in your browser.
 
 ## 📱 Live Production Mobile & Web Demo for Stakeholders
 
-- **Live URL:** [https://anwozo157.github.io/AetherVault/](https://anwozo157.github.io/AetherVault/)
+- **Live URL:** [https://getaethervault.com/](https://getaethervault.com/)
 - **Zero Infrastructure Cost:** Hosted permanently via GitHub Pages ($0.00/mo).
 - **Mobile Optimized:** Full touch support on iOS & Android browsers for 3D globe gesture rotation and hold-to-failover haptics (Android; iOS browsers do not support vibration).
 
 <div align="center">
-  <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://anwozo157.github.io/AetherVault/" alt="Scan for Mobile Live Demo" width="160" />
+  <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://getaethervault.com/" alt="Scan for Mobile Live Demo" width="160" />
   <p><em>Scan with iPhone or Android camera for instant live demo</em></p>
 </div>
 

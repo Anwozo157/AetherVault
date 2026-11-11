@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Custom domain: getaethervault.com (prepared, not live; 2026-11-11)
+
+- Domain `getaethervault.com` registered at Cloudflare. `public/CNAME` and `LIVE_URL` (share links and QR) now point at it; README and the deploy message too.
+- `docs/CUSTOM_DOMAIN.md`: go-live order (DNS first, then deploy), GitHub domain verification, the GitHub Pages DNS records (DNS only), Supabase auth redirect update, and checks.
+
 ### Docs: multicloud research and live AWS proof of concept (2026-11-10)
 
 - `docs/MULTICLOUD_DR.md`: Azure Site Recovery for physical servers (architecture with the on-premises replication appliance, ports, recovery points, supported systems, test failover, monitoring fields, pricing model), sourced from Microsoft Learn, with unverified items marked. A side-by-side table compares it with AWS. Google Cloud research is blocked (docs domain not fetchable from this session), so that section lists the exact pages to read next. It also lists what adding a cloud to AetherVault takes.
