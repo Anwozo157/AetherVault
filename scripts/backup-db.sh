@@ -59,6 +59,27 @@ npx --no-install supabase db dump --linked --data-only --use-copy -f "$DEST/data
 for t in '"auth"."users"' '"public"."orgs"' '"public"."audit_log"'; do
   grep -q "^COPY $t" "$DEST/data.sql" || fail "data dump is missing $t"
 done
+# Scheduled jobs live in pg_cron's own tables, which `supabase db dump` skips. Save them as
+# cron.schedule() calls (via the Management API, CLI token from the Keychain) so a restore
+# brings back the drill scheduler and alert sweeper.
+SUPABASE_TOKEN="$(security find-generic-password -s 'Supabase CLI' -w)" || fail "Supabase CLI token not found in Keychain"
+curl -sf -X POST "https://api.supabase.com/v1/projects/yvcejahygubzbbbooxas/database/query" \
+  -H "Authorization: Bearer ${SUPABASE_TOKEN}" -H "Content-Type: application/json" \
+  -d '{"query":"select jobname, schedule, command from cron.job order by jobname"}' \
+  >"$DEST/cron.json" || fail "cron jobs query"
+unset SUPABASE_TOKEN
+python3 - "$DEST/cron.json" >"$DEST/cron.sql" <<'PY' || fail "cron jobs file"
+import json, sys
+jobs = json.load(open(sys.argv[1]))
+print("-- pg_cron jobs at backup time. Run after the data restore.")
+for j in jobs:
+    q = lambda s: "$aether$" + s + "$aether$"
+    print(f"select cron.schedule({q(j['jobname'])}, {q(j['schedule'])}, {q(j['command'])});")
+if not jobs:
+    sys.exit("no cron jobs returned")
+PY
+rm -f "$DEST/cron.json"
+
 gzip -9f "$DEST"/*.sql
 chmod 600 "$DEST"/*.gz
 
