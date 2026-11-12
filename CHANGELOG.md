@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Backup restore rehearsed; scheduled jobs now backed up (2026-11-12)
+
+- Practice restore of the weekly backup into an empty local Supabase: data identical to production (fingerprints matched), audit chain intact, all security policies, functions and triggers present.
+- Found: the dump skipped the two pg_cron jobs (drill scheduler, alert sweeper), so a restore would have silently stopped drills and alerts. `scripts/backup-db.sh` now also saves them as `cron.sql`; restoring it brought both jobs back and they ran. `docs/BACKUPS.md` has the tested steps and lessons.
+
 ### Weekly database backup (2026-11-11)
 
 - `scripts/backup-db.sh` + a launchd schedule (Sundays 10:00): `supabase db dump` of roles, schema and data (including `auth` and every `public` table) to `~/Backups/AetherVault` on the founder's Mac, owner-only permissions, newest 8 kept, failure notification. Free stand-in until Supabase Pro's managed backups; `docs/BACKUPS.md` has the restore steps (not yet rehearsed).
