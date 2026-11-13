@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### AWS live test: Ohio-only plan and test source server (2026-11-13)
+
+- `scripts/poc/source-server.sh`: creates, checks and removes a small test server in our own AWS account (stands in for NewConnect's server; no SSH, no inbound ports, encrypted disk, managed through SSM; heartbeat file every minute so lag and data loss are visible). `check` runs free dry runs: EC2 launches are allowed in us-east-2; Elastic Disaster Recovery is still denied by an AWS-owned service control policy.
+- `docs/AWS_LIVE_POC.md` rewritten for the actual situation: the agent access-key route, the two AWS-owned blocks, and an Ohio-only test (same-Region recovery into another Availability Zone), so only the DRS block has to be lifted.
+
 ### Backup restore rehearsed; scheduled jobs now backed up (2026-11-12)
 
 - Practice restore of the weekly backup into an empty local Supabase: data identical to production (fingerprints matched), audit chain intact, all security policies, functions and triggers present.
