@@ -1,7 +1,7 @@
 import { Check, ChevronDown, ChevronUp, Copy } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import type { IngestTokenStatus, ReplicationCapability, ReplicationStatus } from '../../domain/dr';
-import { DRS_REGIONS, agentCommands, tfvars } from './setup';
+import { DEFAULT_DRS_REGION, DRS_REGIONS, agentCommands, isDrsRegion, tfvars } from './setup';
 
 const errText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
@@ -18,12 +18,15 @@ function load(orgId: string): Saved {
     const raw = window.localStorage.getItem(storeKey(orgId));
     if (raw) {
       const v = JSON.parse(raw) as Partial<Saved>;
-      return { region: v.region ?? 'us-west-2', done: v.done ?? {} };
+      // Stored values are untrusted: the region ends up in links and copyable shell commands.
+      const region = isDrsRegion(v.region) ? v.region : DEFAULT_DRS_REGION;
+      const done = v.done && typeof v.done === 'object' ? v.done : {};
+      return { region, done };
     }
   } catch {
     // Storage blocked or corrupt: start fresh.
   }
-  return { region: 'us-west-2', done: {} };
+  return { region: DEFAULT_DRS_REGION, done: {} };
 }
 function save(orgId: string, v: Saved) {
   try {
@@ -228,7 +231,9 @@ export default function ConnectAwsWizard({
               </span>
               <select
                 value={saved.region}
-                onChange={(e) => update({ ...saved, region: e.target.value })}
+                onChange={(e) => {
+                  if (isDrsRegion(e.target.value)) update({ ...saved, region: e.target.value });
+                }}
                 disabled={!isAdmin}
                 className="bg-aether-panel border border-white/10 rounded-lg px-2.5 py-2 text-zinc-200 text-xs focus:outline-none focus:border-aether-cyan/50 max-w-full"
               >
@@ -240,7 +245,7 @@ export default function ConnectAwsWizard({
               </select>
             </label>
             <a
-              href={`https://console.aws.amazon.com/drs/home?region=${saved.region}`}
+              href={`https://console.aws.amazon.com/drs/home?region=${encodeURIComponent(saved.region)}`}
               target="_blank"
               rel="noreferrer noopener"
               className="text-aether-cyan hover:underline w-fit"

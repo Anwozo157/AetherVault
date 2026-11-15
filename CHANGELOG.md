@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Fix: AWS setup guide only accepts known regions (2026-11-14)
+
+- The Connect-your-AWS guide remembered the recovery region in browser storage and used it as-is in the "Open Elastic Disaster Recovery" link and in the copyable agent and `aws drs` commands. A tampered stored value could have put arbitrary text into a command someone pastes into a terminal. The region is now checked against the offered list (`isDrsRegion`) on load and on change, falls back to `us-west-2`, and is URL-encoded in the link. Closes the CodeQL `js/xss-through-dom` alert. Tests cover tampered storage; verified in a browser at desktop and 390px.
+
 ### Legal prep prompt for working with counsel (2026-11-14)
 
 - Legal prep tasks T1–T15 done. New in `docs/legal/`: company fact sheet, data inventory (from the schema; flags that member emails sit in the append-only audit log and in laptop backups), customer-facing sub-processor list with verified vendor terms, AI tools register (+ draft `docs/policies/ai-use.md`), open-source license report (`scripts/license-report.mjs`: 131 production packages, no copyleft; finding: the build ships no license notices), claims audit, security overview and website terms drafts; privacy notice and SLA drafts updated (technical logs, 7-day status retention, US storage; Supabase uptime SLA is Enterprise-only). README now labels the multi-cloud target selection as simulated. Privileged material is in the founder's private workspace.

