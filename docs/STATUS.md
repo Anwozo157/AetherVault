@@ -13,6 +13,8 @@
 | AWS live test: what ran, what's blocked  | `docs/AWS_LIVE_POC.md` (status at the top)                                                                          |
 | Legal prep for counsel (Kim Larsen)      | `docs/LEGAL_PREP_PROMPT.md` (task table with ✅ dates), drafts in `docs/legal/`                                     |
 | SOC 2 program                            | `docs/SOC2_PROGRAM_PROMPT.md` (phase table), `docs/SOC2_READINESS.md`, dated records in `docs/reviews/`             |
+| SOC 2 Type I 30-day sprint               | `docs/SOC2_TYPE_I_SPRINT.md` (deep dive, timeline, control→evidence matrix, costs)                                  |
+| Security test agent ("Big Getty Star")   | `docs/security/SECURITY_TEST_AGENT.md` (prompt, toolchain, read-only creds per cloud)                               |
 | Trust pack for customer security reviews | `docs/trust/README.md` (what to send at each stage, honest gap answers, founder to-do)                              |
 | Private material (never in this repo)    | Founder's Mac: `~/Developer/AegisCoreLabs-private/` (local git, no remote): counsel prep, account IDs, case numbers |
 | Secrets                                  | macOS Keychain only (item names in `docs/SECURITY.md`); never in files or chat                                      |
