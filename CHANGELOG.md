@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### SOC 2 founder steps: secret-scanning extras not available (2026-11-14)
+
+- `docs/SOC2_PROGRAM_PROMPT.md`: the "non-provider patterns" and "validity checks" secret-scanning settings could not be turned on. GitHub leaves them off for this personal account on the free plan, so they appear to need paid Secret Protection. Removed as a founder step; secret scanning, push protection, Dependabot and gitleaks stay in place.
+
 ### Records and security housekeeping (2026-11-15)
 
 - `docs/STATUS.md`: new "Finding what's done" guide (where each kind of record lives), refreshed header and AWS next steps, and a founder to-do to back up the private folder.
