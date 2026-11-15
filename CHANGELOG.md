@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Consistent AetherVault naming (2026-11-15)
+
+- npm package renamed `aethervault-command-center` → `aethervault`. GitHub repository now has a description and links to https://getaethervault.com. Audit: the product is named "AetherVault" consistently across code, docs, site, email sender, Supabase project and the other AetherVault repositories; "command center" and "Mission Control" remain only as descriptions of screens. The AWS account is still named "Moonshot Mode" (AWS's default); renaming it is blocked by the same AWS policy as DRS and is a founder step in AWS Settings.
+
 ### Customer name removed from the repository (2026-11-15)
 
 - All mentions of the first pilot customer's company name, and details that identify it (its data center, field app and network equipment), replaced with neutral wording ("the pilot customer") across docs, the CHANGELOG and the POC script. Keeps the public repository free of other companies' names ahead of trademark work. Customer specifics live in the founder's private notes. Earlier git history still contains the old wording.
