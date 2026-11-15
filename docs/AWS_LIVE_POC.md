@@ -16,6 +16,15 @@ verified, but two **AWS-owned service control policies** (organization o-cgrskr3
 with "This account is not eligible for this operation". An AWS Support case is open (number in the founder's private notes).
 `scripts/poc/source-server.sh check` shows the current state in one command.
 
+**2026-11-15:** project renamed from AWS's default "Moonshot Mode" to **AetherVault** in AWS Settings.
+Activating advanced features is AWS's documented route to DRS on this account type (DRS is listed as
+"not supported" in the simplified experience until activation; see
+[activate advanced features](https://docs.aws.amazon.com/accounts/latest/reference/activate-advanced-features.html)).
+Retried at settings.aws.com → Projects → Continue to activation: still "This account is not eligible
+for this operation. Please contact AWS Support". Founder to reply on the support case asking to make
+the account eligible or to lift the DRS policy. Note before activating: it can't be undone and it
+deletes the spend limit, so create budget alerts ($5 / $10 / $20) immediately after.
+
 **Tested 2026-11-14 (everything that doesn't need DRS):** source server up, heartbeat and web
 page verified through SSM; collector deployed with Terraform (dummy token, no data sent to the live
 console), runs on schedule and reaches DRS with its read-only role, blocked only by `p-1m6ffy9a`.
