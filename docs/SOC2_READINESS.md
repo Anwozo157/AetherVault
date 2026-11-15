@@ -51,11 +51,11 @@
 
 ## CC4: Monitoring of controls
 
-| Control                               | Status | Evidence / gap                                                                                                                 |
-| ------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| Automated checks on every change      | ✅     | CI: lint, types, tests, coverage, `npm audit`, E2E, CSP, pgTAP, CodeQL, gitleaks                                               |
-| Periodic control reviews with records | 🟡     | Calendar `docs/compliance/CONTROL_CALENDAR.md`; records in `docs/reviews/` (first 2026-11-14); needs a full quarter of records |
-| Penetration test                      | ❌ 💰  | Usually expected before or during Type II                                                                                      |
+| Control                               | Status | Evidence / gap                                                                                                                                                 |
+| ------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Automated checks on every change      | ✅     | CI: lint, types, tests, coverage, `npm audit`, E2E, CSP, pgTAP, CodeQL, gitleaks                                                                               |
+| Periodic control reviews with records | 🟡     | Calendar `docs/compliance/CONTROL_CALENDAR.md`; records in `docs/reviews/` (access review and first monthly check 2026-11-14); needs a full quarter of records |
+| Penetration test                      | ❌ 💰  | Usually expected before or during Type II                                                                                                                      |
 
 ## CC5: Control activities (policies that drive the controls)
 

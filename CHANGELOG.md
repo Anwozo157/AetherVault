@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### SOC 2 program: prompt v2 and first monthly check (2026-11-14)
+
+- `docs/SOC2_PROGRAM_PROMPT.md` v2: "Current state" block, key decisions table (scope, Type I vs straight to Type II, Supabase report, platform, auditor criteria, private evidence store), read-only evidence rule, git lessons (worktrees outside the repo; verify right before every commit, merge and push), Supabase Team price confirmed ($599/month).
+- First monthly control check (`docs/reviews/2026-11-14-monthly-check.md`): backups, Dependabot, code and secret scanning, CI, database health, vendor status. 2 findings tracked privately.
+
 ### SOC 2 program: policies, records and plan (2026-11-14)
 
 - `docs/SOC2_PROGRAM_PROMPT.md`: reusable agent prompt plus the plan of record (phases A–G with exit criteria, budget ranges with sources, timeline to Type I and Type II).

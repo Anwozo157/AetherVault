@@ -11,3 +11,4 @@ vulnerabilities) are kept in private storage and referenced, not copied.
 | ---------- | ------------------------------------------------------------------------------------------ | -------------------------------- |
 | 2026-11-12 | Restore rehearsal (`docs/BACKUPS.md`)                                                      | Passed                           |
 | 2026-11-14 | [Initial access, endpoint and vendor review](2026-11-14-initial-access-endpoint-review.md) | 7 founder actions open (private) |
+| 2026-11-14 | [Monthly control check](2026-11-14-monthly-check.md)                                       | 2 (private); next 2026-12-14     |
