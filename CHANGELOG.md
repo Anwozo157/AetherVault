@@ -5,6 +5,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### SOC 2 session 3: recovery drill, questionnaire, evidence and status repositories (2026-11-14)
+
+- Recovery drill of AetherVault's own database (`docs/reviews/2026-11-14-recovery-drill.md`): latest backup restored into an empty stack in about 2 minutes; row counts, audit chain, scheduled jobs and security objects match. Finding: a restored project kept Supabase's default grants (signed-out users could run all 59 functions; production allows 1). `docs/BACKUPS.md` step 4 now revokes them and re-applies production's exact grants; verified.
+- `docs/compliance/SECURITY_QUESTIONNAIRE.md` (standard answers for pilots) and `docs/compliance/OUTREACH_DRAFTS.md` (Supabase report access, auditor and pen test quote requests; not sent).
+- New repositories: `Anwozo157/aethervault-evidence` (private; holds the specifics behind public review records) and `Anwozo157/aethervault-status` (Upptime monitor and status page; starts once the founder adds its token).
+- Program doc: key decisions recorded (Security + Availability; skip Type I unless a buyer asks; no platform yet), founder steps (status page token, Cloudflare security headers, secret scanning extras), current state.
+
 ### Fix: AWS setup guide only accepts known regions (2026-11-14)
 
 - The Connect-your-AWS guide remembered the recovery region in browser storage and used it as-is in the "Open Elastic Disaster Recovery" link and in the copyable agent and `aws drs` commands. A tampered stored value could have put arbitrary text into a command someone pastes into a terminal. The region is now checked against the offered list (`isDrsRegion`) on load and on change, falls back to `us-west-2`, and is URL-encoded in the link. Closes the CodeQL `js/xss-through-dom` alert. Tests cover tampered storage; verified in a browser at desktop and 390px.

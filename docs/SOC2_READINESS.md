@@ -34,12 +34,12 @@
 
 ## CC2: Communication and information
 
-| Control                                                          | Status | Evidence / gap                                                                                                              |
-| ---------------------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------- |
-| Security policies documented                                     | 🟡     | Full policy set drafted 2026-11-14 (`docs/policies/`); awaiting founder approval                                            |
-| System description (what the product is, data flows, boundaries) | ✅     | Draft `docs/compliance/SYSTEM_DESCRIPTION.md` (DC 200 structure) + `docs/ARCHITECTURE.md` + data flow in `docs/SECURITY.md` |
-| External way to report security issues                           | ✅     | GitHub private vulnerability reporting; `SECURITY.md`                                                                       |
-| Customer-facing commitments (terms, SLA, privacy notice)         | 🟡 💰  | Drafts in `docs/legal/` (privacy notice, SLA); terms and DPA need counsel                                                   |
+| Control                                                          | Status | Evidence / gap                                                                                                                              |
+| ---------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Security policies documented                                     | 🟡     | Full policy set drafted 2026-11-14 (`docs/policies/`); awaiting founder approval                                                            |
+| System description (what the product is, data flows, boundaries) | ✅     | Draft `docs/compliance/SYSTEM_DESCRIPTION.md` (DC 200 structure) + `docs/ARCHITECTURE.md` + data flow in `docs/SECURITY.md`                 |
+| External way to report security issues                           | ✅     | GitHub private vulnerability reporting; `SECURITY.md`                                                                                       |
+| Customer-facing commitments (terms, SLA, privacy notice)         | 🟡 💰  | Drafts in `docs/legal/`; standard security questionnaire answers in `docs/compliance/SECURITY_QUESTIONNAIRE.md`; terms and DPA need counsel |
 
 ## CC3: Risk assessment
 
@@ -101,19 +101,19 @@
 
 ## CC9: Risk mitigation (vendors, business disruption)
 
-| Control                                                             | Status | Evidence / gap                                                                                                          |
-| ------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------- |
-| Vendor inventory with their SOC 2 reports                           | 🟡     | `docs/compliance/VENDORS.md`; vendor reports not yet obtained (Supabase's needs a Team plan or a request)               |
-| Business continuity / disaster recovery plan for AetherVault itself | 🟡     | `docs/policies/business-continuity.md` (RTO/RPO per component, scenarios); full recovery drill not yet done             |
-| Backups, tested restores                                            | 🟡 💰  | Weekly encrypted local backup; restore rehearsed 2026-11-12 (`docs/BACKUPS.md`); Supabase Pro for managed daily backups |
+| Control                                                             | Status | Evidence / gap                                                                                                                                                                                                          |
+| ------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vendor inventory with their SOC 2 reports                           | 🟡     | `docs/compliance/VENDORS.md`; vendor reports not yet obtained (Supabase's needs a Team plan or a request)                                                                                                               |
+| Business continuity / disaster recovery plan for AetherVault itself | 🟡     | `docs/policies/business-continuity.md` (RTO/RPO per component, scenarios); full recovery drill not yet done                                                                                                             |
+| Backups, tested restores                                            | 🟡 💰  | Weekly encrypted local backup; recovery drill 2026-11-14 passed in about 2 minutes (`docs/reviews/2026-11-14-recovery-drill.md`), procedure fixed to re-apply production grants; Supabase Pro for managed daily backups |
 
 ## A1: Availability (recommended scope for a DR product)
 
-| Control                                | Status | Evidence / gap                                                                               |
-| -------------------------------------- | ------ | -------------------------------------------------------------------------------------------- |
-| Capacity and uptime commitments        | ❌     | Free Supabase projects pause after 7 idle days, which conflicts with any SLA                 |
-| Recovery objectives defined and tested | 🟡     | Targets defined for AetherVault's own systems (`business-continuity.md`); full drill pending |
-| Status page                            | ❌     | Free options exist; on the Phase 4 list                                                      |
+| Control                                | Status | Evidence / gap                                                                                                                                        |
+| -------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Capacity and uptime commitments        | ❌     | Free Supabase projects pause after 7 idle days, which conflicts with any SLA                                                                          |
+| Recovery objectives defined and tested | 🟡     | Targets in `business-continuity.md`; database restore drill passed 2026-11-14; full hosted recovery (new project + redeploy) due 2027-02-14           |
+| Status page                            | 🟡 👤  | Upptime repository `Anwozo157/aethervault-status` configured (website, sign-in, database API every 5 minutes); starts when the founder adds its token |
 
 ## Free next steps (in order)
 
