@@ -620,6 +620,14 @@ export default function LandingPage({
             >
               Threat model
             </a>
+            <a
+              href="THIRD_PARTY_NOTICES.txt"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white"
+            >
+              Open-source notices
+            </a>
           </span>
         </div>
       </footer>
