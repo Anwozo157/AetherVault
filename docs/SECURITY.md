@@ -21,7 +21,7 @@ Not the code itself, by design. Web apps run in the visitor's browser, which mus
 | Traffic between browser and site     | HTTPS (TLS)                                                                                                       | GitHub Pages enforces HTTPS  |
 | Traffic between browser and database | HTTPS + secure websockets (TLS)                                                                                   | Supabase (hosted, Phase 3.6) |
 | User passwords                       | Never stored; Supabase Auth stores bcrypt hashes                                                                  | Supabase Auth                |
-| Data at rest                         | Encrypted disks on the hosted database (per Supabase's security docs; confirm when the hosted project is created) | Supabase                     |
+| Data at rest                         | AES-256, per-project keys in FIPS 140-2 HSMs (per Supabase's security docs); alert secrets also in Supabase Vault | Supabase                     |
 | Audit history                        | SHA-256 hash chain; any edit is detected by "Verify chain"                                                        | `audit_log` table            |
 | Source code integrity                | Git history, CI on every change, code scanning, secret scanning                                                   | GitHub                       |
 
@@ -102,4 +102,4 @@ Use GitHub's private vulnerability reporting on this repository (Security tab â†
 
 - `frame-ancestors` / other HTTP security headers need a host that sends headers. The site is on `getaethervault.com` (2026-11-11) but still served by GitHub Pages, which can't send them; options: Cloudflare proxy with a header rule, or a host such as Cloudflare Pages.
 - Hosted backend (created 2026-11-10): keep its dashboard settings matched to `supabase/config.toml` (magic link only, email confirmation on, rate limits).
-- No third-party penetration test or SOC 2 yet (when customers require it). Readiness self-assessment and free next steps: `docs/SOC2_READINESS.md`.
+- No third-party penetration test or SOC 2 report yet. Program, budget and timeline: `docs/SOC2_PROGRAM_PROMPT.md`; policies: `docs/policies/`; self-assessment: `docs/SOC2_READINESS.md`.

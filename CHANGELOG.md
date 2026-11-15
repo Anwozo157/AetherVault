@@ -5,6 +5,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### SOC 2 program: prompt v2 and first monthly check (2026-11-14)
+
+- `docs/SOC2_PROGRAM_PROMPT.md` v2: "Current state" block, key decisions table (scope, Type I vs straight to Type II, Supabase report, platform, auditor criteria, private evidence store), read-only evidence rule, git lessons (worktrees outside the repo; verify right before every commit, merge and push), Supabase Team price confirmed ($599/month).
+- First monthly control check (`docs/reviews/2026-11-14-monthly-check.md`): backups, Dependabot, code and secret scanning, CI, database health, vendor status. 2 findings tracked privately.
+
+### SOC 2 program: policies, records and plan (2026-11-14)
+
+- `docs/SOC2_PROGRAM_PROMPT.md`: reusable agent prompt plus the plan of record (phases A–G with exit criteria, budget ranges with sources, timeline to Type I and Type II).
+- `docs/policies/`: nine policies (information security, acceptable use and code of conduct, access control, change management, incident response, vendor management, business continuity/DR for AetherVault itself, data management, risk management) with an approval and acknowledgement table. Draft v1.0, awaiting founder approval.
+- `docs/compliance/`: risk register (18 risks), vendor inventory, system description draft (DC 200 structure, subservice organizations, customer responsibilities), roles, training plan, control calendar.
+- `docs/reviews/` (template + first access, endpoint and vendor review, read-only), `docs/incidents/` (template), `docs/legal/` (privacy notice and SLA drafts for legal review).
+- `docs/SOC2_READINESS.md`: 17 controls in place, 21 partly, 5 not started (was 11 / 15 / 16, plus one unchecked); `docs/SECURITY.md` links the program and states encryption at rest.
+
 ### AWS live test: collector deployed for real, two Terraform fixes (2026-11-14)
 
 - Deployed the collector with Terraform in our own AWS account (Ohio) and ran the test source server. Everything except DRS works: the Lambda runs on its EventBridge schedule (~100 ms, ~110 MB), calls `DescribeSourceServers` with its read-only role, and logs to CloudWatch; the only error is AWS's DRS block. The source server's heartbeat and web page check out through SSM (no open ports).
