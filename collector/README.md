@@ -43,7 +43,7 @@ Full checklist (blockers, network, agent, first drill, removal, troubleshooting)
    cd collector/terraform
    cp terraform.tfvars.example terraform.tfvars   # fill in; never commit it
    terraform init
-   terraform plan -out tfplan    # review: 8 resources on first deploy
+   terraform plan -out tfplan    # review: 9 resources on first deploy
    terraform apply tfplan
    ```
 4. Within a minute the console shows **LIVE · AWS DRS**. If nothing arrives, check the

@@ -55,6 +55,12 @@ variable "schedule" {
   default     = "rate(1 minute)"
 }
 
+variable "reserved_concurrency" {
+  description = "Set to 1 to guarantee one run at a time. Leave null on new AWS accounts: they allow only 10 concurrent Lambda runs and AWS refuses any reservation that leaves fewer than 10 unreserved. The database already rejects reports less than 20 s apart."
+  type        = number
+  default     = null
+}
+
 variable "tags" {
   type    = map(string)
   default = { ManagedBy = "AetherVault", Purpose = "dr-replication-status" }
@@ -101,8 +107,8 @@ resource "aws_lambda_function" "collector" {
   source_code_hash = filebase64sha256(var.lambda_zip)
   memory_size      = 128
   timeout          = 30
-  # Never more than one run at a time.
-  reserved_concurrent_executions = 1
+  # Optional: never more than one run at a time (see var.reserved_concurrency).
+  reserved_concurrent_executions = var.reserved_concurrency
 
   environment {
     variables = {
@@ -115,6 +121,14 @@ resource "aws_lambda_function" "collector" {
 
   depends_on = [aws_cloudwatch_log_group.collector, aws_iam_role_policy_attachment.logs]
   tags       = var.tags
+}
+
+# No automatic retries: a failed run is simply replaced by the next scheduled one. Without this,
+# AWS retries a failed scheduled run twice, tripling calls (seen in our live test).
+resource "aws_lambda_function_event_invoke_config" "collector" {
+  function_name                = aws_lambda_function.collector.function_name
+  maximum_retry_attempts       = 0
+  maximum_event_age_in_seconds = 60
 }
 
 resource "aws_cloudwatch_event_rule" "every_minute" {

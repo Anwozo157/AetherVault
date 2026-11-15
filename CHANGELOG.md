@@ -5,6 +5,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### AWS live test: collector deployed for real, two Terraform fixes (2026-11-14)
+
+- Deployed the collector with Terraform in our own AWS account (Ohio) and ran the test source server. Everything except DRS works: the Lambda runs on its EventBridge schedule (~100 ms, ~110 MB), calls `DescribeSourceServers` with its read-only role, and logs to CloudWatch; the only error is AWS's DRS block. The source server's heartbeat and web page check out through SSM (no open ports).
+- Fix: reserved concurrency is now optional (`reserved_concurrency`, default off). New AWS accounts allow only 10 concurrent Lambda runs, and AWS refused the reservation of 1, so `terraform apply` failed. The database already rejects reports less than 20 s apart.
+- Fix: no automatic retries (`aws_lambda_function_event_invoke_config`, 0 retries). AWS retried every failed scheduled run twice, so a failing collector ran 3 times a minute. First deploy now creates 9 resources.
+
 ### AWS live test: Ohio-only plan and test source server (2026-11-13)
 
 - `scripts/poc/source-server.sh`: creates, checks and removes a small test server in our own AWS account (stands in for NewConnect's server; no SSH, no inbound ports, encrypted disk, managed through SSM; heartbeat file every minute so lag and data loss are visible). `check` runs free dry runs: EC2 launches are allowed in us-east-2; Elastic Disaster Recovery is still denied by an AWS-owned service control policy.

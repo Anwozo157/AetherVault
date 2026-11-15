@@ -43,7 +43,7 @@ steps, fills in commands for the chosen Region, and checks off steps it can veri
 | 2    | Open the network path (443 + 1500 outbound).                                                                                                                | `curl -I https://drs.<region>.amazonaws.com` from the server            |
 | 3    | Install the agent with temporary credentials (`AWSElasticDisasterRecoveryAgentInstallationPolicy`).                                                         | Server appears in DRS as _Initial sync_                                 |
 | 4    | Console: create the collector token (shown once; store it in the password manager).                                                                         | Console shows "token …abcd"                                             |
-| 5    | `npm run collector:package`; in `collector/terraform` write `terraform.tfvars` (the guide prints it), `terraform init`, `plan -out tfplan`, `apply tfplan`. | 8 resources created                                                     |
+| 5    | `npm run collector:package`; in `collector/terraform` write `terraform.tfvars` (the guide prints it), `terraform init`, `plan -out tfplan`, `apply tfplan`. | 9 resources created                                                     |
 | 6    | Wait ≤ 1 minute.                                                                                                                                            | Badge **LIVE · AWS DRS**; server listed as _Initial sync_ with progress |
 
 Optional: `npm run collector -- --record pages.json --dry-run` (with their read-only credentials)

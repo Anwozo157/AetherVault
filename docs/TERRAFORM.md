@@ -12,7 +12,7 @@ access they grant, or by their own team.
    every apply uses the same provider build. (It is gitignored here because this module is generic.) Use Terraform 1.10 or later if you want S3 native state locking.
 2. **Always plan, review, then apply the saved plan.**
    ```sh
-   terraform plan -out tfplan    # read it: expect 8 resources to add on first deploy
+   terraform plan -out tfplan    # read it: expect 9 resources to add on first deploy
    terraform apply tfplan
    ```
    Never `apply -auto-approve` in a customer account.
@@ -73,8 +73,10 @@ terraform {
 
 ## Why the module is shaped this way
 
-- **Reserved concurrency 1:** never two collectors pushing at once; the database also rejects
-  reports less than 20 s apart.
+- **Reserved concurrency is optional** (`reserved_concurrency = 1`): the database already rejects
+  reports less than 20 s apart. It is off by default because new AWS accounts allow only 10
+  concurrent Lambda runs and refuse any reservation that leaves fewer than 10 unreserved
+  (`InvalidParameterValueException ... below its minimum value of [10]`; found in our live test).
 - **AWS managed policies only:** `AWSElasticDisasterRecoveryReadOnlyAccess` and
   `AWSLambdaBasicExecutionRole`. A customer's security team can review them by name. AWS maintains
   them; no custom policy to audit.
