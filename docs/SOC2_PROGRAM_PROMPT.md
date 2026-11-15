@@ -34,8 +34,10 @@
    `Referrer-Policy: strict-origin-when-cross-origin`,
    `Permissions-Policy: camera=(), microphone=(), geolocation=()`. Check the site still loads and
    GitHub Pages still shows the certificate as valid; if not, switch back to DNS only.
-3. **Secret scanning extras:** repository Settings → Code security → turn on "Non-provider patterns"
-   and "Validity checks" (free for public repositories).
+3. ~~**Secret scanning extras**~~ (checked 2026-11-14): "Non-provider patterns" and "Validity checks"
+   stay off. GitHub ignores the request to turn them on for this personal account on the free plan, so
+   they appear to need paid Secret Protection. No action under the $0 rule; already in place: secret
+   scanning, push protection, Dependabot, and gitleaks in CI.
 4. Sign `docs/policies/README.md`; training; emergency-access note; the 7 findings (list in the
    private evidence repository).
 5. Send the drafts in `docs/compliance/OUTREACH_DRAFTS.md` from company email.
