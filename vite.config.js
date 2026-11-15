@@ -2,6 +2,7 @@ import { execSync } from 'node:child_process';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { buildCsp } from './scripts/csp.mjs';
+import { licenseNotices } from './scripts/license-notices.mjs';
 
 /** Build stamp: short commit + UTC date. Shown in Share and used to bust phone caches. */
 function buildVersion() {
@@ -62,7 +63,7 @@ export default defineConfig(({ mode }) => {
         /^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(env.VITE_SUPABASE_URL ?? ''),
       ),
     },
-    plugins: [react(), versionFile(), securityMeta(env.VITE_SUPABASE_URL)],
+    plugins: [react(), versionFile(), securityMeta(env.VITE_SUPABASE_URL), licenseNotices()],
     build: {
       // The lazily loaded 3D globe chunk bundles three.js (~930 kB). It is not on the
       // critical path, so warn only above that; the initial bundle is ~300 kB.
@@ -72,7 +73,7 @@ export default defineConfig(({ mode }) => {
       environment: 'jsdom',
       globals: true,
       setupFiles: ['./src/setupTests.ts'],
-      exclude: ['node_modules', 'dist', 'e2e/**'],
+      exclude: ['node_modules', 'dist', 'e2e/**', '.claude/**'],
       coverage: {
         provider: 'v8',
         include: ['src/**/*.{ts,tsx}'],

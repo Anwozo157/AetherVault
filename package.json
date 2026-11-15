@@ -23,7 +23,7 @@
     "e2e:console": "bash scripts/e2e-console.sh",
     "collector:build": "vite build -c collector/vite.config.ts --logLevel warn",
     "collector": "npm run collector:build && node dist-collector/cli/cli.mjs",
-    "collector:package": "COLLECTOR_ENTRY=lambda npm run collector:build && cd dist-collector/lambda && zip -q -FS lambda.zip lambda.mjs && echo dist-collector/lambda/lambda.zip"
+    "collector:package": "COLLECTOR_ENTRY=lambda npm run collector:build && cd dist-collector/lambda && zip -q -FS lambda.zip lambda.mjs THIRD_PARTY_NOTICES.txt && echo dist-collector/lambda/lambda.zip"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",

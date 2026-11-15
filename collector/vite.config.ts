@@ -2,12 +2,15 @@
 //   COLLECTOR_ENTRY=cli    (default) local CLI; AWS SDK loaded from node_modules
 //   COLLECTOR_ENTRY=lambda Lambda handler with the AWS SDK bundled in (self-contained zip)
 import { defineConfig } from 'vite';
+// @ts-expect-error -- plain ESM helper without type declarations
+import { licenseNotices } from '../scripts/license-notices.mjs';
 
 const entry = process.env.COLLECTOR_ENTRY === 'lambda' ? 'lambda' : 'cli';
 const bundleSdk = entry === 'lambda';
 
 export default defineConfig({
   publicDir: false,
+  plugins: [licenseNotices({ product: 'AetherVault DRS collector' })],
   build: {
     ssr: `collector/${entry}.ts`,
     outDir: `dist-collector/${entry}`,

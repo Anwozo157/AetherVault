@@ -21,11 +21,12 @@ LICENSE file is MIT. Development-only tools (test, lint, build) don't ship and a
 
 ## Findings
 
-1. **License notices are not shipped.** The production build strips all license comments (0 of 24 JS
-   files contain one). MIT, ISC, BSD and Apache-2.0 ask that the copyright and license notice accompany
-   copies, and the website sends the bundled code to every visitor. Common fix: generate a
-   `THIRD_PARTY_NOTICES.txt` at build time and link it from the site footer. Engineering task, free
-   (tracked as T6b in `docs/LEGAL_PREP_PROMPT.md`).
+1. **License notices: fixed 2026-11-14 (T6b).** The minified build strips license comments, so
+   `scripts/license-notices.mjs` (a build plugin, no dependencies) now emits `THIRD_PARTY_NOTICES.txt`
+   with the license text of every package actually bundled: 29 in the website (linked from the site
+   footer as "Open-source notices") and 20 AWS SDK packages (Apache-2.0, with NOTICE files) inside the
+   collector's `lambda.zip`. Packages that ship no license file get the standard text with the author
+   from `package.json`.
 2. **Our own license vs. a public repository.** `LICENSE` says the software is "proprietary and
    confidential" with all rights reserved, and names "Aegis Core Labs / Antonio Nwozo", while the GitHub
    repository is public. Questions for counsel: (a) which owner should the notice name (ties to the IP
@@ -33,5 +34,5 @@ LICENSE file is MIT. Development-only tools (test, lint, build) don't ship and a
    should the repository be private (a business decision with a small cost: GitHub Pages from a private
    repository needs a paid GitHub plan); (c) is the notice wording right for source that is visible but
    not licensed.
-3. **Collector Lambda** (deployed in customers' AWS accounts) bundles the AWS SDK (Apache-2.0); the
-   customer receives a copy, so the notices finding applies to `dist-collector/` too.
+3. **Collector Lambda** (deployed in customers' AWS accounts) bundles the AWS SDK (Apache-2.0); its
+   notices now ship inside `lambda.zip` (finding 1).
