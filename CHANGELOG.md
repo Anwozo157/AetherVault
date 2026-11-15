@@ -5,6 +5,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Records and security housekeeping (2026-11-15)
+
+- `docs/STATUS.md`: new "Finding what's done" guide (where each kind of record lives), refreshed header and AWS next steps, and a founder to-do to back up the private folder.
+- `docs/SECURITY.md`: credential inventory brought up to date (AWS agent key, Supabase CLI token and DB password, Resend key, Cloudflare token, with Keychain item names and rotation dates; no values).
+- AWS account ID and support case number removed from public docs (kept in the founder's private notes), per the public-repo rule. They remain in earlier git history; AWS doesn't treat account IDs as secrets.
+
 ### SOC 2 session 3: recovery drill, questionnaire, evidence and status repositories (2026-11-14)
 
 - Recovery drill of AetherVault's own database (`docs/reviews/2026-11-14-recovery-drill.md`): latest backup restored into an empty stack in about 2 minutes; row counts, audit chain, scheduled jobs and security objects match. Finding: a restored project kept Supabase's default grants (signed-out users could run all 59 functions; production allows 1). `docs/BACKUPS.md` step 4 now revokes them and re-applies production's exact grants; verified.

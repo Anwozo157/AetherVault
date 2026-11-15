@@ -1,7 +1,20 @@
 # Project Status
 
 > Living handoff document. **Every agent or contributor updates this at the end of a session.**
-> Last updated: 2026-11-11 (site live on getaethervault.com, company email, AWS account pending verification) by Claude Code (Opus 5.5).
+> Last updated: 2026-11-15 (AWS non-DRS test done, legal prep for counsel, license notices, SOC 2 program) by Claude Code (Opus 5.5).
+
+## Finding what's done (read this first)
+
+| Question                                | Where to look                                                                                                       |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| What changed, when, and why             | `CHANGELOG.md` (Unreleased, newest first; one entry per piece of work)                                              |
+| Exact code of each change               | `git log --oneline` on `main` (Conventional Commits; every merge passed `npm run verify` + `npm run db:test`)       |
+| Proof that checks passed on GitHub      | GitHub Actions tab: CI and CodeQL for each merge commit                                                             |
+| AWS live test: what ran, what's blocked | `docs/AWS_LIVE_POC.md` (status at the top)                                                                          |
+| Legal prep for counsel (Kim Larsen)     | `docs/LEGAL_PREP_PROMPT.md` (task table with ✅ dates), drafts in `docs/legal/`                                     |
+| SOC 2 program                           | `docs/SOC2_PROGRAM_PROMPT.md` (phase table), `docs/SOC2_READINESS.md`, dated records in `docs/reviews/`             |
+| Private material (never in this repo)   | Founder's Mac: `~/Developer/AegisCoreLabs-private/` (local git, no remote): counsel prep, account IDs, case numbers |
+| Secrets                                 | macOS Keychain only (item names in `docs/SECURITY.md`); never in files or chat                                      |
 
 ## Where we are
 
@@ -39,8 +52,8 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 
 0. **Legal prep (`docs/LEGAL_PREP_PROMPT.md`, counsel: Kim Larsen, Stinson LLP):** T1–T15 done 2026-11-14 (public drafts in `docs/legal/`, private files in `~/Developer/AegisCoreLabs-private/legal/`). **Founder:** answer `founder-questions.md` there (entity, employment/IP, NewConnect relationship, budget), then send the drafted email to Kim. Agent next: T16 after the answers (T6b license notices done).
 1. **3.6 hosting:** ✅ Live at **https://getaethervault.com** (2026-11-11; GitHub Pages, HTTPS enforced, old github.io URL redirects). Founder signed in and created the organization. Domain at Cloudflare (DNS + Email Routing: antonio@/support@/security@/billing@ → founder inbox); steps and records in `docs/CUSTOM_DOMAIN.md`. Resend SMTP connected 2026-11-11 (B9 done; DMARC report-only). **Next:** founder rolls the Cloudflare API token (it was pasted in chat once).
-   **AWS 2026-11-14:** everything except DRS tested live in Ohio (source server via SSM; collector deployed with Terraform, runs on schedule, reaches DRS with its read-only role). Two Terraform fixes for new accounts merged. Torn down; only blocker is AWS SCP `p-1m6ffy9a` (support case 179442114000438). The AWS "support-console IAM" Health notice is the same SCP, not our IAM; no action.
-   **AWS (live proof of concept, `docs/AWS_LIVE_POC.md`):** account created and upgraded; AWS is still verifying it (blocks Organizations, CloudShell, console access for IAM users). After verification: CloudShell `create-login-profile` for `antonio-admin`, MFA, `aws login --profile aegis`, then the test. AWS CLI 2.40.0 installed in `~/aws-cli` (old 2.6.2 in `/usr/local/aws-cli` needs `sudo rm` by the founder).
+   **AWS 2026-11-14:** everything except DRS tested live in Ohio (source server via SSM; collector deployed with Terraform, runs on schedule, reaches DRS with its read-only role). Two Terraform fixes for new accounts merged. Torn down; only blocker is AWS SCP `p-1m6ffy9a` (support case number in the founder's private notes). The AWS "support-console IAM" Health notice is the same SCP, not our IAM; no action.
+   **AWS next (`docs/AWS_LIVE_POC.md`):** once AWS lifts the DRS block, run steps 2–10 there (about 1–2 days). Agent access is the IAM user + Keychain key described in that file; delete the key after the test. AWS CLI 2.40.0 in `~/aws-cli` (old 2.6.2 in `/usr/local/aws-cli` needs `sudo rm` by the founder).
 2. **Phase 4, free parts:** all free items done. Pilot day: follow `docs/PILOT_DAY.md` (blocker B1 is hosting, item 1 above); run `--record` to replace the hand-built sample responses. Possible next: AetherVault launching DRS drills itself (needs a write-capable role; design with the customer first), GCP/Azure providers, email alerts (needs a mail provider). ✅ Done 2026-11-10: 4.7 Connect-your-AWS-account guide + `docs/AWS_DR_BEST_PRACTICES.md`, `docs/TERRAFORM.md`, `docs/PILOT_DAY.md`; 4.6 DR runbooks (versioned runbook, AWS DRS template, per-run checklist in evidence); 4.5 measured RPO in drill/failover evidence (replication snapshot captured at launch; drills fail on a missed RPO); 4.4 AWS DRS collector (read-only Lambda, ingest token, live Replication panel, RPO-breach alerts); 4.3 Slack/PagerDuty alerts (Vault-encrypted secrets, delivery log); 4.2 scheduled, non-disruptive drills (`pg_cron`, weekly/monthly/quarterly, Run drill now, drill evidence). ✅ Done 2026-11-09: team invites/roles + onboarding checklist; 4.1 drill evidence reports (RTO/RPO targets, PASS/FAIL drill history, Print/Save as PDF, SHA-256-fingerprinted JSON; deployed as `89c4e1b`).
 3. **Requires funding (founder approves):** AWS account + Elastic Disaster Recovery for real replication data (~$40–60/mo), Supabase Pro ($25/mo), custom domain ✅ bought 2026-11-11 ($11.17/yr; headers still need a host or proxy that sends them). Supabase Pro ($25/mo): upgrade when the pilot signs, before customer data goes in; weekly local backup meanwhile (`docs/BACKUPS.md`).
 
@@ -49,6 +62,8 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 5. **Landing page** built (2026-11-09) on `feat/landing-page`: ✅ `CONTACT_EMAIL` set to antonio@getaethervault.com (2026-11-11); add real console screenshots and the NewConnect case study when available.
 
 ## Open decisions for the founder
+
+- **Back up the private folder** `~/Developer/AegisCoreLabs-private/`: it exists only on this Mac (no remote, on purpose). Use an encrypted backup (Time Machine to an encrypted disk, or an encrypted disk image in iCloud Drive).
 
 - Approve funds (costs in `docs/PHASE_3_PLAN.md` and the investor market report).
 - Pricing assumption in the market report ($3,000/month per customer): confirm, or choose a lower entry tier.
