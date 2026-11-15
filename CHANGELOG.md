@@ -7,6 +7,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ### Legal prep prompt for working with counsel (2026-11-14)
 
+- Legal prep tasks T1–T15 done. New in `docs/legal/`: company fact sheet, data inventory (from the schema; flags that member emails sit in the append-only audit log and in laptop backups), customer-facing sub-processor list with verified vendor terms, AI tools register (+ draft `docs/policies/ai-use.md`), open-source license report (`scripts/license-report.mjs`: 131 production packages, no copyleft; finding: the build ships no license notices), claims audit, security overview and website terms drafts; privacy notice and SLA drafts updated (technical logs, 7-day status retention, US storage; Supabase uptime SLA is Enterprise-only). README now labels the multi-cloud target selection as simulated. Privileged material is in the founder's private workspace.
 - `docs/LEGAL_PREP_PROMPT.md`: an agent prompt, a matter map (15 areas where AetherVault may need counsel, matched to Kim Larsen's public practice areas at Stinson LLP, ordered by urgency: engagement, company foundation and IP, the NewConnect pilot agreement, DPA and incident duties, hosting terms, AI-built code) and a 17-step task list that runs until the founder must step in. Privileged material, negotiation positions and fees stay in a private local folder, never in this public repo.
 
 ### SOC 2 program: policies, records and plan (2026-11-14)
