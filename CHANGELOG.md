@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Security test agent + SOC 2 Type I sprint (2026-11-15)
+
+- New `docs/security/SECURITY_TEST_AGENT.md`: a paste-in prompt turning a coding agent ("The Big Getty Star") into an in-house multi-cloud security/pen-test engineer, with hard authorization guardrails, an OWASP/NIST methodology, a free open-source toolchain (semgrep, gitleaks/trufflehog, Prowler, ScoutSuite, OWASP ZAP, checkov/tfsec), the AetherVault-specific attack surface (RLS multi-tenancy, two-person approval, hash-chained audit log, collector token), and the read-only credentials each cloud needs (AWS SecurityAudit+ViewOnlyAccess, GCP Security Reviewer, Azure Reader+Graph). Explicitly not a replacement for the independent human pen test.
+- New `docs/SOC2_TYPE_I_SPRINT.md`: deep dive on SOC 2 Type I, an aggressive 30-day readiness sprint (founder vs agent tasks), a control→evidence matrix (CC1–CC9, A1), lean-path costs, and the settled pen-test question (Type I does not mandate a pen test; AI-only won't satisfy an auditor as the independent test).
+
 ### Trust pack for customer security reviews (2026-11-15)
 
 - New `docs/trust/`: an index of what to send a customer's security team at each stage and the honest answer to each gap (SOC 2, pen test, insurance, SSO, SLA, backups); "What leaves your AWS account" (every field the collector sends, checked against `src/integrations/awsDrs/snapshot.ts`); a shared-responsibility table (customer / AetherVault / AWS) with the two pilot access options; and a SOC 2 status letter template with dates for the founder to fill. All drafts for counsel; no new claims.
