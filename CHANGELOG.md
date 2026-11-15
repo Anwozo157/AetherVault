@@ -5,6 +5,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### SOC 2 session 3: recovery drill, questionnaire, evidence and status repositories (2026-11-14)
+
+- Recovery drill of AetherVault's own database (`docs/reviews/2026-11-14-recovery-drill.md`): latest backup restored into an empty stack in about 2 minutes; row counts, audit chain, scheduled jobs and security objects match. Finding: a restored project kept Supabase's default grants (signed-out users could run all 59 functions; production allows 1). `docs/BACKUPS.md` step 4 now revokes them and re-applies production's exact grants; verified.
+- `docs/compliance/SECURITY_QUESTIONNAIRE.md` (standard answers for pilots) and `docs/compliance/OUTREACH_DRAFTS.md` (Supabase report access, auditor and pen test quote requests; not sent).
+- New repositories: `Anwozo157/aethervault-evidence` (private; holds the specifics behind public review records) and `Anwozo157/aethervault-status` (Upptime monitor and status page; starts once the founder adds its token).
+- Program doc: key decisions recorded (Security + Availability; skip Type I unless a buyer asks; no platform yet), founder steps (status page token, Cloudflare security headers, secret scanning extras), current state.
+
 ### Legal prep prompt for working with counsel (2026-11-14)
 
 - Legal prep tasks T1–T15 done. New in `docs/legal/`: company fact sheet, data inventory (from the schema; flags that member emails sit in the append-only audit log and in laptop backups), customer-facing sub-processor list with verified vendor terms, AI tools register (+ draft `docs/policies/ai-use.md`), open-source license report (`scripts/license-report.mjs`: 131 production packages, no copyleft; finding: the build ships no license notices), claims audit, security overview and website terms drafts; privacy notice and SLA drafts updated (technical logs, 7-day status retention, US storage; Supabase uptime SLA is Enterprise-only). README now labels the multi-cloud target selection as simulated. Privileged material is in the founder's private workspace.

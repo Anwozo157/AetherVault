@@ -39,6 +39,17 @@ functions and 5 triggers all present. Lessons, now built in:
 - Hosted projects have Storage; a local stack with storage disabled needs the `storage.*` COPY
   blocks removed (we store no files).
 
+**Recovery drill 2026-11-14** (backup `2026-11-12T135558Z` into a throwaway, empty local stack;
+record in `docs/reviews/2026-11-14-recovery-drill.md`): about 2 minutes from empty stack to verified
+restore; row counts identical to the backup; audit chain intact; both scheduled jobs present; 13
+tables with row-level security, 6 policies, 59 functions, 5 triggers. **New lesson, now step 4:**
+a new Supabase project's default privileges give `anon` and `authenticated` full rights on every
+table and function, and restoring the dump doesn't remove them. After a restore, signed-out users
+could run all 59 functions (production: 1) and signed-in users had insert/update/delete/truncate on
+all 13 tables (production: select on 6). Row-level security and the functions' own role checks still
+protected the data, but the restored system did not match production until step 4 re-applied the
+exact grants.
+
 ```bash
 B=~/Backups/AetherVault/<time>; mkdir -p /tmp/r && chmod 700 /tmp/r
 for f in roles schema data cron; do gunzip -c "$B/$f.sql.gz" > /tmp/r/$f.sql; done
@@ -50,9 +61,22 @@ docker run --rm -v /tmp/r:/b postgres:17 psql "<new project's session-pooler con
   --command 'SET session_replication_role = replica' --file /b/data.sql
 # 3. scheduled jobs:
 docker run --rm -v /tmp/r:/b postgres:17 psql "<same connection string>" -v ON_ERROR_STOP=1 --file /b/cron.sql
+# 4. permissions: drop the new project's default grants, re-apply production's exact ones from the dump.
+{ echo 'BEGIN;'
+  echo 'REVOKE ALL ON ALL TABLES IN SCHEMA public FROM anon, authenticated;'
+  echo 'REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM anon, authenticated;'
+  echo 'REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM PUBLIC, anon, authenticated;'
+  grep -E '^(GRANT|REVOKE) ' /tmp/r/schema.sql | grep -E ' ON (TABLE|SEQUENCE|FUNCTION) "public"\.'
+  echo 'COMMIT;'; } > /tmp/r/regrant.sql
+docker run --rm -v /tmp/r:/b postgres:17 psql "<same connection string>" -v ON_ERROR_STOP=1 --file /b/regrant.sql
 rm -rf /tmp/r
 ```
 
+No `postgres:17` image? Run `psql` inside the stack's own database container instead
+(`docker cp` the files in, then `docker exec <db container> psql "postgresql://postgres:postgres@127.0.0.1:5432/postgres" …`),
+as the 2026-11-14 drill did.
+
 Then check: row counts and `verify_audit_chain` (as a member) match the backup; `select * from cron.job`
-lists both jobs and `cron.job_run_details` shows successes. Point `.env.production` at the new project,
+lists both jobs and `cron.job_run_details` shows successes; **grants match production**: `authenticated`
+has SELECT on exactly the tables the dump grants, `anon` can execute only the collector ingest function. Point `.env.production` at the new project,
 redeploy, and set the auth settings again (`docs/CUSTOM_DOMAIN.md`: site URL, redirects, SMTP).
