@@ -5,16 +5,17 @@
 
 ## Finding what's done (read this first)
 
-| Question                                | Where to look                                                                                                       |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| What changed, when, and why             | `CHANGELOG.md` (Unreleased, newest first; one entry per piece of work)                                              |
-| Exact code of each change               | `git log --oneline` on `main` (Conventional Commits; every merge passed `npm run verify` + `npm run db:test`)       |
-| Proof that checks passed on GitHub      | GitHub Actions tab: CI and CodeQL for each merge commit                                                             |
-| AWS live test: what ran, what's blocked | `docs/AWS_LIVE_POC.md` (status at the top)                                                                          |
-| Legal prep for counsel (Kim Larsen)     | `docs/LEGAL_PREP_PROMPT.md` (task table with ✅ dates), drafts in `docs/legal/`                                     |
-| SOC 2 program                           | `docs/SOC2_PROGRAM_PROMPT.md` (phase table), `docs/SOC2_READINESS.md`, dated records in `docs/reviews/`             |
-| Private material (never in this repo)   | Founder's Mac: `~/Developer/AegisCoreLabs-private/` (local git, no remote): counsel prep, account IDs, case numbers |
-| Secrets                                 | macOS Keychain only (item names in `docs/SECURITY.md`); never in files or chat                                      |
+| Question                                 | Where to look                                                                                                       |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| What changed, when, and why              | `CHANGELOG.md` (Unreleased, newest first; one entry per piece of work)                                              |
+| Exact code of each change                | `git log --oneline` on `main` (Conventional Commits; every merge passed `npm run verify` + `npm run db:test`)       |
+| Proof that checks passed on GitHub       | GitHub Actions tab: CI and CodeQL for each merge commit                                                             |
+| AWS live test: what ran, what's blocked  | `docs/AWS_LIVE_POC.md` (status at the top)                                                                          |
+| Legal prep for counsel (Kim Larsen)      | `docs/LEGAL_PREP_PROMPT.md` (task table with ✅ dates), drafts in `docs/legal/`                                     |
+| SOC 2 program                            | `docs/SOC2_PROGRAM_PROMPT.md` (phase table), `docs/SOC2_READINESS.md`, dated records in `docs/reviews/`             |
+| Trust pack for customer security reviews | `docs/trust/README.md` (what to send at each stage, honest gap answers, founder to-do)                              |
+| Private material (never in this repo)    | Founder's Mac: `~/Developer/AegisCoreLabs-private/` (local git, no remote): counsel prep, account IDs, case numbers |
+| Secrets                                  | macOS Keychain only (item names in `docs/SECURITY.md`); never in files or chat                                      |
 
 ## Where we are
 
