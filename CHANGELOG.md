@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Customer name removed from the repository (2026-11-15)
+
+- All mentions of the first pilot customer's company name, and details that identify it (its data center, field app and network equipment), replaced with neutral wording ("the pilot customer") across docs, the CHANGELOG and the POC script. Keeps the public repository free of other companies' names ahead of trademark work. Customer specifics live in the founder's private notes. Earlier git history still contains the old wording.
+
 ### SOC 2 founder steps: secret-scanning extras not available (2026-11-14)
 
 - `docs/SOC2_PROGRAM_PROMPT.md`: the "non-provider patterns" and "validity checks" secret-scanning settings could not be turned on. GitHub leaves them off for this personal account on the free plan, so they appear to need paid Secret Protection. Removed as a founder step; secret scanning, push protection, Dependabot and gitleaks stay in place.
@@ -37,7 +41,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 ### Legal prep prompt for working with counsel (2026-11-14)
 
 - Legal prep tasks T1–T15 done. New in `docs/legal/`: company fact sheet, data inventory (from the schema; flags that member emails sit in the append-only audit log and in laptop backups), customer-facing sub-processor list with verified vendor terms, AI tools register (+ draft `docs/policies/ai-use.md`), open-source license report (`scripts/license-report.mjs`: 131 production packages, no copyleft; finding: the build ships no license notices), claims audit, security overview and website terms drafts; privacy notice and SLA drafts updated (technical logs, 7-day status retention, US storage; Supabase uptime SLA is Enterprise-only). README now labels the multi-cloud target selection as simulated. Privileged material is in the founder's private workspace.
-- `docs/LEGAL_PREP_PROMPT.md`: an agent prompt, a matter map (15 areas where AetherVault may need counsel, matched to Kim Larsen's public practice areas at Stinson LLP, ordered by urgency: engagement, company foundation and IP, the NewConnect pilot agreement, DPA and incident duties, hosting terms, AI-built code) and a 17-step task list that runs until the founder must step in. Privileged material, negotiation positions and fees stay in a private local folder, never in this public repo.
+- `docs/LEGAL_PREP_PROMPT.md`: an agent prompt, a matter map (15 areas where AetherVault may need counsel, matched to Kim Larsen's public practice areas at Stinson LLP, ordered by urgency: engagement, company foundation and IP, the first pilot agreement, DPA and incident duties, hosting terms, AI-built code) and a 17-step task list that runs until the founder must step in. Privileged material, negotiation positions and fees stay in a private local folder, never in this public repo.
 
 ### SOC 2 program: prompt v2 and first monthly check (2026-11-14)
 
@@ -60,7 +64,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ### AWS live test: Ohio-only plan and test source server (2026-11-13)
 
-- `scripts/poc/source-server.sh`: creates, checks and removes a small test server in our own AWS account (stands in for NewConnect's server; no SSH, no inbound ports, encrypted disk, managed through SSM; heartbeat file every minute so lag and data loss are visible). `check` runs free dry runs: EC2 launches are allowed in us-east-2; Elastic Disaster Recovery is still denied by an AWS-owned service control policy.
+- `scripts/poc/source-server.sh`: creates, checks and removes a small test server in our own AWS account (stands in for the pilot customer's server; no SSH, no inbound ports, encrypted disk, managed through SSM; heartbeat file every minute so lag and data loss are visible). `check` runs free dry runs: EC2 launches are allowed in us-east-2; Elastic Disaster Recovery is still denied by an AWS-owned service control policy.
 - `docs/AWS_LIVE_POC.md` rewritten for the actual situation: the agent access-key route, the two AWS-owned blocks, and an Ohio-only test (same-Region recovery into another Availability Zone), so only the DRS block has to be lifted.
 
 ### Backup restore rehearsed; scheduled jobs now backed up (2026-11-12)
@@ -91,7 +95,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 ### Docs: multicloud research and live AWS proof of concept (2026-11-10)
 
 - `docs/MULTICLOUD_DR.md`: Azure Site Recovery for physical servers (architecture with the on-premises replication appliance, ports, recovery points, supported systems, test failover, monitoring fields, pricing model), sourced from Microsoft Learn, with unverified items marked. A side-by-side table compares it with AWS. Google Cloud research is blocked (docs domain not fetchable from this session), so that section lists the exact pages to read next. It also lists what adding a cloud to AetherVault takes.
-- `docs/AWS_LIVE_POC.md`: a live test in our own AWS account before NewConnect: what's needed, cost (about $12–20 for a week), steps, done-when, teardown.
+- `docs/AWS_LIVE_POC.md`: a live test in our own AWS account before the first customer pilot: what's needed, cost (about $12–20 for a week), steps, done-when, teardown.
 
 ### Phase 3.6: Hosted Supabase project (2026-11-10)
 
@@ -106,7 +110,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 ### Phase 4.7: Connect-your-AWS-account guide and DR documentation (2026-11-10)
 
 - **Connect your AWS account** (AWS DRS & Telemetry tab): a six-step guide. (1) Choose the recovery Region and initialize Elastic Disaster Recovery. (2) Open the network path (TCP 443 and 1500). (3) Install the replication agent: Linux and Windows commands for the chosen Region, using short-lived credentials. (4) Create the collector token. (5) Deploy the collector: `terraform.tfvars` filled in with this console's URL, anon key and the new token, plus plan/apply commands. (6) Confirm live data. The token, connection and live-data steps are checked against the server; the admin ticks the rest, and progress is remembered per organization in the browser. Sample data never counts as connected. The guide warns when the console runs on a local database a collector in AWS can't reach. It is open until the account is connected, then folds away.
-- **Docs:** `docs/AWS_DR_BEST_PRACTICES.md` (account and Region, network, agent install, replication and launch settings, drills, failback for physical servers, monitoring, cost; sourced from AWS documentation). `docs/TERRAFORM.md` (version pinning, plan/apply discipline, least-privilege deployer, secrets in tfvars and state, S3 remote state with native locking, day-2 operations). `docs/PILOT_DAY.md` (blockers, week-before, on-the-day steps, first drill, removal, troubleshooting, NewConnect questions). Collector README links them.
+- **Docs:** `docs/AWS_DR_BEST_PRACTICES.md` (account and Region, network, agent install, replication and launch settings, drills, failback for physical servers, monitoring, cost; sourced from AWS documentation). `docs/TERRAFORM.md` (version pinning, plan/apply discipline, least-privilege deployer, secrets in tfvars and state, S3 remote state with native locking, day-2 operations). `docs/PILOT_DAY.md` (blockers, week-before, on-the-day steps, first drill, removal, troubleshooting, pilot-customer questions). Collector README links them.
 - **Terraform:** `collector/terraform/backend.tf.example` (encrypted S3 state with `use_lockfile`); `backend.tf` and `tfplan` are gitignored.
 - Tests: guide unit tests (helpers, remembered progress, token into tfvars shown once, replace confirmation, live/sample/stale states, read-only for non-admins, local-database warning) and a browser check.
 
@@ -229,7 +233,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
   - Labeled region markers with pulse rings; standby regions shown dimmed
   - Comet-trail packets; replication reverses toward the former primary after failover
   - North America framed at rest with a gentle sway; real great-circle distance shown
-- Removed unverifiable overlay text ("Three.js 60FPS", "eBPF", "CoreSite").
+- Removed unverifiable overlay text ("Three.js 60FPS", "eBPF", a data-center name).
 - **Share on Phone:**
   - QR generated in the browser (MIT `qrcode`, loaded on open) instead of the third-party api.qrserver.com service
   - Links carry the build version (`?v=<commit>`) so phones never show a stale cached deploy

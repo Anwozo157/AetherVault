@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Live proof of concept: a small test server in our own AWS account that stands in for
-# NewConnect's server (no customer data). It serves a web page and appends a UTC timestamp
+# the pilot customer's server (no customer data). It serves a web page and appends a UTC timestamp
 # to a heartbeat file every minute, so replication lag and data loss after a drill are visible.
 # See docs/AWS_LIVE_POC.md.
 #
