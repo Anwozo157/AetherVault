@@ -53,7 +53,7 @@ UI talks only to the `DrProvider` interface (`src/domain/dr.ts`) via `useDrProvi
 
 ## Roadmap
 
-Phased plan: `docs/CONTINUE_BUILD_PROMPT.md`. Current position and next steps: `docs/STATUS.md`. SOC 2 program (policies in `docs/policies/`): `docs/SOC2_PROGRAM_PROMPT.md`.
+Phased plan: `docs/CONTINUE_BUILD_PROMPT.md`. Current position and next steps: `docs/STATUS.md`. SOC 2 program (policies in `docs/policies/`): `docs/SOC2_PROGRAM_PROMPT.md`. Working with counsel (Kim Larsen, Stinson LLP): `docs/LEGAL_PREP_PROMPT.md`.
 
 ## Commit attribution
 

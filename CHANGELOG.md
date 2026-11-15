@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Legal prep prompt for working with counsel (2026-11-14)
+
+- `docs/LEGAL_PREP_PROMPT.md`: an agent prompt, a matter map (15 areas where AetherVault may need counsel, matched to Kim Larsen's public practice areas at Stinson LLP, ordered by urgency: engagement, company foundation and IP, the NewConnect pilot agreement, DPA and incident duties, hosting terms, AI-built code) and a 17-step task list that runs until the founder must step in. Privileged material, negotiation positions and fees stay in a private local folder, never in this public repo.
+
 ### SOC 2 program: policies, records and plan (2026-11-14)
 
 - `docs/SOC2_PROGRAM_PROMPT.md`: reusable agent prompt plus the plan of record (phases A–G with exit criteria, budget ranges with sources, timeline to Type I and Type II).
