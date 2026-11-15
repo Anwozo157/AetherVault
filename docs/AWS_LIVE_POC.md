@@ -16,6 +16,12 @@ verified, but two **AWS-owned service control policies** (organization o-cgrskr3
 with "This account is not eligible for this operation". AWS Support case 179442114000438 is open.
 `scripts/poc/source-server.sh check` shows the current state in one command.
 
+**Tested 2026-11-14 (everything that doesn't need DRS):** source server up, heartbeat and web
+page verified through SSM; collector deployed with Terraform (dummy token, no data sent to the live
+console), runs on schedule and reaches DRS with its read-only role, blocked only by `p-1m6ffy9a`.
+Found and fixed two Terraform problems that would have hit a new customer account (Lambda
+concurrency reservation refused; automatic retries tripling failed runs). Both torn down afterwards.
+
 **We only need the DRS block lifted.** DRS can recover an EC2 server into another Availability
 Zone of the same Region, so the whole test can run in Ohio: source in `us-east-2a`, recovery into
 another Ohio zone. Cross-Region failover is a later, optional test.
