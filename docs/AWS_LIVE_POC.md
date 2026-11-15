@@ -6,14 +6,14 @@ with measured data loss and a runbook in its evidence, and failback rehearsed.
 
 ## Status (2026-11-13)
 
-Account 305815657680 ("Moonshot Mode" project, AWS's new-account "projects" setup) is paid and
+Our AWS account (AWS's new-account "projects" setup; ID in the founder's private notes) is paid and
 verified, but two **AWS-owned service control policies** (organization o-cgrskr3bdk) block us:
 
 - `p-1m6ffy9a` denies **all of Elastic Disaster Recovery (`drs:*`) in every Region**. This is the real blocker.
 - `p-w8q5iueo` denies most services outside **us-east-2 (Ohio)**.
 
 "Activate advanced features" (which would let us remove them) and IAM Identity Center both fail
-with "This account is not eligible for this operation". AWS Support case 179442114000438 is open.
+with "This account is not eligible for this operation". An AWS Support case is open (number in the founder's private notes).
 `scripts/poc/source-server.sh check` shows the current state in one command.
 
 **Tested 2026-11-14 (everything that doesn't need DRS):** source server up, heartbeat and web
