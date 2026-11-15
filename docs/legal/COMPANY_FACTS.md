@@ -12,7 +12,7 @@
   Recovery (DRS) in the customer's own AWS account: two-person approval for failover, tamper-evident audit
   log, scheduled drills with evidence reports, runbooks, live replication status, Slack/PagerDuty alerts.
   Planned delivery is a managed service: we help set up DRS in the customer's account (`docs/PILOT_DAY.md`).
-- **Stage:** pre-revenue. First pilot planned with NewConnect (one physical server; `docs/PILOT_DAY.md`).
+- **Stage:** pre-revenue. First customer pilot planned (one physical server; `docs/PILOT_DAY.md`).
   Seed round planned. Pricing not final (deck tiers $2,500 / $7,500 / $25,000+ per month; see
   `CLAIMS_AUDIT.md`).
 - **People:** the founder; AI coding agents do most of the implementation under `AGENTS.md` (`AI_TOOLS.md`).

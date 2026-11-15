@@ -37,7 +37,7 @@ Sources: [support matrix](https://learn.microsoft.com/en-us/azure/site-recovery/
 Azure over 443. Data lands in a cache storage account, then managed disks. A **new Recovery
 Services vault** is required for the appliance; the vault holds metadata, not customer data.
 
-**What this means for a customer like NewConnect:** Azure needs one extra Windows Server machine
+**What this means for a customer with one physical server:** Azure needs one extra Windows Server machine
 on site (the appliance, 8 cores / 16 GB). AWS does not. That's a real difference in setup effort.
 
 **Network.** Server → appliance: TCP 443 (control) and 9443 (data, changeable). Appliance → Azure:

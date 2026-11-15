@@ -50,7 +50,7 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 
 ## Next steps (in order)
 
-0. **Legal prep (`docs/LEGAL_PREP_PROMPT.md`, counsel: Kim Larsen, Stinson LLP):** T1–T15 done 2026-11-14 (public drafts in `docs/legal/`, private files in `~/Developer/AegisCoreLabs-private/legal/`). **Founder:** answer `founder-questions.md` there (entity, employment/IP, NewConnect relationship, budget), then send the drafted email to Kim. Agent next: T16 after the answers (T6b license notices done).
+0. **Legal prep (`docs/LEGAL_PREP_PROMPT.md`, counsel: Kim Larsen, Stinson LLP):** T1–T15 done 2026-11-14 (public drafts in `docs/legal/`, private files in `~/Developer/AegisCoreLabs-private/legal/`). **Founder:** answer `founder-questions.md` there (entity, employment/IP, pilot-customer relationship, budget), then send the drafted email to Kim. Agent next: T16 after the answers (T6b license notices done).
 1. **3.6 hosting:** ✅ Live at **https://getaethervault.com** (2026-11-11; GitHub Pages, HTTPS enforced, old github.io URL redirects). Founder signed in and created the organization. Domain at Cloudflare (DNS + Email Routing: antonio@/support@/security@/billing@ → founder inbox); steps and records in `docs/CUSTOM_DOMAIN.md`. Resend SMTP connected 2026-11-11 (B9 done; DMARC report-only). **Next:** founder rolls the Cloudflare API token (it was pasted in chat once).
    **AWS 2026-11-14:** everything except DRS tested live in Ohio (source server via SSM; collector deployed with Terraform, runs on schedule, reaches DRS with its read-only role). Two Terraform fixes for new accounts merged. Torn down; only blocker is AWS SCP `p-1m6ffy9a` (support case number in the founder's private notes). The AWS "support-console IAM" Health notice is the same SCP, not our IAM; no action.
    **AWS next (`docs/AWS_LIVE_POC.md`):** once AWS lifts the DRS block, run steps 2–10 there (about 1–2 days). Agent access is the IAM user + Keychain key described in that file; delete the key after the test. AWS CLI 2.40.0 in `~/aws-cli` (old 2.6.2 in `/usr/local/aws-cli` needs `sudo rm` by the founder).
@@ -59,7 +59,7 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 
 4. **SOC 2:** program and agent prompt in `docs/SOC2_PROGRAM_PROMPT.md` (2026-11-14). Phase A (free readiness: policies, risk register, vendors, system description, calendar, first review) done. **Next (founder):** approve and sign `docs/policies/README.md`, close the 7 private findings from the 2026-11-14 review, take the training. Then run the control calendar for a quarter. Funded steps and costs are in the program doc.
 
-5. **Landing page** built (2026-11-09) on `feat/landing-page`: ✅ `CONTACT_EMAIL` set to antonio@getaethervault.com (2026-11-11); add real console screenshots and the NewConnect case study when available.
+5. **Landing page** built (2026-11-09) on `feat/landing-page`: ✅ `CONTACT_EMAIL` set to antonio@getaethervault.com (2026-11-11); add real console screenshots and a pilot-customer case study when available.
 
 ## Open decisions for the founder
 

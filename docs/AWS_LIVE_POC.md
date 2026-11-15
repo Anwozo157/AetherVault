@@ -1,4 +1,4 @@
-# Live AWS proof of concept (before NewConnect)
+# Live AWS proof of concept (before the first customer pilot)
 
 Prove the whole chain with **real** AWS Elastic Disaster Recovery data, in our own AWS account,
 before touching a customer: a server replicating, AetherVault showing LIVE lag, an alert, a drill
@@ -36,7 +36,7 @@ another Ohio zone. Cross-Region failover is a later, optional test.
 
 ## Test source server
 
-`scripts/poc/source-server.sh` (stands in for NewConnect's server; no customer data):
+`scripts/poc/source-server.sh` (stands in for the pilot customer's server; no customer data):
 t3.micro Amazon Linux 2023 in `us-east-2a`, encrypted 8 GB disk, **no SSH key and no inbound
 ports** (managed through SSM), IMDSv2 only. It serves a web page and appends a UTC timestamp to
 `/var/lib/aethervault/heartbeat.log` every minute, so lag and data loss after a drill are visible.
@@ -56,7 +56,7 @@ Expected AWS cost for a 2-day test, all in Ohio: DRS $0.028/h per server (~$1.35
 server t3.small (~$1), disks and snapshots (under $1), source t3.micro (~$0.50), drill instances
 (cents). **Under $5, inside the credits.**
 
-**Closer to NewConnect (later):** NewConnect's server is a physical machine outside AWS. The same
+**Closer to the pilot (later):** the pilot customer's server is a physical machine outside AWS. The same
 agent runs on any Linux or Windows machine with outbound internet, so a VM on this Mac (Intel, so
 an x86_64 VM works) or a $4–6/month cloud VM elsewhere (e.g. a DigitalOcean droplet; needs the
 founder's spend approval) is a more realistic source. It does not get around the DRS block: the
@@ -85,4 +85,4 @@ AWS side (DRS, replication server, recovery) still runs in our account.
     the agent access key; check the bill next day.
 
 **Done when:** screenshots/PDF of LIVE status, an alert, and a drill evidence report with measured
-data loss and runbook ticks, all from real AWS data. That's the demo for NewConnect.
+data loss and runbook ticks, all from real AWS data. That's the demo for the first pilot customer.

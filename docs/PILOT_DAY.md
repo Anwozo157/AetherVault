@@ -1,33 +1,33 @@
 # Pilot day: protecting a customer server with AWS DRS + AetherVault
 
 Everything needed to go from "signed pilot" to "LIVE replication and a passed drill with evidence".
-Written for the NewConnect pilot (one Dell PowerEdge server at CoreSite, reached by field engineers
-through the Jump app) but generic. Background: [`AWS_DR_BEST_PRACTICES.md`](AWS_DR_BEST_PRACTICES.md),
+Written for the first customer pilot (one physical server in a colocation data center, reached by
+field engineers through the customer's field app) but generic. Background: [`AWS_DR_BEST_PRACTICES.md`](AWS_DR_BEST_PRACTICES.md),
 [`TERRAFORM.md`](TERRAFORM.md).
 
 ## 0. Blockers: must be true before the day
 
-| #   | Item                                                                                                                                                                                                                                  | Owner            | Status                                                                             |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------- |
-| B1  | **AetherVault console hosted** (Phase 3.6): Supabase project created, migrations pushed (`npx supabase db push`), console deployed with its URL and anon key. A collector in AWS cannot reach a laptop database.                      | Founder + agent  | ✅ Live at https://getaethervault.com (2026-11-11); founder signed in, org created |
-| B2  | Hosted database extensions on: `pg_cron` (drill scheduler, alert sweeper), `pg_net` (alerts), Vault (alert secrets). Check in the Supabase dashboard after pushing migrations.                                                        | Agent            | ✅ Verified 2026-11-10 (both cron jobs running)                                    |
-| B3  | Customer's **AWS account** for recovery, with billing owned by the customer, and their approval of the DRS cost (≈ $45–65/month for one 500 GB server; see best practices §10).                                                       | Customer         | Ask                                                                                |
-| B4  | **Temporary deployment access**: an IAM role in their account we can assume (or their engineer runs the steps with us).                                                                                                               | Customer         | Ask                                                                                |
-| B5  | **Server facts**: OS and version, disk sizes, average daily change, whether it can reboot (agent install doesn't need one, but patching might).                                                                                       | Customer         | Ask (NewConnect question list)                                                     |
-| B6  | **Network**: outbound TCP 443 and TCP 1500 from the server's CoreSite network to the recovery Region; VPN/Direct Connect if they have one.                                                                                            | Customer network | Ask                                                                                |
-| B7  | **Recovery access path**: how field engineers (Jump app → Nexus → switches and radios) will reach the _recovered_ server: DNS name, VPN into the recovery VPC, or IP change.                                                          | Customer + us    | Design together; becomes runbook steps                                             |
-| B9  | **Email to customer addresses**: Supabase's built-in email only reaches the Supabase organization's team members. NewConnect's people need magic-link emails, so set up custom SMTP (free tiers exist; needs a company email domain). | Founder          | ✅ Resend SMTP connected 2026-11-11 (sender no-reply@getaethervault.com)           |
-| B10 | **Database backups**: upgrade Supabase to **Pro** ($25/month, daily backups, no pausing) before the customer's real data goes in. Until then, the weekly backup to the founder's Mac (`docs/BACKUPS.md`).                             | Founder          | 🟡 Weekly local backup running; Pro when the pilot signs                           |
-| B8  | Founder approval for any AetherVault-side spend (AGENTS.md rule 1). The customer's AWS bill is theirs.                                                                                                                                | Founder          | Pilot price agreed                                                                 |
+| #   | Item                                                                                                                                                                                                                                    | Owner            | Status                                                                             |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------- |
+| B1  | **AetherVault console hosted** (Phase 3.6): Supabase project created, migrations pushed (`npx supabase db push`), console deployed with its URL and anon key. A collector in AWS cannot reach a laptop database.                        | Founder + agent  | ✅ Live at https://getaethervault.com (2026-11-11); founder signed in, org created |
+| B2  | Hosted database extensions on: `pg_cron` (drill scheduler, alert sweeper), `pg_net` (alerts), Vault (alert secrets). Check in the Supabase dashboard after pushing migrations.                                                          | Agent            | ✅ Verified 2026-11-10 (both cron jobs running)                                    |
+| B3  | Customer's **AWS account** for recovery, with billing owned by the customer, and their approval of the DRS cost (≈ $45–65/month for one 500 GB server; see best practices §10).                                                         | Customer         | Ask                                                                                |
+| B4  | **Temporary deployment access**: an IAM role in their account we can assume (or their engineer runs the steps with us).                                                                                                                 | Customer         | Ask                                                                                |
+| B5  | **Server facts**: OS and version, disk sizes, average daily change, whether it can reboot (agent install doesn't need one, but patching might).                                                                                         | Customer         | Ask (pilot-customer question list)                                                 |
+| B6  | **Network**: outbound TCP 443 and TCP 1500 from the server's data-center network to the recovery Region; VPN/Direct Connect if they have one.                                                                                           | Customer network | Ask                                                                                |
+| B7  | **Recovery access path**: how field engineers (field app → core switch → switches and radios) will reach the _recovered_ server: DNS name, VPN into the recovery VPC, or IP change.                                                     | Customer + us    | Design together; becomes runbook steps                                             |
+| B9  | **Email to customer addresses**: Supabase's built-in email only reaches the Supabase organization's team members. The customer's people need magic-link emails, so set up custom SMTP (free tiers exist; needs a company email domain). | Founder          | ✅ Resend SMTP connected 2026-11-11 (sender no-reply@getaethervault.com)           |
+| B10 | **Database backups**: upgrade Supabase to **Pro** ($25/month, daily backups, no pausing) before the customer's real data goes in. Until then, the weekly backup to the founder's Mac (`docs/BACKUPS.md`).                               | Founder          | 🟡 Weekly local backup running; Pro when the pilot signs                           |
+| B8  | Founder approval for any AetherVault-side spend (AGENTS.md rule 1). The customer's AWS bill is theirs.                                                                                                                                  | Founder          | Pilot price agreed                                                                 |
 
 ## 1. The week before
 
 1. Agree the **RTO and RPO targets** with the customer and set them on the Drills tab (admin).
 2. Invite their people to the console (Team tab): at least one **approver** besides the requester,
    so failovers meet the two-person rule.
-3. Write their **runbook** (Runbook tab → Start from template). Make it theirs. For NewConnect, add:
+3. Write their **runbook** (Runbook tab → Start from template). Make it theirs. For a pilot like this, add:
    - "Confirm field engineers can reach the recovered server through Jump", with the exact path from B7.
-   - "Confirm the Nexus and the switches and radios it manages are reachable from the recovered server".
+   - "Confirm the core switch and the switches and radios it manages are reachable from the recovered server".
    - Names and phone numbers of the incident lead and their network contact.
 4. Add an **alert channel** (Alerts tab): their Slack or PagerDuty, with "Replication at risk" on.
 5. Decide the **recovery Region** and the **staging subnet** CIDR with their network team.
@@ -95,10 +95,10 @@ report is AetherVault's simulated stage model and is labeled as such.
 | "lag unknown"                              | `lagDuration` in a format we don't parse yet               | Run `--record`, send the sample to us; we add the format                                       |
 | `terraform apply` AccessDenied             | Deployment role missing IAM/Lambda/Events/Logs permissions | See TERRAFORM.md rule 3                                                                        |
 
-## 7. Questions to settle with NewConnect
+## 7. Questions to settle with the pilot customer
 
 - Server OS, disks and change rate (B5).
-- Network path from CoreSite and whether a VPN to AWS exists (B6).
+- Network path from the data center and whether a VPN to AWS exists (B6).
 - How Jump reaches the server today (public IP? VPN? DNS name?) and how it should reach the
   recovered one (B7).
 - Who approves a real failover on their side (second person for the two-person rule).
