@@ -2,7 +2,7 @@
 
 > Honest, reusable answers to the questions pilot customers usually send (a short vendor security
 > questionnaire). Copy answers into the customer's form; adjust only to make them more precise, never
-> more favorable. Customer-facing summary: `docs/legal/SECURITY_OVERVIEW_DRAFT.md`.
+> more favorable. Customer-facing summary: `docs/legal/SECURITY_OVERVIEW_DRAFT.md`; what to send at each stage: `docs/trust/README.md`.
 > Last updated: 2026-11-14. Review with every policy change and before sending.
 
 **Rules for answering:** say "no" or "in progress" when that's the truth; never claim SOC 2, ISO 27001

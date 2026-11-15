@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Trust pack for customer security reviews (2026-11-15)
+
+- New `docs/trust/`: an index of what to send a customer's security team at each stage and the honest answer to each gap (SOC 2, pen test, insurance, SSO, SLA, backups); "What leaves your AWS account" (every field the collector sends, checked against `src/integrations/awsDrs/snapshot.ts`); a shared-responsibility table (customer / AetherVault / AWS) with the two pilot access options; and a SOC 2 status letter template with dates for the founder to fill. All drafts for counsel; no new claims.
+- Security questionnaire links to the trust pack.
+
 ### AWS: project renamed, activation retried (2026-11-15)
 
 - AWS project renamed to AetherVault. Activating advanced features (the documented route to DRS on AWS's simplified account type) still returns "not eligible"; next step is the AWS support case. Recorded in `docs/AWS_LIVE_POC.md`.
