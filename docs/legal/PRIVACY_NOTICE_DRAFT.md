@@ -11,7 +11,10 @@
   runbooks and checklist notes, alert settings.
 - **Activity:** an audit log of actions taken in the console (who, what, when).
 - **Replication status:** if your organization connects AWS Elastic Disaster Recovery, the status your
-  collector sends us (server identifiers, replication state and lag).
+  collector sends us (server identifiers and hostnames, your AWS account ID and Region, replication
+  state and lag). We keep these status reports for 7 days.
+- **Technical logs:** our hosting and email providers keep request logs (for example IP address,
+  browser and time) to run and secure their services, under their own retention.
 
 We do not use analytics, advertising or tracking cookies. The public website and demo collect no
 personal data.
@@ -37,8 +40,14 @@ tamper-evident audit log. See [security page / SECURITY.md link].
 ## Retention
 
 We keep your organization's data while it has an account and delete it within 30 days of a written
-request after the account ends. The audit log can't be edited, so it is deleted together with the
-organization.
+request after the account ends. The audit log can't be edited (that is what makes it tamper-evident)
+and records team members' email addresses when they are invited, join or are removed, so it is deleted
+together with the organization. Encrypted backups keep copies for up to [8 weeks] before they are
+replaced. [Counsel: individual deletion requests vs. the append-only log; see DATA_INVENTORY.md Q1–Q2.]
+
+## Where data is stored
+
+In the United States (our database provider's US East region). [Counsel: international users.]
 
 ## Your choices and rights
 

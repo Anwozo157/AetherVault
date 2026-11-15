@@ -32,6 +32,12 @@ affects their data.
 Our own recovery targets for the console are published in our business continuity plan
 ([RTO/RPO]); backups are encrypted and restore-tested quarterly.
 
+## Vendor dependency (note for counsel, remove before publishing)
+
+Our database provider (Supabase) offers an uptime SLA only on its Enterprise plan; Pro has none
+([SLA](https://supabase.com/docs/guides/platform/sla), checked 2026-11-14). Any availability target
+above is backed by our own operations, not by a vendor commitment. Size service credits accordingly.
+
 ## Customer responsibilities
 
 As listed in the system description (complementary user entity controls): manage your users, protect

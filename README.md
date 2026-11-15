@@ -19,8 +19,8 @@
 - **Replication Telemetry (simulated):** Live-updating replication lag, sync health, and failover state transitions.
 - **Abortable Failover:** Operators can abort until traffic cutover begins, matching real DR tooling.
 - **Accidental-Click Guard (Hold-to-Initiate):** Requires an intentional 1.2s confirmation hold with procedural cybernetic audio ramping and haptic feedback on Android.
-- **Multi-Cloud Target Selection:** Real-time routing flexibility targeting **GCP us-central1 (Iowa)**, **AWS us-west-2 (Oregon)**, and **Azure East US 2 (Virginia)**.
-- **SDET Chaos Simulation:** Integrated fault injection simulating network jitter, packet turbulence, and dropped frames to prove platform resilience.
+- **Multi-Cloud Target Selection (simulated):** Choose a recovery target in the demo: **GCP us-central1 (Iowa)**, **AWS us-west-2 (Oregon)**, and **Azure East US 2 (Virginia)**.
+- **SDET Chaos Simulation:** Integrated fault injection simulating network jitter, packet turbulence, and dropped frames to exercise the UI under degraded telemetry.
 - **Zero-Cost Synthesizer Engine:** Native HTML5 Web Audio API synthesizing ascending charge sweeps, cutover bass drops, and harmonic resolution chimes without paid assets.
 
 ---

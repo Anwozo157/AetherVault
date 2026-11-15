@@ -19,6 +19,7 @@ founder signs the approval table below.
 | [Business continuity and disaster recovery](business-continuity.md) | CC9.1, A1.2, A1.3                   | Founder |
 | [Data management](data-management.md)                               | CC6.1, CC6.5, CC6.7, C1.1, C1.2     | Founder |
 | [Risk management](risk-management.md)                               | CC3.1–CC3.4, CC4.1, CC9.1           | Founder |
+| [AI use](ai-use.md) (draft, added with the legal prep work)         | CC1.4, CC2.2, CC6.1, C1.1           | Founder |
 
 ## Rules for these policies
 
