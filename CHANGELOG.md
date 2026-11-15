@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Fix: AWS setup guide only accepts known regions (2026-11-14)
+
+- The Connect-your-AWS guide remembered the recovery region in browser storage and used it as-is in the "Open Elastic Disaster Recovery" link and in the copyable agent and `aws drs` commands. A tampered stored value could have put arbitrary text into a command someone pastes into a terminal. The region is now checked against the offered list (`isDrsRegion`) on load and on change, falls back to `us-west-2`, and is URL-encoded in the link. Closes the CodeQL `js/xss-through-dom` alert. Tests cover tampered storage; verified in a browser at desktop and 390px.
+
 ### Open-source license notices now ship (2026-11-14)
 
 - New build plugin `scripts/license-notices.mjs` (no dependencies): every build emits `THIRD_PARTY_NOTICES.txt` with the license text of each open-source package actually bundled (29 in the website, 20 AWS SDK packages in the collector's `lambda.zip`). The site footer links to it ("Open-source notices"). Fixes the finding in `docs/legal/OSS_LICENSES.md`; unit-tested.

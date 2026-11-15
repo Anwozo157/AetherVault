@@ -12,6 +12,14 @@ export const DRS_REGIONS = [
   ['ap-southeast-2', 'Asia Pacific (Sydney)'],
 ] as const;
 
+export type DrsRegion = (typeof DRS_REGIONS)[number][0];
+export const DEFAULT_DRS_REGION: DrsRegion = 'us-west-2';
+
+/** True only for a region we offer. Anything read back from storage must pass this before use. */
+export function isDrsRegion(value: unknown): value is DrsRegion {
+  return typeof value === 'string' && DRS_REGIONS.some(([id]) => id === value);
+}
+
 /** terraform.tfvars for collector/terraform, filled in from this console. */
 export function tfvars(region: string, url: string, anonKey: string, token: string | null): string {
   return [
