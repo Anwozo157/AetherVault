@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Security policies approved (7 of 10) (2026-11-15)
+
+- `docs/policies/README.md`: recorded founder approval of 7 policies now true as written (information security, change management, incident response, vendor management, business continuity/DR, data management, risk management). Acceptable use and access control are **held** until MFA on all company accounts and FileVault are confirmed; AI use is held for counsel. Product controls behind the policies verified in code (two-person DB constraint, hash-chained append-only audit log, RLS, roles, Supabase Vault for alert secrets, CSP, passwordless sign-in).
+
 ### Security test agent + SOC 2 Type I sprint (2026-11-15)
 
 - New `docs/security/SECURITY_TEST_AGENT.md`: a paste-in prompt turning a coding agent ("The Big Getty Star") into an in-house multi-cloud security/pen-test engineer, with hard authorization guardrails, an OWASP/NIST methodology, a free open-source toolchain (semgrep, gitleaks/trufflehog, Prowler, ScoutSuite, OWASP ZAP, checkov/tfsec), the AetherVault-specific attack surface (RLS multi-tenancy, two-person approval, hash-chained audit log, collector token), and the read-only credentials each cloud needs (AWS SecurityAudit+ViewOnlyAccess, GCP Security Reviewer, Azure Reader+Graph). Explicitly not a replacement for the independent human pen test.

@@ -35,9 +35,23 @@ founder signs the approval table below.
 
 ## Approval
 
-| Version | Date | Approved by | Signature / note |
-| ------- | ---- | ----------- | ---------------- |
-| 1.0     |      | Founder     |                  |
+Approved by the founder on **2026-11-15** (recorded by Claude Code in-session on the founder's
+instruction). Each in-effect policy is true as written on that date. Two policies that assert a present
+fact (MFA on all company accounts; FileVault on) are **held** until that fact is confirmed; one is held
+for counsel. Update the status and date when a held policy takes effect.
+
+| Policy                   | Version | Status        | Date       | Note                                                                                                      |
+| ------------------------ | ------- | ------------- | ---------- | --------------------------------------------------------------------------------------------------------- |
+| Information security     | 1.0     | **In effect** | 2026-11-15 |                                                                                                           |
+| Acceptable use           | 1.0     | **Held**      | —          | Takes effect once MFA on all company accounts **and** FileVault are confirmed on (Nov-14 review findings) |
+| Access control           | 1.0     | **Held**      | —          | Same precondition: MFA on every company account                                                           |
+| Change management        | 1.0     | **In effect** | 2026-11-15 |                                                                                                           |
+| Incident response        | 1.0     | **In effect** | 2026-11-15 |                                                                                                           |
+| Vendor management        | 1.0     | **In effect** | 2026-11-15 |                                                                                                           |
+| Business continuity & DR | 1.0     | **In effect** | 2026-11-15 | Backup RPO stated honestly for the Free plan; improves on Supabase Pro                                    |
+| Data management          | 1.0     | **In effect** | 2026-11-15 |                                                                                                           |
+| Risk management          | 1.0     | **In effect** | 2026-11-15 |                                                                                                           |
+| AI use                   | 1.0     | **Held**      | —          | Pending counsel (Kim Larsen) review                                                                       |
 
 ## Acknowledgements
 
