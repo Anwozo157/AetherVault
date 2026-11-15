@@ -7,3 +7,5 @@ test-results
 dist-console
 dist-collector
 **/.terraform
+.claude
+supabase/.temp

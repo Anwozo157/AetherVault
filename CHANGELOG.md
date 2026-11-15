@@ -8,7 +8,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 ### Open-source license notices now ship (2026-11-14)
 
 - New build plugin `scripts/license-notices.mjs` (no dependencies): every build emits `THIRD_PARTY_NOTICES.txt` with the license text of each open-source package actually bundled (29 in the website, 20 AWS SDK packages in the collector's `lambda.zip`). The site footer links to it ("Open-source notices"). Fixes the finding in `docs/legal/OSS_LICENSES.md`; unit-tested.
-- Vitest now ignores `.claude/` so agent worktrees inside the repo can't break `npm test`.
+
+### Fix: worktrees inside the repo no longer break verify (2026-11-14)
+
+- Vitest, ESLint and Prettier ignore `.claude/` (agent worktrees and settings) and nested `node_modules`; Prettier also ignores `supabase/.temp`. A git worktree under `.claude/worktrees/` made `npm run verify` from the main checkout run every test twice and fail on its linked `node_modules`.
 
 ### Legal prep prompt for working with counsel (2026-11-14)
 

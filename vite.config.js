@@ -73,7 +73,8 @@ export default defineConfig(({ mode }) => {
       environment: 'jsdom',
       globals: true,
       setupFiles: ['./src/setupTests.ts'],
-      exclude: ['node_modules', 'dist', 'e2e/**', '.claude/**'],
+      // .claude/: agent worktrees and settings; nested copies of the repo must not run twice.
+      exclude: ['**/node_modules/**', 'dist', 'e2e/**', '.claude/**'],
       coverage: {
         provider: 'v8',
         include: ['src/**/*.{ts,tsx}'],
