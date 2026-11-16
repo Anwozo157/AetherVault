@@ -8,6 +8,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 ### Security policies approved (7 of 10) (2026-11-15)
 
 - `docs/policies/README.md`: recorded founder approval of 7 policies now true as written (information security, change management, incident response, vendor management, business continuity/DR, data management, risk management). Acceptable use and access control are **held** until MFA on all company accounts and FileVault are confirmed; AI use is held for counsel. Product controls behind the policies verified in code (two-person DB constraint, hash-chained append-only audit log, RLS, roles, Supabase Vault for alert secrets, CSP, passwordless sign-in).
+- Pre-push review (Opus 5.5): every claim in the 7 in-effect policies re-checked against the repo and live settings (FileVault on, Dependabot alerts on, branch protection requires CI + gitleaks + CodeQL, deploy script blocks local-DB builds, CSP enforced by E2E). Fixed the README header that still said "awaiting approval"; the two held policies now wait only on MFA.
 
 ### Security test agent + SOC 2 Type I sprint (2026-11-15)
 

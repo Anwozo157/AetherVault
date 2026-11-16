@@ -5,8 +5,8 @@ short and true: each one describes what we actually do, or names the gap and the
 They map to the AICPA Trust Services Criteria for **Security** and **Availability** (see
 `docs/SOC2_READINESS.md`).
 
-**Status: draft v1.0 (2026-11-14), awaiting founder approval.** A policy takes effect when the
-founder signs the approval table below.
+**Status: v1.0. 7 of 10 in effect since 2026-11-15; 3 held (see the approval table below).** A
+policy takes effect when the founder approves it in that table.
 
 | Policy                                                              | Covers (SOC 2)                      | Owner   |
 | ------------------------------------------------------------------- | ----------------------------------- | ------- |
@@ -36,22 +36,22 @@ founder signs the approval table below.
 ## Approval
 
 Approved by the founder on **2026-11-15** (recorded by Claude Code in-session on the founder's
-instruction). Each in-effect policy is true as written on that date. Two policies that assert a present
-fact (MFA on all company accounts; FileVault on) are **held** until that fact is confirmed; one is held
-for counsel. Update the status and date when a held policy takes effect.
+instruction). Each in-effect policy is true as written on that date. Two policies that assert MFA on
+all company accounts are **held** until that is confirmed (FileVault was verified on 2026-11-15); one
+is held for counsel. Update the status and date when a held policy takes effect.
 
-| Policy                   | Version | Status        | Date       | Note                                                                                                      |
-| ------------------------ | ------- | ------------- | ---------- | --------------------------------------------------------------------------------------------------------- |
-| Information security     | 1.0     | **In effect** | 2026-11-15 |                                                                                                           |
-| Acceptable use           | 1.0     | **Held**      | —          | Takes effect once MFA on all company accounts **and** FileVault are confirmed on (Nov-14 review findings) |
-| Access control           | 1.0     | **Held**      | —          | Same precondition: MFA on every company account                                                           |
-| Change management        | 1.0     | **In effect** | 2026-11-15 |                                                                                                           |
-| Incident response        | 1.0     | **In effect** | 2026-11-15 |                                                                                                           |
-| Vendor management        | 1.0     | **In effect** | 2026-11-15 |                                                                                                           |
-| Business continuity & DR | 1.0     | **In effect** | 2026-11-15 | Backup RPO stated honestly for the Free plan; improves on Supabase Pro                                    |
-| Data management          | 1.0     | **In effect** | 2026-11-15 |                                                                                                           |
-| Risk management          | 1.0     | **In effect** | 2026-11-15 |                                                                                                           |
-| AI use                   | 1.0     | **Held**      | —          | Pending counsel (Kim Larsen) review                                                                       |
+| Policy                   | Version | Status        | Date       | Note                                                                                          |
+| ------------------------ | ------- | ------------- | ---------- | --------------------------------------------------------------------------------------------- |
+| Information security     | 1.0     | **In effect** | 2026-11-15 |                                                                                               |
+| Acceptable use           | 1.0     | **Held**      | —          | Takes effect once MFA on all company accounts is confirmed (FileVault verified on 2026-11-15) |
+| Access control           | 1.0     | **Held**      | —          | Same precondition: MFA on every company account                                               |
+| Change management        | 1.0     | **In effect** | 2026-11-15 |                                                                                               |
+| Incident response        | 1.0     | **In effect** | 2026-11-15 |                                                                                               |
+| Vendor management        | 1.0     | **In effect** | 2026-11-15 |                                                                                               |
+| Business continuity & DR | 1.0     | **In effect** | 2026-11-15 | Backup RPO stated honestly for the Free plan; improves on Supabase Pro                        |
+| Data management          | 1.0     | **In effect** | 2026-11-15 |                                                                                               |
+| Risk management          | 1.0     | **In effect** | 2026-11-15 |                                                                                               |
+| AI use                   | 1.0     | **Held**      | —          | Pending counsel (Kim Larsen) review                                                           |
 
 ## Acknowledgements
 
