@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Status monitor fixed (2026-11-16)
+
+- Hosted setting: `aethervault-status` repo, Actions workflow permissions changed from read to **read and write** (founder approved) so the uptime monitor can commit its results. It had never completed a run since it was created on 2026-11-15; the checks themselves always reported the site, sign-in and database up. Chosen over a personal access token: the built-in token is short-lived and limited to that repo. All 6 monitor workflows re-run green.
+
 ### MFA remediation recorded (2026-11-15)
 
 - New `docs/reviews/2026-11-15-mfa-remediation.md`: MFA verified on 4 of 5 company accounts and FileVault on; the last account is blocked by a provider-side restriction (tracked privately). Review index and policy approval notes updated.
