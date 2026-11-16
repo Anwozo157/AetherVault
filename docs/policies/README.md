@@ -40,18 +40,18 @@ instruction). Each in-effect policy is true as written on that date. Two policie
 all company accounts are **held** until that is confirmed (FileVault was verified on 2026-11-15); one
 is held for counsel. Update the status and date when a held policy takes effect.
 
-| Policy                   | Version | Status        | Date       | Note                                                                                          |
-| ------------------------ | ------- | ------------- | ---------- | --------------------------------------------------------------------------------------------- |
-| Information security     | 1.0     | **In effect** | 2026-11-15 |                                                                                               |
-| Acceptable use           | 1.0     | **Held**      | —          | Takes effect once MFA on all company accounts is confirmed (FileVault verified on 2026-11-15) |
-| Access control           | 1.0     | **Held**      | —          | Same precondition: MFA on every company account                                               |
-| Change management        | 1.0     | **In effect** | 2026-11-15 |                                                                                               |
-| Incident response        | 1.0     | **In effect** | 2026-11-15 |                                                                                               |
-| Vendor management        | 1.0     | **In effect** | 2026-11-15 |                                                                                               |
-| Business continuity & DR | 1.0     | **In effect** | 2026-11-15 | Backup RPO stated honestly for the Free plan; improves on Supabase Pro                        |
-| Data management          | 1.0     | **In effect** | 2026-11-15 |                                                                                               |
-| Risk management          | 1.0     | **In effect** | 2026-11-15 |                                                                                               |
-| AI use                   | 1.0     | **Held**      | —          | Pending counsel (Kim Larsen) review                                                           |
+| Policy                   | Version | Status        | Date       | Note                                                                                   |
+| ------------------------ | ------- | ------------- | ---------- | -------------------------------------------------------------------------------------- |
+| Information security     | 1.0     | **In effect** | 2026-11-15 |                                                                                        |
+| Acceptable use           | 1.0     | **Held**      | —          | MFA verified on 4 of 5 company accounts (2026-11-15); takes effect when the last is on |
+| Access control           | 1.0     | **Held**      | —          | Same precondition: MFA on every company account                                        |
+| Change management        | 1.0     | **In effect** | 2026-11-15 |                                                                                        |
+| Incident response        | 1.0     | **In effect** | 2026-11-15 |                                                                                        |
+| Vendor management        | 1.0     | **In effect** | 2026-11-15 |                                                                                        |
+| Business continuity & DR | 1.0     | **In effect** | 2026-11-15 | Backup RPO stated honestly for the Free plan; improves on Supabase Pro                 |
+| Data management          | 1.0     | **In effect** | 2026-11-15 |                                                                                        |
+| Risk management          | 1.0     | **In effect** | 2026-11-15 |                                                                                        |
+| AI use                   | 1.0     | **Held**      | —          | Pending counsel (Kim Larsen) review                                                    |
 
 ## Acknowledgements
 
