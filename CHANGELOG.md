@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Public status page (2026-11-16)
+
+- Hosted setting: GitHub Pages turned on for `aethervault-status` (founder approved), so the uptime page is public at https://anwozo157.github.io/aethervault-status/. It shows only up/down and response times for the website, sign-in service and database API (the anon key it uses is already public in the site's code).
+
 ### Status monitor fixed (2026-11-16)
 
 - Hosted setting: `aethervault-status` repo, Actions workflow permissions changed from read to **read and write** (founder approved) so the uptime monitor can commit its results. It had never completed a run since it was created on 2026-11-15; the checks themselves always reported the site, sign-in and database up. Chosen over a personal access token: the built-in token is short-lived and limited to that repo. All 6 monitor workflows re-run green.
