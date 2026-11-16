@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### MFA remediation recorded (2026-11-15)
+
+- New `docs/reviews/2026-11-15-mfa-remediation.md`: MFA verified on 4 of 5 company accounts and FileVault on; the last account is blocked by a provider-side restriction (tracked privately). Review index and policy approval notes updated.
+
 ### Security policies approved (7 of 10) (2026-11-15)
 
 - `docs/policies/README.md`: recorded founder approval of 7 policies now true as written (information security, change management, incident response, vendor management, business continuity/DR, data management, risk management). Acceptable use and access control are **held** until MFA on all company accounts and FileVault are confirmed; AI use is held for counsel. Product controls behind the policies verified in code (two-person DB constraint, hash-chained append-only audit log, RLS, roles, Supabase Vault for alert secrets, CSP, passwordless sign-in).
