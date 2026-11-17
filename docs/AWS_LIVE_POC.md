@@ -4,94 +4,106 @@ Prove the whole chain with **real** AWS Elastic Disaster Recovery data, in our o
 before touching a customer: a server replicating, AetherVault showing LIVE lag, an alert, a drill
 with measured data loss and a runbook in its evidence, and failback rehearsed.
 
-## Status (2026-11-13)
+## Status (2026-11-17)
 
-Our AWS account (AWS's new-account "projects" setup; ID in the founder's private notes) is paid and
-verified, but two **AWS-owned service control policies** (organization o-cgrskr3bdk) block us:
+**Unblocked.** The test now runs in a **standard AWS account** (opened 2026-11-17; ID in the
+founder's private notes), with the source server in **us-east-1** and DRS replicating and
+recovering into **us-west-2**, the same cross-Region shape a customer would use.
 
-- `p-1m6ffy9a` denies **all of Elastic Disaster Recovery (`drs:*`) in every Region**. This is the real blocker.
-- `p-w8q5iueo` denies most services outside **us-east-2 (Ohio)**.
+Pre-flight (`scripts/poc/source-server.sh check`, 2026-11-17): EC2 launch dry run OK in us-east-1,
+DRS reachable in us-west-2 (not initialized yet). New-account quotas: **5 standard vCPUs and 5
+concurrent Lambda runs per Region**. That fits the test (replication server t3.small + one drill
+instance ≈ 4 vCPUs in us-west-2; the collector needs 1 Lambda run), but request a vCPU increase
+before anything larger.
 
-"Activate advanced features" (which would let us remove them) and IAM Identity Center both fail
-with "This account is not eligible for this operation". An AWS Support case is open (number in the founder's private notes).
-`scripts/poc/source-server.sh check` shows the current state in one command.
+Account setup done first: root MFA (passkey), no root access keys, budget alerts at $10 and $25 a
+month (email at 85%, 100% and forecast; warn only, never pause), AWS's free Cost Anomaly Detection.
 
-**2026-11-15:** project renamed from AWS's default "Moonshot Mode" to **AetherVault** in AWS Settings.
-Activating advanced features is AWS's documented route to DRS on this account type (DRS is listed as
-"not supported" in the simplified experience until activation; see
-[activate advanced features](https://docs.aws.amazon.com/accounts/latest/reference/activate-advanced-features.html)).
-Retried at settings.aws.com → Projects → Continue to activation: still "This account is not eligible
-for this operation. Please contact AWS Support". Founder to reply on the support case asking to make
-the account eligible or to lift the DRS policy. Note before activating: it can't be undone and it
-deletes the spend limit, so create budget alerts ($5 / $10 / $20) immediately after.
-
-**Tested 2026-11-14 (everything that doesn't need DRS):** source server up, heartbeat and web
-page verified through SSM; collector deployed with Terraform (dummy token, no data sent to the live
-console), runs on schedule and reaches DRS with its read-only role, blocked only by `p-1m6ffy9a`.
-Found and fixed two Terraform problems that would have hit a new customer account (Lambda
-concurrency reservation refused; automatic retries tripling failed runs). Both torn down afterwards.
-
-**We only need the DRS block lifted.** DRS can recover an EC2 server into another Availability
-Zone of the same Region, so the whole test can run in Ohio: source in `us-east-2a`, recovery into
-another Ohio zone. Cross-Region failover is a later, optional test.
+**History.** The first account was created through AWS's new "projects" sign-up. That puts the
+account in an AWS-managed organization whose service control policies denied DRS in every Region
+and most services outside us-east-2, and its root console has no way to change them; AWS Support
+confirmed it cannot detach them either. Everything except DRS was tested there on 2026-11-14
+(source server, collector deployed with Terraform, two Terraform fixes for new accounts), then
+torn down. **Lesson for customers:** a DR account must be a standard account ("Sign up for AWS
+(advanced)"), not a projects account, and must not have a spend limit that pauses it.
 
 ## Access
 
-- The agent uses IAM user `aethervault-agent` (AdministratorAccess, tag `Project=aethervault-poc`)
-  through `AWS_PROFILE=aegis`; its access key is in the macOS Keychain ("AWS agent key (Aegis Core
-  Labs)") and read by `credential_process`, never written to disk. **Delete the key after the test.**
-- Spend: the $20 project spend limit pauses the account; costs come out of the $120 credits. If the
-  limit is ever removed, create budget alerts first (e.g. $5 / $10 / $20, email antonio@).
+- The agent uses IAM user `aethervault-agent` (AdministratorAccess, attached by the founder)
+  through `AWS_PROFILE=aegis-dr`. Its access key is in the macOS Keychain ("AWS agent key (Aegis
+  Core Labs DR)") and read by `credential_process`, never written to disk. **Delete the user and
+  key after the test.**
+- Spend: paid account with a card on file, no credits. Founder approved a test under $10; ask
+  again before anything that keeps running.
 
 ## Test source server
 
 `scripts/poc/source-server.sh` (stands in for the pilot customer's server; no customer data):
-t3.micro Amazon Linux 2023 in `us-east-2a`, encrypted 8 GB disk, **no SSH key and no inbound
+t3.micro Amazon Linux 2023 in `us-east-1a`, encrypted 8 GB disk, **no SSH key and no inbound
 ports** (managed through SSM), IMDSv2 only. It serves a web page and appends a UTC timestamp to
 `/var/lib/aethervault/heartbeat.log` every minute, so lag and data loss after a drill are visible.
 The instance role allows SSM and `AWSElasticDisasterRecoveryEc2InstancePolicy`, so the DRS agent
 installs without access keys.
 
 ```sh
-scripts/poc/source-server.sh check          # free dry runs; creates nothing
-scripts/poc/source-server.sh up             # ~$0.25/day from credits
+scripts/poc/source-server.sh check          # free dry runs and quotas; creates nothing
+scripts/poc/source-server.sh init-drs       # one-time DRS setup in us-west-2
+scripts/poc/source-server.sh up             # source server in us-east-1 (~$0.25/day)
 scripts/poc/source-server.sh verify         # heartbeat + web page, via SSM
-scripts/poc/source-server.sh install-agent  # once DRS is unblocked and initialized
+scripts/poc/source-server.sh install-agent  # agent replicates into us-west-2
 scripts/poc/source-server.sh status
 scripts/poc/source-server.sh down           # removes everything `up` created
 ```
 
-Expected AWS cost for a 2-day test, all in Ohio: DRS $0.028/h per server (~$1.35), replication
-server t3.small (~$1), disks and snapshots (under $1), source t3.micro (~$0.50), drill instances
-(cents). **Under $5, inside the credits.**
+Regions come from `POC_SOURCE_REGION` (default us-east-1) and `POC_DRS_REGION` (default us-west-2);
+`POC_REGION=us-east-2` runs the old single-Region test.
 
-**Closer to the pilot (later):** the pilot customer's server is a physical machine outside AWS. The same
-agent runs on any Linux or Windows machine with outbound internet, so a VM on this Mac (Intel, so
-an x86_64 VM works) or a $4–6/month cloud VM elsewhere (e.g. a DigitalOcean droplet; needs the
-founder's spend approval) is a more realistic source. It does not get around the DRS block: the
-AWS side (DRS, replication server, recovery) still runs in our account.
+`init-drs` creates the DRS service roles and replication defaults: staging area in the default
+subnet of `us-west-2a`, t3.small shared replication server, encrypted GP3 staging disks, public IP
+data routing (the source is in another Region), point in time every 10 minutes for 1 hour, hourly
+for 24 hours, daily for 7 days. See `docs/AWS_DR_BEST_PRACTICES.md`.
+
+Expected AWS cost for a 2-day test: DRS $0.028/h per server (~$1.35), replication server t3.small
+(~$1), staging disks and snapshots (under $1), source t3.micro (~$0.50), cross-Region transfer of
+the 8 GB disk plus changes (~$0.20), drill instances (cents). **About $5; budget alert at $10.**
+
+**Closer to the pilot (later):** the pilot customer's server is a physical machine outside AWS. The
+same agent runs on any Linux or Windows machine with outbound internet, so a VM on this Mac or a
+small cloud VM elsewhere (needs the founder's spend approval) is a more realistic source.
 
 ## Steps
 
-1. ✅ Account, agent access key, AWS CLI 2.40 (2026-11-11/12). ⏳ AWS lifts `p-1m6ffy9a`.
-2. `scripts/poc/source-server.sh check` shows "OK: DRS reachable". Then initialize DRS in
-   us-east-2 (`aws drs initialize-service`) and set replication defaults: encrypted staging,
-   t3.small replication server, 7-day point in time, staging subnet in `us-east-2b`.
-3. `source-server.sh up`, wait ~3 minutes, `verify` (heartbeat lines growing).
-4. `source-server.sh install-agent`; wait for initial sync (minutes for 8 GB). `status` shows
-   `CONTINUOUS` and a lag of seconds.
-5. Console: Connect your AWS account → create the token; agent deploys the collector with
-   Terraform (`drs_region = "us-east-2"`). Expect **LIVE · AWS DRS** within a minute.
+1. ✅ Standard account, MFA, budgets, agent access key (2026-11-17). ✅ `check` passes.
+2. ✅ `source-server.sh init-drs` (us-west-2, 2026-11-17; needed the service roles created first).
+3. ✅ `source-server.sh up`, wait ~3 minutes, `verify` (heartbeat lines growing).
+4. ✅ `source-server.sh install-agent`; initial sync. **2026-11-17: agent installed 17:08 UTC,
+   first byte 17:13, `CONTINUOUS` at 17:30 with lag `P0D` and 0 bytes backlogged (8 GiB disk, ~23
+   minutes end to end).** Took four script fixes (single-line SSM command, 1 GB swap on the
+   t3.micro, `TMPDIR=/var/tmp`, real exit status); see `docs/AWS_DR_BEST_PRACTICES.md` §2 and §4.
+5. ✅ Console: Connect your AWS account → create the token (founder; stored in the Keychain as
+   "AetherVault ingest token (live DRS test)"); collector deployed with Terraform in us-west-2
+   (`drs_region = "us-west-2"`, plan reviewed then applied, local state gitignored). **2026-11-17
+   18:03 UTC: first report accepted (1 server, CONTINUOUS, lag 0 s, data-loss target met); the
+   console shows LIVE · AWS DRS.**
 6. Add a Slack alert channel; stop the agent on the source for a few minutes → "Data-loss target
    at risk" alert → restart → "recovered".
-7. Drill: Run drill now in AetherVault, launch the drill instance in DRS, tick the runbook, confirm
-   the web page and the latest file on the drill instance, terminate it, open the evidence report.
-8. Optional: full recovery + failback rehearsal (cross-Region, once the Region block is lifted).
+7. ✅ Drill (2026-11-17): Run drill now in AetherVault and `aws drs start-recovery --is-drill` at
+   18:09:24 UTC; recovery point 18:09:33. Before launching: DRS post-launch enabled (attaches the
+   role with SSM) and the DRS launch template given a public IP so the drill server can reach SSM
+   (outbound only; the default security group admits nothing from the internet). **Measured data
+   loss: none** (every heartbeat through 18:08:49 recovered; 1-minute resolution). **Recovery time:
+   19 min 47 s to a verified web page (server up at 17 min 16 s), missing the 15-minute target.**
+   Job log: conversion 18:10:21–18:15:31, then an unexplained wait to launch start 18:25:22. Drill
+   server terminated afterwards. Still to do: explain the wait, tick the runbook in the console,
+   rerun. The console's drill row showed a modeled 5.5 s recovery (simulated timer) next to the
+   real 0 s data loss; fix tracked in STATUS.
+8. Optional: full recovery + failback rehearsal back to us-east-1.
 9. Record real `DescribeSourceServers` responses (`--record`) to replace the hand-built fixtures
    and confirm the `lagDuration` format.
 10. Tear down: `terraform destroy`, disconnect and delete the source server in DRS,
-    `source-server.sh down`, delete leftover replication servers, volumes and snapshots, delete
-    the agent access key; check the bill next day.
+    `source-server.sh down`, delete the DRS source network the agent created for the source VPC,
+    delete leftover replication servers, volumes and snapshots in us-west-2, delete the agent
+    user and key; check the bill next day.
 
 **Done when:** screenshots/PDF of LIVE status, an alert, and a drill evidence report with measured
 data loss and runbook ticks, all from real AWS data. That's the demo for the first pilot customer.

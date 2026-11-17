@@ -5,20 +5,24 @@
 # See docs/AWS_LIVE_POC.md.
 #
 # Usage: scripts/poc/source-server.sh <command>
-#   check          free permission checks (dry runs); creates nothing
-#   up             create the role, security group and t3.micro instance (~$0.25/day, from credits)
+#   check          free permission and quota checks (dry runs); creates nothing
+#   init-drs       one-time DRS setup in the recovery Region (service init + replication defaults)
+#   up             create the role, security group and t3.micro instance (~$0.25/day)
 #   verify         show the heartbeat and web page from inside the server (via SSM, no open ports)
-#   install-agent  install the AWS DRS replication agent (needs DRS initialized in the Region)
+#   install-agent  install the DRS replication agent, replicating into the recovery Region
 #   status         instance state and DRS source servers
 #   down           terminate the instance and delete everything `up` created
 #
-# Environment: AWS_PROFILE (default aegis), POC_REGION (default us-east-2).
+# Environment: AWS_PROFILE (default aegis-dr), POC_SOURCE_REGION (where the test server runs,
+# default us-east-1), POC_DRS_REGION (where DRS replicates and recovers, default us-west-2).
+# POC_REGION, if set, is the default for both (single-Region test).
 # Everything is tagged Project=aethervault-poc. No SSH key, no inbound ports, IMDSv2 only,
 # encrypted disk.
 set -euo pipefail
 
-export AWS_PROFILE="${AWS_PROFILE:-aegis}"
-REGION="${POC_REGION:-us-east-2}"
+export AWS_PROFILE="${AWS_PROFILE:-aegis-dr}"
+REGION="${POC_SOURCE_REGION:-${POC_REGION:-us-east-1}}"
+DRS_REGION="${POC_DRS_REGION:-${POC_REGION:-us-west-2}}"
 NAME=aethervault-poc-source
 ROLE=aethervault-poc-source-role
 SG_NAME=aethervault-poc-source-sg
@@ -30,6 +34,7 @@ POLICIES=(
 )
 
 a() { aws --region "$REGION" "$@"; }
+d() { aws --region "$DRS_REGION" "$@"; }
 say() { printf '\n== %s\n' "$*"; }
 
 instance_id() {
@@ -56,9 +61,16 @@ run_remote() {
   cmd_id="$(a ssm send-command --instance-ids "$id" --document-name AWS-RunShellScript \
     --parameters "commands=[$(python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$1")]" \
     --timeout-seconds "${2:-600}" --query Command.CommandId --output text)"
-  a ssm wait command-executed --command-id "$cmd_id" --instance-id "$id" 2>/dev/null || true
+  # Poll instead of `ssm wait`, which gives up after ~100 s (the agent install takes longer).
+  local status=Pending
+  while [[ $status == Pending || $status == InProgress || $status == Delayed ]]; do
+    sleep 10
+    status="$(a ssm get-command-invocation --command-id "$cmd_id" --instance-id "$id" \
+      --query Status --output text 2>/dev/null || echo Pending)"
+  done
   a ssm get-command-invocation --command-id "$cmd_id" --instance-id "$id" \
     --query '[Status,StandardOutputContent,StandardErrorContent]' --output text
+  [[ $status == Success ]]
 }
 
 user_data() {
@@ -86,8 +98,16 @@ systemctl enable --now nginx aethervault-heartbeat
 EOF
 }
 
+# Running On-Demand Standard (A, C, D, H, I, M, R, T, Z) instances vCPU quota, and Lambda concurrency.
+quotas() {
+  local r=$1
+  echo "$r: EC2 standard vCPUs $(aws --region "$r" service-quotas get-service-quota --service-code ec2 \
+    --quota-code L-1216C47A --query Quota.Value --output text 2>&1 | head -1), Lambda concurrency $(aws --region "$r" \
+    lambda get-account-settings --query AccountLimit.ConcurrentExecutions --output text 2>&1 | head -1)"
+}
+
 cmd_check() {
-  say "Region $REGION, profile $AWS_PROFILE"
+  say "Source Region $REGION, DRS Region $DRS_REGION, profile $AWS_PROFILE"
   echo "account: $(aws sts get-caller-identity --query Account --output text)"
   echo "AMI: $(a ssm get-parameter --name $AMI_PARAM --query Parameter.Value --output text)"
   echo "default VPC: $(vpc_id), subnet ${REGION}a: $(subnet_id)"
@@ -95,12 +115,97 @@ cmd_check() {
   say "EC2 launch (dry run, nothing is created)"
   a ec2 run-instances --dry-run --image-id "$(a ssm get-parameter --name $AMI_PARAM --query Parameter.Value --output text)" \
     --instance-type t3.micro --subnet-id "$(subnet_id)" 2>&1 | grep -oE 'DryRunOperation|UnauthorizedOperation.*' | head -1 || true
-  say "Elastic Disaster Recovery"
-  if out="$(a drs describe-source-servers --query 'length(items)' 2>&1)"; then
+  say "Quotas (new accounts start low; DRS needs ~2 vCPUs per drill or recovery instance)"
+  quotas "$REGION"
+  [[ $DRS_REGION == "$REGION" ]] || quotas "$DRS_REGION"
+  say "Elastic Disaster Recovery in $DRS_REGION"
+  if out="$(d drs describe-source-servers --query 'length(items)' 2>&1)"; then
     echo "OK: DRS reachable ($out source servers)"
+  elif grep -q UninitializedAccountException <<<"$out"; then
+    echo "OK: DRS reachable, not initialized yet. Run: $0 init-drs"
   else
-    echo "BLOCKED: $(echo "$out" | grep -oE 'explicit deny in a service control policy.*|UninitializedAccountException.*|AccessDenied.*' | head -1)"
+    echo "BLOCKED: $(echo "$out" | grep -oE 'explicit deny in a service control policy.*|AccessDenied.*' | head -1)"
   fi
+}
+
+# One-time DRS setup in the recovery Region: creates the DRS service roles and the default
+# replication settings (encrypted staging disks, t3.small replication server, 7-day point in time,
+# staging area in the default subnet of zone a). Same defaults as docs/AWS_DR_BEST_PRACTICES.md.
+# DRS service roles. The console creates these on first use; InitializeService from the CLI
+# requires them to exist already. Global (IAM), AWS managed policies only, path /service-role/.
+DRS_POLICY=arn:aws:iam::aws:policy/service-role/AWSElasticDisasterRecovery
+ensure_ec2_role() {
+  local name=$1
+  shift
+  if ! aws iam get-role --role-name "$name" >/dev/null 2>&1; then
+    aws iam create-role --role-name "$name" --path /service-role/ --tags "$TAGS" \
+      --assume-role-policy-document '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"ec2.amazonaws.com"},"Action":"sts:AssumeRole"}]}' >/dev/null
+    echo "created $name"
+  fi
+  for p in "$@"; do aws iam attach-role-policy --role-name "$name" --policy-arn "$p"; done
+}
+ensure_drs_role() {
+  local name=$1 principal=$2 actions=$3
+  shift 3
+  if ! aws iam get-role --role-name "$name" >/dev/null 2>&1; then
+    local account
+    account="$(aws sts get-caller-identity --query Account --output text)"
+    aws iam create-role --role-name "$name" --path /service-role/ --tags "$TAGS" \
+      --assume-role-policy-document "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",
+        \"Principal\":{\"Service\":\"$principal\"},\"Action\":$actions,
+        \"Condition\":{\"StringEquals\":{\"aws:SourceAccount\":\"$account\"}}}]}" >/dev/null
+    echo "created $name"
+  fi
+  for p in "$@"; do aws iam attach-role-policy --role-name "$name" --policy-arn "$p"; done
+}
+
+cmd_init_drs() {
+  say "DRS service roles"
+  # Replication, conversion and recovery servers are EC2 instances; the agent and failback roles
+  # are assumed by DRS itself, limited to this account.
+  local drs='["sts:AssumeRole","sts:SetSourceIdentity"]'
+  for r in ReplicationServer ConversionServer RecoveryInstance; do
+    ensure_ec2_role "AWSElasticDisasterRecovery${r}Role" "${DRS_POLICY}${r}Policy"
+  done
+  ensure_ec2_role AWSElasticDisasterRecoveryRecoveryInstanceWithLaunchActionsRole \
+    "${DRS_POLICY}RecoveryInstancePolicy" arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+  ensure_drs_role AWSElasticDisasterRecoveryAgentRole drs.amazonaws.com "$drs" "${DRS_POLICY}AgentPolicy"
+  ensure_drs_role AWSElasticDisasterRecoveryFailbackRole drs.amazonaws.com "$drs" "${DRS_POLICY}FailbackPolicy"
+  echo "waiting 15 s for IAM to propagate"
+  sleep 15
+
+  say "Initializing DRS in $DRS_REGION"
+  local out
+  if ! out="$(d drs initialize-service 2>&1)"; then
+    echo "$out"
+    exit 1
+  fi
+  if [[ "$(d drs describe-replication-configuration-templates --query 'length(items)' --output text)" != "0" ]]; then
+    echo "replication defaults already exist:"
+  else
+    local staging
+    staging="$(d ec2 describe-subnets --filters Name=default-for-az,Values=true \
+      "Name=availability-zone,Values=${DRS_REGION}a" --query 'Subnets[0].SubnetId' --output text)"
+    d drs create-replication-configuration-template \
+      --staging-area-subnet-id "$staging" \
+      --associate-default-security-group \
+      --no-use-dedicated-replication-server \
+      --replication-server-instance-type t3.small \
+      --replication-servers-security-groups-ids '[]' \
+      --default-large-staging-disk-type GP3 \
+      --ebs-encryption DEFAULT \
+      --bandwidth-throttling 0 \
+      --data-plane-routing PUBLIC_IP \
+      --create-public-ip \
+      --staging-area-tags Project=aethervault-poc \
+      --pit-policy '[{"interval":10,"retentionDuration":60,"units":"MINUTE","enabled":true,"ruleID":1},
+        {"interval":1,"retentionDuration":24,"units":"HOUR","enabled":true,"ruleID":2},
+        {"interval":1,"retentionDuration":7,"units":"DAY","enabled":true,"ruleID":3}]' \
+      --tags Project=aethervault-poc >/dev/null
+    echo "created replication defaults:"
+  fi
+  d drs describe-replication-configuration-templates \
+    --query 'items[0].[stagingAreaSubnetId,replicationServerInstanceType,ebsEncryption,defaultLargeStagingDiskType]' --output text
 }
 
 cmd_up() {
@@ -151,18 +256,21 @@ cmd_verify() {
 }
 
 cmd_install_agent() {
-  run_remote "set -e; cd /tmp
-curl -fsSo aws-replication-installer-init https://aws-elastic-disaster-recovery-$REGION.s3.$REGION.amazonaws.com/latest/linux/aws-replication-installer-init
-chmod +x aws-replication-installer-init
-./aws-replication-installer-init --region $REGION --no-prompt" 1800
+  # One line joined with && (SSM ran the multi-line form as a single line). /var/tmp and
+  # TMPDIR=/var/tmp, not /tmp: Amazon Linux 2023 mounts /tmp as a ~450 MB tmpfs, and the installer
+  # downloads ~330 MB there ("No space left on device"). No pipe, so a failed install fails.
+  local url="https://aws-elastic-disaster-recovery-$DRS_REGION.s3.$DRS_REGION.amazonaws.com/latest/linux/aws-replication-installer-init"
+  # A t3.micro has ~900 MB of RAM and no swap; the installer was killed by the OOM killer while
+  # downloading. Add a 1 GB swap file first (kept across reboots).
+  run_remote "cd /var/tmp && { swapon --show | grep -q /swapfile || { dd if=/dev/zero of=/swapfile bs=1M count=1024 status=none && chmod 600 /swapfile && mkswap /swapfile >/dev/null && swapon /swapfile && echo '/swapfile none swap defaults 0 0' >> /etc/fstab; }; } && curl -fsSo aws-replication-installer-init $url && chmod +x aws-replication-installer-init && TMPDIR=/var/tmp ./aws-replication-installer-init --region $DRS_REGION --no-prompt" 1800
 }
 
 cmd_status() {
   say "Instance"
   a ec2 describe-instances --filters "Name=tag:Name,Values=$NAME" \
     --query 'Reservations[].Instances[].[InstanceId,State.Name,Placement.AvailabilityZone,LaunchTime]' --output text
-  say "DRS source servers"
-  a drs describe-source-servers \
+  say "DRS source servers ($DRS_REGION)"
+  d drs describe-source-servers \
     --query 'items[].[sourceServerID,sourceProperties.identificationHints.hostname,dataReplicationInfo.dataReplicationState,dataReplicationInfo.lagDuration]' \
     --output text 2>&1 | grep -oE '^s-.*|explicit deny in a service control policy|UninitializedAccountException' | head -5 || true
 }
@@ -190,10 +298,11 @@ cmd_down() {
 
 case "${1:-}" in
   check) cmd_check ;;
+  init-drs) cmd_init_drs ;;
   up) cmd_up ;;
   verify) cmd_verify ;;
   install-agent) cmd_install_agent ;;
   status) cmd_status ;;
   down) cmd_down ;;
-  *) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+  *) sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
 esac

@@ -27,6 +27,18 @@ back to the original (or a new) server.
   Console: open DRS in that Region and follow first-time setup. CLI:
   `aws drs initialize-service --region <region>`. The DRS full-access console policy does not
   include the IAM permissions needed to initialize: an account administrator does this once.
+  **From the CLI, create the six roles first** (path `/service-role/`, AWS managed
+  `AWSElasticDisasterRecovery*Policy` policies): `initialize-service` does not create them and
+  fails with "Failed to attach the following IAM roles to their instance profiles" (seen
+  2026-11-17). `scripts/poc/source-server.sh init-drs` does both.
+- **The recovery account must be a standard AWS account** with no spend limit that pauses it.
+  Accounts opened through AWS's simplified "projects" sign-up sit in an AWS-managed organization
+  whose policies can deny DRS, and neither the account owner nor AWS Support could lift them
+  (2026-11-17). Check with `aws drs describe-source-servers --region <region>`: "Account not
+  initialized" is fine; "explicit deny in a service control policy" is not.
+- **Check quotas before a drill.** New accounts can start at 5 standard vCPUs per Region; the
+  replication server plus each drill or recovery instance count against it. Request an increase
+  (Service Quotas, `L-1216C47A`) sized for a full recovery of every protected server.
 - **Pick a recovery Region away from the source site** (different power grid, flood zone and
   network providers). For a server at a US data center, a US Region in another part of the
   country is the usual choice (e.g. source in Virginia → recover to `us-west-2`).
@@ -70,6 +82,16 @@ Source servers need **outbound** access only:
 - **Plan for initial sync.** Every disk is copied once before continuous replication starts. It can
   take hours for large disks; schedule it outside peak hours if bandwidth is tight.
 - Windows sources need at least **2 GB free disk space** to launch a recovery instance.
+- **Linux sources: memory and temp space** (seen on Amazon Linux 2023, 2026-11-17). The installer
+  downloads ~330 MB and needs working memory. On a 1 GB server with no swap it was killed by the
+  out-of-memory killer; with `/tmp` as a small in-memory tmpfs (the AL2023 default) it failed with
+  "No space left on device". Run it with `TMPDIR=/var/tmp` (or any directory on disk with ~1 GB
+  free) and make sure the server has free memory or swap.
+
+- **Checking a drill server needs a path to Systems Manager.** Enable DRS post-launch actions (it
+  attaches a role with SSM access) and give the recovery subnet a route to SSM: private VPC
+  endpoints (`ssm`, `ssmmessages`, `ec2messages`) in production, or a public IP with no inbound
+  rules in a test. Without one, you can launch a drill but not verify the application on it.
 
 ## 5. Replication settings
 
