@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Collector Terraform pins its Region (2026-11-17)
+
+- `collector/terraform/main.tf` sets the AWS provider Region to `drs_region`. Before, it used the
+  shell's default Region: redeploying the live collector from a us-east-1 profile planned a
+  second collector in us-east-1 (caught in plan review, not applied). Live collector redeployed
+  in us-west-2 with the recovery-jobs reader (1 change, plan reviewed first); migration
+  `20261117000011_recovery_jobs.sql` applied to the hosted database (dry run first; pgTAP passes
+  against it).
+
 ### Second live drill: within the 15-minute target (2026-11-17)
 
 - Drill 2: server launched 9 min 58 s after the request, web page verified at 12 min 29 s

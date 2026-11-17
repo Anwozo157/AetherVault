@@ -18,6 +18,13 @@ terraform {
   }
 }
 
+# Deploy where DRS replicates. Without this the provider falls back to the profile's default
+# Region, and a later plan from a shell with another default Region would try to create a
+# second collector there.
+provider "aws" {
+  region = var.drs_region
+}
+
 variable "drs_region" {
   description = "Region Elastic Disaster Recovery replicates into (e.g. us-west-2)."
   type        = string
