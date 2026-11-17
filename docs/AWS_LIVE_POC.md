@@ -80,8 +80,11 @@ small cloud VM elsewhere (needs the founder's spend approval) is a more realisti
    first byte 17:13, `CONTINUOUS` at 17:30 with lag `P0D` and 0 bytes backlogged (8 GiB disk, ~23
    minutes end to end).** Took four script fixes (single-line SSM command, 1 GB swap on the
    t3.micro, `TMPDIR=/var/tmp`, real exit status); see `docs/AWS_DR_BEST_PRACTICES.md` §2 and §4.
-5. Console: Connect your AWS account → create the token; agent deploys the collector with
-   Terraform in us-west-2 (`drs_region = "us-west-2"`). Expect **LIVE · AWS DRS** within a minute.
+5. ✅ Console: Connect your AWS account → create the token (founder; stored in the Keychain as
+   "AetherVault ingest token (live DRS test)"); collector deployed with Terraform in us-west-2
+   (`drs_region = "us-west-2"`, plan reviewed then applied, local state gitignored). **2026-11-17
+   18:03 UTC: first report accepted (1 server, CONTINUOUS, lag 0 s, data-loss target met); the
+   console shows LIVE · AWS DRS.**
 6. Add a Slack alert channel; stop the agent on the source for a few minutes → "Data-loss target
    at risk" alert → restart → "recovered".
 7. Drill: Run drill now in AetherVault, launch the drill instance in DRS (us-west-2), tick the
