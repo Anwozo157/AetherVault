@@ -456,9 +456,28 @@ export interface IngestTokenStatus {
 }
 
 /** Optional capability: real replication status from AWS Elastic Disaster Recovery. */
+/**
+ * A recovery launch job measured by AWS Elastic Disaster Recovery (drill, recovery or
+ * failback), reported by the collector. Real, not simulated.
+ */
+export interface MeasuredRecovery {
+  jobId: string;
+  kind: 'drill' | 'recovery' | 'failback';
+  status: 'PENDING' | 'STARTED' | 'COMPLETED';
+  awsRegion: string;
+  startedAt: string;
+  endedAt: string | null;
+  /** AWS job time: recovery requested -> servers launched. null while running. */
+  durationSeconds: number | null;
+  servers: number;
+  launched: number;
+}
+
 export interface ReplicationCapability {
   latest(): Promise<ReplicationStatus | null>;
   history(): Promise<LagPoint[]>;
+  /** Recovery jobs measured by AWS DRS, newest first. */
+  recoveries(): Promise<MeasuredRecovery[]>;
   tokenStatus(): Promise<IngestTokenStatus | null>;
   /** Admins only. Returns the token once; only its hash is stored. Replaces any old token. */
   createToken(): Promise<string>;

@@ -220,6 +220,7 @@ export default function CommandCenter({
                   orgId={orgId ?? undefined}
                   myRole={provider.team?.myRole ?? 'viewer'}
                   refreshKey={activityKey}
+                  getObjectives={provider.drills?.getObjectives}
                 />
               </Suspense>
             </ErrorBoundary>

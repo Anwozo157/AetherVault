@@ -4,6 +4,12 @@ Prove the whole chain with **real** AWS Elastic Disaster Recovery data, in our o
 before touching a customer: a server replicating, AetherVault showing LIVE lag, an alert, a drill
 with measured data loss and a runbook in its evidence, and failback rehearsed.
 
+## Status (2026-11-17, evening)
+
+**Two live drills done.** Drill 1: 17 min 14 s to a launched server (first-recovery setup),
+no data loss. Drill 2: 9 min 58 s to a launched server, 12 min 29 s to a verified web page
+(within the 15-minute target), about 8 s of data loss (within the 1-minute target).
+
 ## Status (2026-11-17)
 
 **Unblocked.** The test now runs in a **standard AWS account** (opened 2026-11-17; ID in the
@@ -51,6 +57,7 @@ scripts/poc/source-server.sh init-drs       # one-time DRS setup in us-west-2
 scripts/poc/source-server.sh up             # source server in us-east-1 (~$0.25/day)
 scripts/poc/source-server.sh verify         # heartbeat + web page, via SSM
 scripts/poc/source-server.sh install-agent  # agent replicates into us-west-2
+scripts/poc/source-server.sh verify-drill   # on the drill server: web page + last heartbeats
 scripts/poc/source-server.sh status
 scripts/poc/source-server.sh down           # removes everything `up` created
 ```
@@ -94,9 +101,21 @@ small cloud VM elsewhere (needs the founder's spend approval) is a more realisti
    loss: none** (every heartbeat through 18:08:49 recovered; 1-minute resolution). **Recovery time:
    19 min 47 s to a verified web page (server up at 17 min 16 s), missing the 15-minute target.**
    Job log: conversion 18:10:21–18:15:31, then an unexplained wait to launch start 18:25:22. Drill
-   server terminated afterwards. Still to do: explain the wait, tick the runbook in the console,
-   rerun. The console's drill row showed a modeled 5.5 s recovery (simulated timer) next to the
-   real 0 s data loss; fix tracked in STATUS.
+   server terminated afterwards. The console's drill row showed a modeled 5.5 s recovery
+   (simulated timer) next to the real 0 s data loss; now labeled "simulated" (fix/console-honesty).
+   **Cause of the wait (found the same day):** one-time preparation on a server's first recovery.
+   CloudTrail shows DRS creating the base snapshots by 18:16:52, then idle until the launch at
+   18:25:22; the second drill launched 2 s after conversion.
+   ✅ **Drill 2 (2026-11-17, `start-recovery --is-drill` at 21:04:58 UTC):** DRS took a new snapshot,
+   then after ~3 minutes used the previous point in time instead (`USING_PREVIOUS_SNAPSHOT`;
+   recovery point 21:04:50, 8 s before the request; a scheduled snapshot had completed 8 s before
+   the drill). Conversion 21:08:11–21:13:37, launch 21:13:39–21:14:57. **Server launched 9 min
+   58 s after the request; web page verified (HTTP 200) at 12 min 29 s: within the 15-minute
+   target.** Data loss: heartbeats through 21:03:51 recovered; the 21:04:51 heartbeat (written
+   7 s before the request, 0.6 s after the recovery point) was not, so about 8 s of writes lost,
+   within the 1-minute target. Checked with `source-server.sh verify-drill`. Drill server
+   terminated. Both drills appear in the console's new "Recoveries measured by AWS" table
+   (collector CLI → local database; the hosted console needs the new migration first).
 8. Optional: full recovery + failback rehearsal back to us-east-1.
 9. Record real `DescribeSourceServers` responses (`--record`) to replace the hand-built fixtures
    and confirm the `lagDuration` format.

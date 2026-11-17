@@ -10,6 +10,7 @@
 #   up             create the role, security group and t3.micro instance (~$0.25/day)
 #   verify         show the heartbeat and web page from inside the server (via SSM, no open ports)
 #   install-agent  install the DRS replication agent, replicating into the recovery Region
+#   verify-drill   on the DRS drill server: wait for SSM, check the web page and last heartbeats
 #   status         instance state and DRS source servers
 #   down           terminate the instance and delete everything `up` created
 #
@@ -54,10 +55,12 @@ sg_id() {
 }
 
 # Run a shell script on the instance through SSM and print its output.
+# run_remote <command> [timeout]: runs on the source server, or on REMOTE_ID in REMOTE_REGION.
 run_remote() {
   local id cmd_id
-  id="$(instance_id)"
+  id="${REMOTE_ID:-$(instance_id)}"
   [[ -n $id ]] || { echo "no running $NAME instance; run: $0 up"; exit 1; }
+  a() { aws --region "${REMOTE_REGION:-$REGION}" "$@"; }
   cmd_id="$(a ssm send-command --instance-ids "$id" --document-name AWS-RunShellScript \
     --parameters "commands=[$(python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$1")]" \
     --timeout-seconds "${2:-600}" --query Command.CommandId --output text)"
@@ -70,7 +73,28 @@ run_remote() {
   done
   a ssm get-command-invocation --command-id "$cmd_id" --instance-id "$id" \
     --query '[Status,StandardOutputContent,StandardErrorContent]' --output text
-  [[ $status == Success ]]
+  local rc=0
+  [[ $status == Success ]] || rc=1
+  a() { aws --region "$REGION" "$@"; }
+  return $rc
+}
+
+cmd_verify_drill() {
+  local ec2 ping=""
+  ec2="$(d drs describe-recovery-instances --query 'items[?isDrill].ec2InstanceID | [0]' --output text)"
+  [[ -n $ec2 && $ec2 != None ]] || { echo "no drill recovery instance in $DRS_REGION"; exit 1; }
+  say "Drill server $ec2 in $DRS_REGION: waiting for Systems Manager"
+  for _ in $(seq 1 60); do
+    ping="$(d ssm describe-instance-information --filters "Key=InstanceIds,Values=$ec2" \
+      --query 'InstanceInformationList[0].PingStatus' --output text 2>/dev/null || true)"
+    [[ $ping == Online ]] && break
+    sleep 10
+  done
+  [[ $ping == Online ]] || { echo "drill server never reached SSM (needs a public IP or VPC endpoints)"; exit 1; }
+  echo "SSM online $(date -u +%FT%TZ)"
+  REMOTE_ID="$ec2" REMOTE_REGION="$DRS_REGION" run_remote \
+    "curl -s -o /dev/null -w 'web page HTTP %{http_code}\n' http://localhost/ && echo heartbeat lines: \$(wc -l < /var/lib/aethervault/heartbeat.log) && tail -3 /var/lib/aethervault/heartbeat.log" 120
+  echo "checked $(date -u +%FT%TZ)"
 }
 
 user_data() {
@@ -301,6 +325,7 @@ case "${1:-}" in
   init-drs) cmd_init_drs ;;
   up) cmd_up ;;
   verify) cmd_verify ;;
+  verify-drill) cmd_verify_drill ;;
   install-agent) cmd_install_agent ;;
   status) cmd_status ;;
   down) cmd_down ;;

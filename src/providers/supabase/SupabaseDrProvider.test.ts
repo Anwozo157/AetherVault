@@ -245,6 +245,19 @@ class FakeServer {
         { collected_at: '2026-11-09T23:59:00Z', max_lag_seconds: '3.5', rpo_met: true },
         { collected_at: '2026-11-10T00:00:00Z', max_lag_seconds: null, rpo_met: null },
       ],
+      listRecoveryJobs: async () => [
+        {
+          job_id: 'drsjob-506416001759e958f',
+          kind: 'drill' as const,
+          status: 'COMPLETED' as const,
+          aws_region: 'us-west-2',
+          started_at: '2026-11-17T18:09:27Z',
+          ended_at: '2026-11-17T18:26:42Z',
+          duration_seconds: '1035',
+          servers: 1,
+          launched: 1,
+        },
+      ],
       ingestTokenStatus: async () => null,
       createIngestToken: vi.fn(async () => 'avi_' + '0'.repeat(48)),
       revokeIngestToken: vi.fn(async () => {}),
@@ -719,6 +732,19 @@ describe('SupabaseDrProvider', () => {
     expect(api.createIngestToken).toHaveBeenCalledWith(ORG);
     await admin.replication.revokeToken();
     expect(api.revokeIngestToken).toHaveBeenCalledWith(ORG);
+    await expect(admin.replication.recoveries()).resolves.toEqual([
+      {
+        jobId: 'drsjob-506416001759e958f',
+        kind: 'drill',
+        status: 'COMPLETED',
+        awsRegion: 'us-west-2',
+        startedAt: '2026-11-17T18:09:27Z',
+        endedAt: '2026-11-17T18:26:42Z',
+        durationSeconds: 1035,
+        servers: 1,
+        launched: 1,
+      },
+    ]);
   });
 
   test('runbooks: runbook and checklist mapped; save and tick pass through (blank note -> null)', async () => {

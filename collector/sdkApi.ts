@@ -1,5 +1,6 @@
-// The only AWS call the collector makes: drs:DescribeSourceServers (read-only).
-import { DescribeSourceServersCommand, DrsClient } from '@aws-sdk/client-drs';
+// The only AWS calls the collector makes, both read-only and covered by
+// AWSElasticDisasterRecoveryReadOnlyAccess: drs:DescribeSourceServers and drs:DescribeJobs.
+import { DescribeJobsCommand, DescribeSourceServersCommand, DrsClient } from '@aws-sdk/client-drs';
 import type { DrsReadApi } from '../src/integrations/awsDrs/collect';
 
 export function sdkApi(region: string, onPage?: (page: unknown) => void): DrsReadApi {
@@ -9,6 +10,9 @@ export function sdkApi(region: string, onPage?: (page: unknown) => void): DrsRea
       const page = await client.send(new DescribeSourceServersCommand({ filters: {}, nextToken }));
       onPage?.(page);
       return page;
+    },
+    describeJobs(fromDate, nextToken) {
+      return client.send(new DescribeJobsCommand({ filters: { fromDate }, nextToken }));
     },
   };
 }

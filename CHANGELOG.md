@@ -5,6 +5,33 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Second live drill: within the 15-minute target (2026-11-17)
+
+- Drill 2: server launched 9 min 58 s after the request, web page verified at 12 min 29 s
+  (target 15 min); about 8 s of data loss (target 1 min). Drill 1's extra ~10 minutes was
+  one-time preparation on a server's first recovery (CloudTrail), not a repeating delay.
+- `scripts/poc/source-server.sh verify-drill`: waits for the drill server in Systems Manager,
+  then checks its web page and last heartbeats. `run_remote` can target another instance/Region.
+- Best practices §7: run the first drill right after initial sync; plan targets from a second
+  drill.
+- Fix: measured recovery times round before splitting minutes ("10 min", never "9 min 60 s").
+
+### Real recovery times measured by AWS DRS (2026-11-17)
+
+- The collector also calls `drs:DescribeJobs` (already allowed by
+  `AWSElasticDisasterRecoveryReadOnlyAccess`; no new permissions) and pushes the last 30 days of
+  drill, recovery and failback launch jobs to the new `ingest_recovery_jobs` RPC (same ingest
+  token). Only job metadata is stored: job ID, kind, status, start/end time, servers launched.
+  A failure there never blocks the replication status push.
+- New migration `20261117000011_recovery_jobs.sql`: `recovery_jobs` table (no direct client
+  access), `ingest_recovery_jobs` (token-checked, at most 100 jobs, a completed job never goes
+  back to running, 400-day retention) and `list_recovery_jobs` for members.
+- The AWS DRS tab shows "Recoveries measured by AWS": type, servers launched and the AWS job
+  time against the recovery time target. A backend without the migration hides the section.
+- Verified with real data: the collector CLI read both live drills from AWS into the local
+  database (drill 1: 17 min 14 s AWS job time).
+- Tests: 14 new pgTAP tests, collector mapping/paging/push tests, provider mapping and panel tests.
+
 ### Console honesty: real targets only, simulated recovery labeled (2026-11-17)
 
 - The signed-in console offers only recovery targets AetherVault really integrates with (AWS

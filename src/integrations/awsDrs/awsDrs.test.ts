@@ -1,8 +1,16 @@
-import type { DescribeSourceServersResponse } from '@aws-sdk/client-drs';
+import type { DescribeJobsResponse, DescribeSourceServersResponse, Job } from '@aws-sdk/client-drs';
 import { describe, expect, test, vi } from 'vitest';
 import degraded from './fixtures/describe-source-servers.degraded.json';
 import healthy from './fixtures/describe-source-servers.healthy.json';
-import { collectSnapshot, listAllSourceServers, pushSnapshot, recordedApi } from './collect';
+import {
+  collectRecoveryJobs,
+  collectSnapshot,
+  listAllSourceServers,
+  pushRecoveryJobs,
+  pushSnapshot,
+  recordedApi,
+  toRecoveryJob,
+} from './collect';
 import { accountFromArn, buildSnapshot, parseLagSeconds, rebaseSampleTimes } from './snapshot';
 
 const pages = (x: unknown) => x as DescribeSourceServersResponse[];
@@ -183,5 +191,91 @@ describe('pushSnapshot', () => {
 
   test('refuses a non-HTTP URL', async () => {
     await expect(pushSnapshot({ ...target, url: 'file:///etc' }, snap)).rejects.toThrow('https://');
+  });
+});
+
+describe('recovery jobs (DescribeJobs)', () => {
+  // Shapes follow the DRS API reference; IDs are synthetic.
+  const drill = {
+    jobID: 'drsjob-506416001759e958f',
+    type: 'LAUNCH',
+    initiatedBy: 'START_DRILL',
+    status: 'COMPLETED',
+    creationDateTime: '2026-11-17T18:09:27.000Z',
+    endDateTime: '2026-11-17T18:26:42.000Z',
+    participatingServers: [{ sourceServerID: 's-0000000000000000a', launchStatus: 'LAUNCHED' }],
+  } satisfies Job;
+
+  test('keeps drill, recovery and failback launches; drops other jobs', () => {
+    expect(toRecoveryJob(drill)).toEqual({
+      job_id: 'drsjob-506416001759e958f',
+      kind: 'drill',
+      status: 'COMPLETED',
+      started_at: '2026-11-17T18:09:27.000Z',
+      ended_at: '2026-11-17T18:26:42.000Z',
+      servers: 1,
+      launched: 1,
+    });
+    expect(toRecoveryJob({ ...drill, initiatedBy: 'START_RECOVERY' })?.kind).toBe('recovery');
+    expect(toRecoveryJob({ ...drill, initiatedBy: 'FAILBACK' })?.kind).toBe('failback');
+    expect(toRecoveryJob({ ...drill, type: 'TERMINATE' })).toBeNull();
+    expect(toRecoveryJob({ ...drill, initiatedBy: 'DIAGNOSTIC' })).toBeNull();
+  });
+
+  test('a running job has no end time and counts only launched servers', () => {
+    const r = toRecoveryJob({
+      ...drill,
+      status: 'STARTED',
+      participatingServers: [
+        { sourceServerID: 's-0000000000000000a', launchStatus: 'IN_PROGRESS' },
+        { sourceServerID: 's-0000000000000000b', launchStatus: 'LAUNCHED' },
+      ],
+    });
+    expect(r).toMatchObject({ status: 'STARTED', ended_at: null, servers: 2, launched: 1 });
+  });
+
+  test('pages through jobs from the last 30 days, newest first', async () => {
+    const describeJobs = vi.fn(
+      async (_from: string, token?: string): Promise<DescribeJobsResponse> =>
+        token
+          ? {
+              items: [
+                {
+                  ...drill,
+                  jobID: 'drsjob-00000000000000001',
+                  creationDateTime: '2026-11-17T21:04:58Z',
+                },
+              ],
+            }
+          : { items: [drill, { ...drill, type: 'TERMINATE' as const }], nextToken: 't2' },
+    );
+    const jobs = await collectRecoveryJobs(
+      { describeSourceServers: async () => ({ items: [] }), describeJobs },
+      new Date('2026-11-17T22:00:00Z'),
+    );
+    expect(describeJobs).toHaveBeenNthCalledWith(1, '2026-10-18T22:00:00Z', undefined);
+    expect(jobs?.map((j) => j.job_id)).toEqual([
+      'drsjob-00000000000000001',
+      'drsjob-506416001759e958f',
+    ]);
+  });
+
+  test('recorded fixtures without DescribeJobs report no jobs', async () => {
+    expect(await collectRecoveryJobs(recordedApi([]))).toBeNull();
+  });
+
+  test('pushes jobs to ingest_recovery_jobs with the token', async () => {
+    const fetchImpl = vi.fn(async () => new Response('{"accepted":true,"jobs":1,"changed":1}'));
+    const target = { url: 'https://x.supabase.co/', anonKey: 'anon', token: 'avi_t' };
+    await expect(
+      pushRecoveryJobs(target, 'us-west-2', [], fetchImpl as unknown as typeof fetch),
+    ).resolves.toEqual({ accepted: true, jobs: 1, changed: 1 });
+    const [url, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe('https://x.supabase.co/rest/v1/rpc/ingest_recovery_jobs');
+    expect(JSON.parse(init.body as string)).toEqual({
+      p_token: 'avi_t',
+      p_region: 'us-west-2',
+      p_jobs: [],
+    });
   });
 });

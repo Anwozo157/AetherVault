@@ -8,7 +8,9 @@ import { writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import type { DescribeSourceServersResponse } from '@aws-sdk/client-drs';
 import {
+  collectRecoveryJobs,
   collectSnapshot,
+  pushRecoveryJobs,
   pushSnapshot,
   recordedApi,
   type DrsReadApi,
@@ -62,14 +64,23 @@ async function main() {
         `Saved ${clean.length} page(s) to ${values.record}. Review and redact hostnames before committing.`,
       );
     }
+    // Recovery jobs come only from a real account (fixtures have none).
+    const jobs = fixture ? null : await collectRecoveryJobs(api);
     if (values['dry-run']) {
-      console.log(JSON.stringify(snapshot, null, 2));
+      console.log(JSON.stringify(jobs ? { ...snapshot, recovery_jobs: jobs } : snapshot, null, 2));
       return;
     }
-    const result = await pushSnapshot(ingestTargetFromEnv(), snapshot);
+    const target = ingestTargetFromEnv();
+    const result = await pushSnapshot(target, snapshot);
     console.log(
       `${new Date().toISOString()} pushed ${snapshot.servers.length} server(s) [${snapshot.source}]: ${JSON.stringify(result)}`,
     );
+    if (jobs) {
+      const r = await pushRecoveryJobs(target, region, jobs);
+      console.log(
+        `${new Date().toISOString()} pushed ${jobs.length} recovery job(s): ${JSON.stringify(r)}`,
+      );
+    }
   };
 
   await once();
