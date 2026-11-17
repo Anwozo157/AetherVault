@@ -5,6 +5,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Live AWS test moved to a standard account, cross-Region (2026-11-17)
+
+- The DRS block on the first AWS account (a "projects" account whose AWS-managed policies deny DRS) could not be lifted by us or by AWS Support, so the founder opened a standard AWS account (approved, card on file, test budget under $10). Set up first: root MFA (passkey), no root keys, warn-only budget alerts at $10 and $25, agent IAM user with its key in the Keychain (profile `aegis-dr`). DRS is reachable there.
+- `scripts/poc/source-server.sh`: source server and DRS Region are now separate (`POC_SOURCE_REGION`, default us-east-1; `POC_DRS_REGION`, default us-west-2; `POC_REGION` still sets both). New `init-drs` command initializes DRS and creates the replication defaults (encrypted GP3 staging, t3.small replication server, 10-minute/hourly/daily points in time for 7 days). `check` now reports EC2 vCPU and Lambda concurrency quotas in both Regions and treats "not initialized" as reachable.
+- `docs/AWS_LIVE_POC.md` rewritten for the new account and us-east-1 → us-west-2: status, pre-flight results (quotas 5 vCPUs / 5 Lambda runs per Region), costs (~$5), steps, and the lesson that a customer DR account must be a standard account without a pausing spend limit.
+
 ### Public status page (2026-11-16)
 
 - Hosted setting: GitHub Pages turned on for `aethervault-status` (founder approved), so the uptime page is public at https://anwozo157.github.io/aethervault-status/. It shows only up/down and response times for the website, sign-in service and database API (the anon key it uses is already public in the site's code).

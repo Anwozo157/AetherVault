@@ -5,20 +5,24 @@
 # See docs/AWS_LIVE_POC.md.
 #
 # Usage: scripts/poc/source-server.sh <command>
-#   check          free permission checks (dry runs); creates nothing
-#   up             create the role, security group and t3.micro instance (~$0.25/day, from credits)
+#   check          free permission and quota checks (dry runs); creates nothing
+#   init-drs       one-time DRS setup in the recovery Region (service init + replication defaults)
+#   up             create the role, security group and t3.micro instance (~$0.25/day)
 #   verify         show the heartbeat and web page from inside the server (via SSM, no open ports)
-#   install-agent  install the AWS DRS replication agent (needs DRS initialized in the Region)
+#   install-agent  install the DRS replication agent, replicating into the recovery Region
 #   status         instance state and DRS source servers
 #   down           terminate the instance and delete everything `up` created
 #
-# Environment: AWS_PROFILE (default aegis), POC_REGION (default us-east-2).
+# Environment: AWS_PROFILE (default aegis-dr), POC_SOURCE_REGION (where the test server runs,
+# default us-east-1), POC_DRS_REGION (where DRS replicates and recovers, default us-west-2).
+# POC_REGION, if set, is the default for both (single-Region test).
 # Everything is tagged Project=aethervault-poc. No SSH key, no inbound ports, IMDSv2 only,
 # encrypted disk.
 set -euo pipefail
 
-export AWS_PROFILE="${AWS_PROFILE:-aegis}"
-REGION="${POC_REGION:-us-east-2}"
+export AWS_PROFILE="${AWS_PROFILE:-aegis-dr}"
+REGION="${POC_SOURCE_REGION:-${POC_REGION:-us-east-1}}"
+DRS_REGION="${POC_DRS_REGION:-${POC_REGION:-us-west-2}}"
 NAME=aethervault-poc-source
 ROLE=aethervault-poc-source-role
 SG_NAME=aethervault-poc-source-sg
@@ -30,6 +34,7 @@ POLICIES=(
 )
 
 a() { aws --region "$REGION" "$@"; }
+d() { aws --region "$DRS_REGION" "$@"; }
 say() { printf '\n== %s\n' "$*"; }
 
 instance_id() {
@@ -86,8 +91,16 @@ systemctl enable --now nginx aethervault-heartbeat
 EOF
 }
 
+# Running On-Demand Standard (A, C, D, H, I, M, R, T, Z) instances vCPU quota, and Lambda concurrency.
+quotas() {
+  local r=$1
+  echo "$r: EC2 standard vCPUs $(aws --region "$r" service-quotas get-service-quota --service-code ec2 \
+    --quota-code L-1216C47A --query Quota.Value --output text 2>&1 | head -1), Lambda concurrency $(aws --region "$r" \
+    lambda get-account-settings --query AccountLimit.ConcurrentExecutions --output text 2>&1 | head -1)"
+}
+
 cmd_check() {
-  say "Region $REGION, profile $AWS_PROFILE"
+  say "Source Region $REGION, DRS Region $DRS_REGION, profile $AWS_PROFILE"
   echo "account: $(aws sts get-caller-identity --query Account --output text)"
   echo "AMI: $(a ssm get-parameter --name $AMI_PARAM --query Parameter.Value --output text)"
   echo "default VPC: $(vpc_id), subnet ${REGION}a: $(subnet_id)"
@@ -95,12 +108,51 @@ cmd_check() {
   say "EC2 launch (dry run, nothing is created)"
   a ec2 run-instances --dry-run --image-id "$(a ssm get-parameter --name $AMI_PARAM --query Parameter.Value --output text)" \
     --instance-type t3.micro --subnet-id "$(subnet_id)" 2>&1 | grep -oE 'DryRunOperation|UnauthorizedOperation.*' | head -1 || true
-  say "Elastic Disaster Recovery"
-  if out="$(a drs describe-source-servers --query 'length(items)' 2>&1)"; then
+  say "Quotas (new accounts start low; DRS needs ~2 vCPUs per drill or recovery instance)"
+  quotas "$REGION"
+  [[ $DRS_REGION == "$REGION" ]] || quotas "$DRS_REGION"
+  say "Elastic Disaster Recovery in $DRS_REGION"
+  if out="$(d drs describe-source-servers --query 'length(items)' 2>&1)"; then
     echo "OK: DRS reachable ($out source servers)"
+  elif grep -q UninitializedAccountException <<<"$out"; then
+    echo "OK: DRS reachable, not initialized yet. Run: $0 init-drs"
   else
-    echo "BLOCKED: $(echo "$out" | grep -oE 'explicit deny in a service control policy.*|UninitializedAccountException.*|AccessDenied.*' | head -1)"
+    echo "BLOCKED: $(echo "$out" | grep -oE 'explicit deny in a service control policy.*|AccessDenied.*' | head -1)"
   fi
+}
+
+# One-time DRS setup in the recovery Region: creates the DRS service roles and the default
+# replication settings (encrypted staging disks, t3.small replication server, 7-day point in time,
+# staging area in the default subnet of zone a). Same defaults as docs/AWS_DR_BEST_PRACTICES.md.
+cmd_init_drs() {
+  say "Initializing DRS in $DRS_REGION"
+  d drs initialize-service >/dev/null 2>&1 || true
+  if [[ "$(d drs describe-replication-configuration-templates --query 'length(items)' --output text)" != "0" ]]; then
+    echo "replication defaults already exist:"
+  else
+    local staging
+    staging="$(d ec2 describe-subnets --filters Name=default-for-az,Values=true \
+      "Name=availability-zone,Values=${DRS_REGION}a" --query 'Subnets[0].SubnetId' --output text)"
+    d drs create-replication-configuration-template \
+      --staging-area-subnet-id "$staging" \
+      --associate-default-security-group \
+      --no-use-dedicated-replication-server \
+      --replication-server-instance-type t3.small \
+      --replication-servers-security-groups-ids '[]' \
+      --default-large-staging-disk-type GP3 \
+      --ebs-encryption DEFAULT \
+      --bandwidth-throttling 0 \
+      --data-plane-routing PUBLIC_IP \
+      --create-public-ip \
+      --staging-area-tags Project=aethervault-poc \
+      --pit-policy '[{"interval":10,"retentionDuration":60,"units":"MINUTE","enabled":true,"ruleID":1},
+        {"interval":1,"retentionDuration":24,"units":"HOUR","enabled":true,"ruleID":2},
+        {"interval":1,"retentionDuration":7,"units":"DAY","enabled":true,"ruleID":3}]' \
+      --tags Project=aethervault-poc >/dev/null
+    echo "created replication defaults:"
+  fi
+  d drs describe-replication-configuration-templates \
+    --query 'items[0].[stagingAreaSubnetId,replicationServerInstanceType,ebsEncryption,defaultLargeStagingDiskType]' --output text
 }
 
 cmd_up() {
@@ -152,17 +204,17 @@ cmd_verify() {
 
 cmd_install_agent() {
   run_remote "set -e; cd /tmp
-curl -fsSo aws-replication-installer-init https://aws-elastic-disaster-recovery-$REGION.s3.$REGION.amazonaws.com/latest/linux/aws-replication-installer-init
+curl -fsSo aws-replication-installer-init https://aws-elastic-disaster-recovery-$DRS_REGION.s3.$DRS_REGION.amazonaws.com/latest/linux/aws-replication-installer-init
 chmod +x aws-replication-installer-init
-./aws-replication-installer-init --region $REGION --no-prompt" 1800
+./aws-replication-installer-init --region $DRS_REGION --no-prompt" 1800
 }
 
 cmd_status() {
   say "Instance"
   a ec2 describe-instances --filters "Name=tag:Name,Values=$NAME" \
     --query 'Reservations[].Instances[].[InstanceId,State.Name,Placement.AvailabilityZone,LaunchTime]' --output text
-  say "DRS source servers"
-  a drs describe-source-servers \
+  say "DRS source servers ($DRS_REGION)"
+  d drs describe-source-servers \
     --query 'items[].[sourceServerID,sourceProperties.identificationHints.hostname,dataReplicationInfo.dataReplicationState,dataReplicationInfo.lagDuration]' \
     --output text 2>&1 | grep -oE '^s-.*|explicit deny in a service control policy|UninitializedAccountException' | head -5 || true
 }
@@ -190,10 +242,11 @@ cmd_down() {
 
 case "${1:-}" in
   check) cmd_check ;;
+  init-drs) cmd_init_drs ;;
   up) cmd_up ;;
   verify) cmd_verify ;;
   install-agent) cmd_install_agent ;;
   status) cmd_status ;;
   down) cmd_down ;;
-  *) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+  *) sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
 esac
