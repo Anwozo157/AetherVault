@@ -8,7 +8,7 @@ import {
   ScrollText,
   Users,
 } from 'lucide-react';
-import { TARGET_REGIONS } from '../../config/regions';
+import { TARGET_REGIONS, type TargetRegion } from '../../config/regions';
 
 export type CommandTab = 'hud' | 'drs' | 'drills' | 'runbook' | 'alerts' | 'audit' | 'team';
 
@@ -16,6 +16,8 @@ interface ControlBarProps {
   tab: CommandTab;
   onTabChange: (tab: CommandTab) => void;
   targetRegion: string;
+  /** Regions offered in the selector (default: every demo region). */
+  regions?: readonly TargetRegion[];
   onTargetRegionChange: (region: string) => void;
   regionLocked: boolean;
   chaosActive: boolean;
@@ -36,6 +38,7 @@ export default function ControlBar({
   tab,
   onTabChange,
   targetRegion,
+  regions = TARGET_REGIONS,
   onTargetRegionChange,
   regionLocked,
   chaosActive,
@@ -130,7 +133,7 @@ export default function ControlBar({
           aria-label="Failover target region"
           className="bg-aether-panel border border-white/10 rounded-lg px-2.5 py-1.5 text-zinc-200 font-mono text-xs focus:outline-none focus:border-aether-cyan/50 disabled:opacity-50 cursor-pointer"
         >
-          {TARGET_REGIONS.map((region) => (
+          {regions.map((region) => (
             <option key={region.id} value={region.id}>
               {region.label}
             </option>

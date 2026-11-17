@@ -61,6 +61,19 @@ export const TARGET_REGIONS: readonly TargetRegion[] = [
 
 export const DEFAULT_TARGET_REGION = TARGET_REGIONS[0].id;
 
+/**
+ * Recovery targets AetherVault really integrates with today (AWS Elastic Disaster Recovery).
+ * GCP and Azure appear only in the simulated public demo, never in the signed-in console.
+ */
+export const CONNECTED_TARGET_REGIONS: readonly TargetRegion[] = TARGET_REGIONS.filter(
+  (r) => r.cloud === 'AWS',
+);
+
+/** Targets to offer: every demo region when simulated, only connected ones otherwise. */
+export function targetRegionsFor(simulated: boolean): readonly TargetRegion[] {
+  return simulated ? TARGET_REGIONS : CONNECTED_TARGET_REGIONS;
+}
+
 export function findTargetRegion(id: string): TargetRegion {
   return TARGET_REGIONS.find((r) => r.id === id) ?? TARGET_REGIONS[0];
 }

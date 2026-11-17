@@ -241,10 +241,12 @@ describe('DrillsPanel', () => {
     const drills = fake();
     render(<DrillsPanel drills={drills} myRole="operator" refreshKey={0} />);
     expect(await screen.findByText('5.5 s · PASS')).toBeInTheDocument();
+    // The recovery time is modeled, not measured, and must say so.
+    expect(screen.getAllByText('recovery time simulated').length).toBeGreaterThan(0);
     expect(screen.getByText('Withdrawn')).toBeInTheDocument();
     expect(
       screen.getByText(
-        '1 of 1 completed drills passed: recovered within 5 min, and data loss within 30 s where measured.',
+        '1 of 1 completed drills passed: recovered within 5 min, and data loss within 30 s where measured. Recovery times are simulated until AetherVault runs recoveries in your cloud.',
       ),
     ).toBeInTheDocument();
     expect(screen.getByText('Only admins change targets.')).toBeInTheDocument();
@@ -309,15 +311,17 @@ describe('Drill schedule', () => {
     fireEvent.change(screen.getByLabelText('First drill'), {
       target: { value: '2026-12-01T09:00' },
     });
-    fireEvent.change(screen.getByLabelText('Recovery region'), {
-      target: { value: 'gcp-us-central1' },
-    });
+    // Only regions AetherVault really integrates with (AWS DRS) are offered.
+    const region = screen.getByLabelText('Recovery region');
+    expect(
+      Array.from(region.querySelectorAll('option')).map((o) => o.getAttribute('value')),
+    ).toEqual(['aws-us-west-2']);
     fireEvent.click(screen.getByRole('button', { name: 'Save schedule' }));
     await waitFor(() =>
       expect(drills.setSchedule).toHaveBeenCalledWith({
         cadence: 'quarterly',
         firstRunAt: new Date('2026-12-01T09:00').toISOString(),
-        targetRegion: 'gcp-us-central1',
+        targetRegion: 'aws-us-west-2',
       }),
     );
     expect(await screen.findByText(/Scheduled\. Next drill/)).toBeInTheDocument();

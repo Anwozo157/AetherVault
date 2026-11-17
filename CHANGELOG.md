@@ -5,6 +5,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Console honesty: real targets only, simulated recovery labeled (2026-11-17)
+
+- The signed-in console offers only recovery targets AetherVault really integrates with (AWS
+  us-west-2, via AWS Elastic Disaster Recovery) in the failover selector, the drill region
+  selector and on the globe; it defaulted to GCP before. The public demo keeps GCP, AWS and Azure
+  (all simulated). An older drill schedule naming a demo-only region falls back to AWS.
+  `CONNECTED_TARGET_REGIONS` / `targetRegionsFor()` in `src/config/regions.ts`.
+- Drill rows say "recovery time simulated" under the modeled recovery time, and the pass summary
+  says recovery times are simulated until AetherVault runs recoveries in the customer's cloud. The
+  evidence report already said so. Found during the first live AWS drill, where the console showed
+  5.5 s while the real DRS recovery took 19 min 47 s.
+- Tests: region filtering unit tests; drills tests check the label and the AWS-only selector.
+  Checked in Chrome (desktop) and headless Chrome at 390 px.
+
 ### Live AWS test moved to a standard account, cross-Region (2026-11-17)
 
 - The DRS block on the first AWS account (a "projects" account whose AWS-managed policies deny DRS) could not be lifted by us or by AWS Support, so the founder opened a standard AWS account (approved, card on file, test budget under $10). Set up first: root MFA (passkey), no root keys, warn-only budget alerts at $10 and $25, agent IAM user with its key in the Keychain (profile `aegis-dr`). DRS is reachable there.

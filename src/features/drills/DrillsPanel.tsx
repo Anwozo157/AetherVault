@@ -148,7 +148,7 @@ export default function DrillsPanel({
         {objectives && (
           <span className="basis-full text-[11px] font-mono text-zinc-500">
             {completed.length
-              ? `${passed.length} of ${completed.length} completed drills passed: recovered within ${formatSeconds(objectives.rtoSeconds)}, and data loss within ${formatSeconds(objectives.rpoSeconds)} where measured.`
+              ? `${passed.length} of ${completed.length} completed drills passed: recovered within ${formatSeconds(objectives.rtoSeconds)}, and data loss within ${formatSeconds(objectives.rpoSeconds)} where measured. Recovery times are simulated until AetherVault runs recoveries in your cloud.`
               : 'No completed drills yet. Run one now or set a schedule below.'}
           </span>
         )}
@@ -261,6 +261,9 @@ export default function DrillsPanel({
                         <span className={met ? 'text-aether-green' : 'text-red-300'}>
                           {formatSeconds(r.recoverySeconds)} · {met ? 'PASS' : 'FAIL'}
                         </span>
+                      )}
+                      {r.recoverySeconds !== null && (
+                        <span className="block text-aether-amber">recovery time simulated</span>
                       )}
                       {r.approvedAt !== null && (
                         <span
