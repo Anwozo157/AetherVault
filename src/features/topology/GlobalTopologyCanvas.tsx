@@ -2,7 +2,13 @@ import { useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Html, Line, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
-import { SOURCE, TARGET_REGIONS, findTargetRegion, type Region } from '../../config/regions';
+import {
+  SOURCE,
+  TARGET_REGIONS,
+  findTargetRegion,
+  type Region,
+  type TargetRegion,
+} from '../../config/regions';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import {
   FACING_LAT,
@@ -324,11 +330,13 @@ function ReplicationArc({
 
 function World({
   target,
+  regions,
   phase,
   still,
   compact,
 }: {
   target: Region;
+  regions: readonly TargetRegion[];
   phase: Phase;
   still: boolean;
   compact: boolean;
@@ -356,7 +364,7 @@ function World({
           still={still}
           showLabel
         />
-        {TARGET_REGIONS.map((r) =>
+        {regions.map((r) =>
           r.id === target.id ? (
             <RegionMarker
               key={r.id}
@@ -396,10 +404,13 @@ function World({
 export default function GlobalTopologyCanvas({
   status = 'ACTIVE_SYNC',
   targetRegion = 'gcp-us-central1',
+  regions = TARGET_REGIONS,
   chaosActive = false,
 }: {
   status?: string;
   targetRegion?: string;
+  /** Regions drawn on the globe (default: every demo region). */
+  regions?: readonly TargetRegion[];
   chaosActive?: boolean;
 }) {
   const reducedMotion = usePrefersReducedMotion();
@@ -456,7 +467,13 @@ export default function GlobalTopologyCanvas({
 
       {/* dpr cap: high-density phones render at most 1.5x, cutting GPU work by up to 4x. */}
       <Canvas camera={{ position: [0, 0, 6.3], fov: 42 }} dpr={[1, 1.5]} aria-hidden="true">
-        <World target={target} phase={phase} still={reducedMotion} compact={compact} />
+        <World
+          target={target}
+          regions={regions}
+          phase={phase}
+          still={reducedMotion}
+          compact={compact}
+        />
         <OrbitControls
           enableZoom={false}
           enablePan={false}

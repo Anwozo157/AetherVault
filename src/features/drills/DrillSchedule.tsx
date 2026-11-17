@@ -1,6 +1,6 @@
 import { CalendarClock, Play } from 'lucide-react';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { TARGET_REGIONS } from '../../config/regions';
+import { CONNECTED_TARGET_REGIONS, TARGET_REGIONS } from '../../config/regions';
 import type {
   DrillCadence,
   DrillSchedule as Schedule,
@@ -62,7 +62,7 @@ export default function DrillSchedule({
   const [schedule, setSchedule] = useState<Schedule | null | undefined>(undefined);
   const [cadence, setCadence] = useState<DrillCadence>('monthly');
   const [firstRun, setFirstRun] = useState(defaultFirstRun);
-  const [target, setTarget] = useState('aws-us-west-2');
+  const [target, setTarget] = useState(CONNECTED_TARGET_REGIONS[0].id);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +73,9 @@ export default function DrillSchedule({
       setSchedule(s);
       if (s) {
         setCadence(s.cadence);
-        setTarget(s.targetRegion);
+        // An older schedule may name a demo-only region; offer a connected one instead.
+        if (CONNECTED_TARGET_REGIONS.some((r) => r.id === s.targetRegion))
+          setTarget(s.targetRegion);
       }
     } catch (e) {
       setError(errText(e));
@@ -178,7 +180,7 @@ export default function DrillSchedule({
             onChange={(e) => setTarget(e.target.value)}
             className={control}
           >
-            {TARGET_REGIONS.map((r) => (
+            {CONNECTED_TARGET_REGIONS.map((r) => (
               <option key={r.id} value={r.id}>
                 {r.label}
               </option>

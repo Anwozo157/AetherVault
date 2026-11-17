@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Suspense, lazy, useState } from 'react';
-import { DEFAULT_TARGET_REGION, SOURCE_REGION } from '../config/regions';
+import { SOURCE_REGION, targetRegionsFor } from '../config/regions';
 import { SystemState } from '../domain/dr';
 import { useDrSession } from '../hooks/useDrSession';
 import { useFailoverRun } from '../hooks/useFailoverRun';
@@ -49,7 +49,9 @@ export default function CommandCenter({
   // Changes on every new activity entry (the log list itself is capped at 50, so its length
   // stops changing once full). Panels reload when this changes.
   const activityKey = logs.length ? logs[logs.length - 1].id : '';
-  const [selectedTarget, setSelectedTarget] = useState(DEFAULT_TARGET_REGION);
+  // The signed-in console offers only regions we really integrate with; the demo offers all.
+  const regions = targetRegionsFor(provider.isSimulated);
+  const [selectedTarget, setSelectedTarget] = useState(regions[0].id);
   const run = useFailoverRun();
   const approvals = provider.approvals;
   // With a server backend, everyone sees the open run's target, not their own selection.
@@ -66,6 +68,7 @@ export default function CommandCenter({
         tab={tab}
         onTabChange={setTab}
         targetRegion={targetRegion}
+        regions={regions}
         onTargetRegionChange={setSelectedTarget}
         regionLocked={state !== SystemState.IDLE || !!run}
         chaosActive={chaosActive}
@@ -100,6 +103,7 @@ export default function CommandCenter({
               <GlobalTopologyCanvas
                 status={state}
                 targetRegion={targetRegion}
+                regions={regions}
                 chaosActive={chaosActive}
               />
             </Suspense>
