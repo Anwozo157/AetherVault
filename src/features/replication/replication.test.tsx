@@ -222,6 +222,8 @@ describe('recoveries measured by AWS', () => {
   test('formats long durations in minutes and seconds', () => {
     expect(formatDuration(1035)).toBe('17 min 15 s');
     expect(formatDuration(900)).toBe('15 min');
+    expect(formatDuration(599.949)).toBe('10 min');
+    expect(formatDuration(1034.23)).toBe('17 min 14 s');
     expect(formatDuration(42)).toBe('42 s');
     expect(formatDuration(null)).toBe('running');
   });

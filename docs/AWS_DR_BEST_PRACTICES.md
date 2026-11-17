@@ -128,6 +128,12 @@ Set these **before** you need them, per server:
   they run.
 - **Measure, don't assume.** Record recovery time and the data-loss window at launch. AetherVault
   captures the replication lag at launch in every drill's evidence report.
+- **Run the first drill right after initial sync, not during an outage.** The first recovery of a
+  server does one-time preparation (DRS builds and snapshots base volumes for the converted boot
+  disk). In our live test (2026-11-17, one 8 GB Amazon Linux server, us-east-1 → us-west-2) the
+  first drill took 17 min 14 s from request to launched server, about 10 minutes of it waiting
+  between conversion and launch; the second drill took 9 min 58 s, launching 2 s after
+  conversion. Plan recovery time targets from a second drill, and re-drill after big changes.
 - **Follow the runbook during drills** (Runbook tab) so the real recovery is practiced, not just
   the button.
 

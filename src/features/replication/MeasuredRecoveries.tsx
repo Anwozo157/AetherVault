@@ -11,8 +11,10 @@ const KIND_LABEL: Record<MeasuredRecovery['kind'], string> = {
 export function formatDuration(seconds: number | null): string {
   if (seconds === null) return 'running';
   if (seconds < 120) return formatSeconds(seconds);
-  const m = Math.floor(seconds / 60);
-  const s = Math.round(seconds - m * 60);
+  // Round once, then split, so 599.9 s reads "10 min", never "9 min 60 s".
+  const total = Math.round(seconds);
+  const m = Math.floor(total / 60);
+  const s = total - m * 60;
   return s ? `${m} min ${s} s` : `${m} min`;
 }
 
