@@ -87,9 +87,16 @@ small cloud VM elsewhere (needs the founder's spend approval) is a more realisti
    console shows LIVE · AWS DRS.**
 6. Add a Slack alert channel; stop the agent on the source for a few minutes → "Data-loss target
    at risk" alert → restart → "recovered".
-7. Drill: Run drill now in AetherVault, launch the drill instance in DRS (us-west-2), tick the
-   runbook, confirm the web page and the latest heartbeat on the drill instance, terminate it,
-   open the evidence report.
+7. ✅ Drill (2026-11-17): Run drill now in AetherVault and `aws drs start-recovery --is-drill` at
+   18:09:24 UTC; recovery point 18:09:33. Before launching: DRS post-launch enabled (attaches the
+   role with SSM) and the DRS launch template given a public IP so the drill server can reach SSM
+   (outbound only; the default security group admits nothing from the internet). **Measured data
+   loss: none** (every heartbeat through 18:08:49 recovered; 1-minute resolution). **Recovery time:
+   19 min 47 s to a verified web page (server up at 17 min 16 s), missing the 15-minute target.**
+   Job log: conversion 18:10:21–18:15:31, then an unexplained wait to launch start 18:25:22. Drill
+   server terminated afterwards. Still to do: explain the wait, tick the runbook in the console,
+   rerun. The console's drill row showed a modeled 5.5 s recovery (simulated timer) next to the
+   real 0 s data loss; fix tracked in STATUS.
 8. Optional: full recovery + failback rehearsal back to us-east-1.
 9. Record real `DescribeSourceServers` responses (`--record`) to replace the hand-built fixtures
    and confirm the `lagDuration` format.

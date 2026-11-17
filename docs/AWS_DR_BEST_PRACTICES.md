@@ -88,6 +88,11 @@ Source servers need **outbound** access only:
   "No space left on device". Run it with `TMPDIR=/var/tmp` (or any directory on disk with ~1 GB
   free) and make sure the server has free memory or swap.
 
+- **Checking a drill server needs a path to Systems Manager.** Enable DRS post-launch actions (it
+  attaches a role with SSM access) and give the recovery subnet a route to SSM: private VPC
+  endpoints (`ssm`, `ssmmessages`, `ec2messages`) in production, or a public IP with no inbound
+  rules in a test. Without one, you can launch a drill but not verify the application on it.
+
 ## 5. Replication settings
 
 - **Instance type:** the default replication servers are low-cost `t3.small`; only move up if a
