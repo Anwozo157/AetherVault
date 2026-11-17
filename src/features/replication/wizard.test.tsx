@@ -29,6 +29,7 @@ const live = (over: Partial<ReplicationStatus> = {}): ReplicationStatus => ({
 const fakeReplication = (): ReplicationCapability => ({
   latest: vi.fn(async () => null),
   history: vi.fn(async () => []),
+  recoveries: vi.fn(async () => []),
   tokenStatus: vi.fn(async () => null),
   createToken: vi.fn(async () => TOKEN),
   revokeToken: vi.fn(async () => {}),

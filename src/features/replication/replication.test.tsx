@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import type { ReplicationCapability, ReplicationStatus } from '../../domain/dr';
+import { formatDuration } from './MeasuredRecoveries';
 import ReplicationPanel, { ago, formatBytes, formatLag, freshness } from './ReplicationPanel';
 
 const NOW = '2026-11-10T12:00:00Z';
@@ -75,6 +76,7 @@ const fake = (over: Partial<ReplicationCapability> = {}): ReplicationCapability 
     { collectedAt: '2026-11-10T11:58:00Z', maxLagSeconds: 4, rpoMet: true },
     { collectedAt: '2026-11-10T11:59:00Z', maxLagSeconds: 130, rpoMet: false },
   ]),
+  recoveries: vi.fn(async () => []),
   tokenStatus: vi.fn(async () => ({
     hint: 'abcd',
     createdAt: '2026-11-10T09:00:00Z',
@@ -201,5 +203,94 @@ describe('ReplicationPanel', () => {
       await vi.advanceTimersByTimeAsync(30_000);
     });
     expect(replication.latest).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('recoveries measured by AWS', () => {
+  const job = {
+    jobId: 'drsjob-506416001759e958f',
+    kind: 'drill' as const,
+    status: 'COMPLETED' as const,
+    awsRegion: 'us-west-2',
+    startedAt: '2026-11-17T18:09:27Z',
+    endedAt: '2026-11-17T18:26:42Z',
+    durationSeconds: 1035,
+    servers: 1,
+    launched: 1,
+  };
+
+  test('formats long durations in minutes and seconds', () => {
+    expect(formatDuration(1035)).toBe('17 min 15 s');
+    expect(formatDuration(900)).toBe('15 min');
+    expect(formatDuration(42)).toBe('42 s');
+    expect(formatDuration(null)).toBe('running');
+  });
+
+  test('shows real AWS recovery times against the recovery time target', async () => {
+    const replication = fake({
+      recoveries: vi.fn(async () => [
+        {
+          ...job,
+          jobId: 'drsjob-00000000000000001',
+          durationSeconds: 600,
+          startedAt: '2026-11-17T21:04:58Z',
+        },
+        job,
+      ]),
+    });
+    render(
+      <ReplicationPanel
+        replication={replication}
+        myRole="viewer"
+        refreshKey={0}
+        getObjectives={async () => ({ rtoSeconds: 900, rpoSeconds: 60 })}
+      />,
+    );
+    expect(await screen.findByText('Recoveries measured by AWS')).toBeInTheDocument();
+    expect(screen.getByTestId('recovery-drsjob-506416001759e958f')).toHaveTextContent(
+      '17 min 15 s · over target',
+    );
+    expect(screen.getByTestId('recovery-drsjob-00000000000000001')).toHaveTextContent(
+      '10 min · within target',
+    );
+    expect(screen.getAllByText('measured by AWS')).toHaveLength(2);
+  });
+
+  test('a running job shows in progress; a backend without recoveries hides the section', async () => {
+    const { unmount } = render(
+      <ReplicationPanel
+        replication={fake({
+          recoveries: vi.fn(async () => [
+            {
+              ...job,
+              status: 'STARTED' as const,
+              endedAt: null,
+              durationSeconds: null,
+              launched: 0,
+            },
+          ]),
+        })}
+        myRole="viewer"
+        refreshKey={0}
+      />,
+    );
+    expect(await screen.findByText('in progress')).toBeInTheDocument();
+    expect(screen.getByText('0 of 1 launched')).toBeInTheDocument();
+    unmount();
+
+    render(
+      <ReplicationPanel
+        replication={fake({
+          recoveries: vi.fn(async () => {
+            throw new Error('function list_recovery_jobs does not exist');
+          }),
+        })}
+        myRole="viewer"
+        refreshKey={0}
+      />,
+    );
+    expect(await screen.findByTestId('server-reports-server-01')).toBeInTheDocument();
+    expect(screen.queryByTestId('measured-recoveries')).not.toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 });

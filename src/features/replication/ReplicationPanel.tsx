@@ -3,7 +3,9 @@ import { useCallback, useEffect, useState } from 'react';
 import type {
   IngestTokenStatus,
   LagPoint,
+  MeasuredRecovery,
   MemberRole,
+  RecoveryObjectives,
   ReplicationCapability,
   ReplicationStatus,
   ServerHealth,
@@ -11,6 +13,7 @@ import type {
 import { SUPABASE_ANON_KEY, SUPABASE_URL, isLocalBackend } from '../../config/backend';
 import TelemetrySparkline from '../telemetry/TelemetrySparkline';
 import ConnectAwsWizard from './ConnectAwsWizard';
+import MeasuredRecoveries from './MeasuredRecoveries';
 
 const errText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
@@ -276,6 +279,7 @@ export default function ReplicationPanel({
   refreshKey,
   orgId = 'default',
   endpoint = DEFAULT_ENDPOINT,
+  getObjectives,
 }: {
   replication: ReplicationCapability;
   myRole: MemberRole;
@@ -284,14 +288,30 @@ export default function ReplicationPanel({
   orgId?: string;
   /** Where a deployed collector sends reports (this console's backend). */
   endpoint?: { url: string; anonKey: string; isLocal: boolean };
+  /** The organization's recovery targets, to judge measured recovery times. */
+  getObjectives?: () => Promise<RecoveryObjectives>;
 }) {
   const isAdmin = myRole === 'admin';
   const [status, setStatus] = useState<ReplicationStatus | null | undefined>(undefined);
   const [history, setHistory] = useState<LagPoint[]>([]);
   const [token, setToken] = useState<IngestTokenStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [recoveries, setRecoveries] = useState<MeasuredRecovery[]>([]);
+  const [rtoTarget, setRtoTarget] = useState<number | undefined>(undefined);
+
+  // Measured recoveries load on their own: an older backend without them must not break
+  // the replication view, so failures here just hide the section.
+  const loadRecoveries = useCallback(async () => {
+    const [r, o] = await Promise.all([
+      replication.recoveries().catch(() => []),
+      getObjectives ? getObjectives().catch(() => undefined) : Promise.resolve(undefined),
+    ]);
+    setRecoveries(r);
+    setRtoTarget(o?.rtoSeconds);
+  }, [replication, getObjectives]);
 
   const load = useCallback(async () => {
+    void loadRecoveries();
     try {
       const [s, h, t] = await Promise.all([
         replication.latest(),
@@ -305,7 +325,7 @@ export default function ReplicationPanel({
     } catch (e) {
       setError(errText(e));
     }
-  }, [replication]);
+  }, [replication, loadRecoveries]);
 
   useEffect(() => {
     void load();
@@ -476,6 +496,8 @@ export default function ReplicationPanel({
           </div>
         </>
       )}
+
+      <MeasuredRecoveries recoveries={recoveries} rtoTargetSeconds={rtoTarget} />
 
       {status !== undefined && (
         <ConnectAwsWizard

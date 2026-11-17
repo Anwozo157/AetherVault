@@ -374,6 +374,18 @@ export class SupabaseDrProvider implements DrProvider {
           maxLagSeconds: num(h.max_lag_seconds),
           rpoMet: h.rpo_met,
         })),
+      recoveries: async () =>
+        (await api.listRecoveryJobs(org)).map((j) => ({
+          jobId: j.job_id,
+          kind: j.kind,
+          status: j.status,
+          awsRegion: j.aws_region,
+          startedAt: j.started_at,
+          endedAt: j.ended_at,
+          durationSeconds: num(j.duration_seconds),
+          servers: j.servers,
+          launched: j.launched,
+        })),
       tokenStatus: async () => {
         const t = await api.ingestTokenStatus(org);
         return t ? { hint: t.hint, createdAt: t.created_at, lastUsedAt: t.last_used_at } : null;

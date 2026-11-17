@@ -179,6 +179,19 @@ export interface ReplicationSnapshotRow {
   servers: ReplicationServerRow[];
 }
 
+export interface RecoveryJobRow {
+  job_id: string;
+  kind: 'drill' | 'recovery' | 'failback';
+  status: 'PENDING' | 'STARTED' | 'COMPLETED';
+  aws_region: string;
+  started_at: string;
+  ended_at: string | null;
+  /** Postgres numeric: may arrive as a string. */
+  duration_seconds: number | string | null;
+  servers: number;
+  launched: number;
+}
+
 export interface LagHistoryRow {
   collected_at: string;
   /** Postgres numeric: may arrive as a string. */
@@ -240,6 +253,7 @@ export interface ConsoleApi {
   sendTestAlert(channelId: string): Promise<void>;
   latestReplication(orgId: string): Promise<ReplicationSnapshotRow | null>;
   replicationHistory(orgId: string): Promise<LagHistoryRow[]>;
+  listRecoveryJobs(orgId: string): Promise<RecoveryJobRow[]>;
   ingestTokenStatus(orgId: string): Promise<IngestTokenRow | null>;
   createIngestToken(orgId: string): Promise<string>;
   revokeIngestToken(orgId: string): Promise<void>;
@@ -349,6 +363,8 @@ export function createSupabaseConsoleApi(client: SupabaseClient): ConsoleApi {
       ),
     replicationHistory: (orgId) =>
       call<LagHistoryRow[]>(client.rpc('replication_lag_history', { p_org: orgId, p_limit: 60 })),
+    listRecoveryJobs: (orgId) =>
+      call<RecoveryJobRow[]>(client.rpc('list_recovery_jobs', { p_org: orgId, p_limit: 20 })),
     ingestTokenStatus: (orgId) =>
       call<IngestTokenRow | null>(client.rpc('ingest_token_status', { p_org: orgId })),
     createIngestToken: (orgId) => call<string>(client.rpc('create_ingest_token', { p_org: orgId })),
