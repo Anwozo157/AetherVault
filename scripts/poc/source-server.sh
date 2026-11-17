@@ -61,9 +61,16 @@ run_remote() {
   cmd_id="$(a ssm send-command --instance-ids "$id" --document-name AWS-RunShellScript \
     --parameters "commands=[$(python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$1")]" \
     --timeout-seconds "${2:-600}" --query Command.CommandId --output text)"
-  a ssm wait command-executed --command-id "$cmd_id" --instance-id "$id" 2>/dev/null || true
+  # Poll instead of `ssm wait`, which gives up after ~100 s (the agent install takes longer).
+  local status=Pending
+  while [[ $status == Pending || $status == InProgress || $status == Delayed ]]; do
+    sleep 10
+    status="$(a ssm get-command-invocation --command-id "$cmd_id" --instance-id "$id" \
+      --query Status --output text 2>/dev/null || echo Pending)"
+  done
   a ssm get-command-invocation --command-id "$cmd_id" --instance-id "$id" \
     --query '[Status,StandardOutputContent,StandardErrorContent]' --output text
+  [[ $status == Success ]]
 }
 
 user_data() {
@@ -124,9 +131,55 @@ cmd_check() {
 # One-time DRS setup in the recovery Region: creates the DRS service roles and the default
 # replication settings (encrypted staging disks, t3.small replication server, 7-day point in time,
 # staging area in the default subnet of zone a). Same defaults as docs/AWS_DR_BEST_PRACTICES.md.
+# DRS service roles. The console creates these on first use; InitializeService from the CLI
+# requires them to exist already. Global (IAM), AWS managed policies only, path /service-role/.
+DRS_POLICY=arn:aws:iam::aws:policy/service-role/AWSElasticDisasterRecovery
+ensure_ec2_role() {
+  local name=$1
+  shift
+  if ! aws iam get-role --role-name "$name" >/dev/null 2>&1; then
+    aws iam create-role --role-name "$name" --path /service-role/ --tags "$TAGS" \
+      --assume-role-policy-document '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"ec2.amazonaws.com"},"Action":"sts:AssumeRole"}]}' >/dev/null
+    echo "created $name"
+  fi
+  for p in "$@"; do aws iam attach-role-policy --role-name "$name" --policy-arn "$p"; done
+}
+ensure_drs_role() {
+  local name=$1 principal=$2 actions=$3
+  shift 3
+  if ! aws iam get-role --role-name "$name" >/dev/null 2>&1; then
+    local account
+    account="$(aws sts get-caller-identity --query Account --output text)"
+    aws iam create-role --role-name "$name" --path /service-role/ --tags "$TAGS" \
+      --assume-role-policy-document "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",
+        \"Principal\":{\"Service\":\"$principal\"},\"Action\":$actions,
+        \"Condition\":{\"StringEquals\":{\"aws:SourceAccount\":\"$account\"}}}]}" >/dev/null
+    echo "created $name"
+  fi
+  for p in "$@"; do aws iam attach-role-policy --role-name "$name" --policy-arn "$p"; done
+}
+
 cmd_init_drs() {
+  say "DRS service roles"
+  # Replication, conversion and recovery servers are EC2 instances; the agent and failback roles
+  # are assumed by DRS itself, limited to this account.
+  local drs='["sts:AssumeRole","sts:SetSourceIdentity"]'
+  for r in ReplicationServer ConversionServer RecoveryInstance; do
+    ensure_ec2_role "AWSElasticDisasterRecovery${r}Role" "${DRS_POLICY}${r}Policy"
+  done
+  ensure_ec2_role AWSElasticDisasterRecoveryRecoveryInstanceWithLaunchActionsRole \
+    "${DRS_POLICY}RecoveryInstancePolicy" arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+  ensure_drs_role AWSElasticDisasterRecoveryAgentRole drs.amazonaws.com "$drs" "${DRS_POLICY}AgentPolicy"
+  ensure_drs_role AWSElasticDisasterRecoveryFailbackRole drs.amazonaws.com "$drs" "${DRS_POLICY}FailbackPolicy"
+  echo "waiting 15 s for IAM to propagate"
+  sleep 15
+
   say "Initializing DRS in $DRS_REGION"
-  d drs initialize-service >/dev/null 2>&1 || true
+  local out
+  if ! out="$(d drs initialize-service 2>&1)"; then
+    echo "$out"
+    exit 1
+  fi
   if [[ "$(d drs describe-replication-configuration-templates --query 'length(items)' --output text)" != "0" ]]; then
     echo "replication defaults already exist:"
   else
@@ -203,10 +256,13 @@ cmd_verify() {
 }
 
 cmd_install_agent() {
-  run_remote "set -e; cd /tmp
-curl -fsSo aws-replication-installer-init https://aws-elastic-disaster-recovery-$DRS_REGION.s3.$DRS_REGION.amazonaws.com/latest/linux/aws-replication-installer-init
-chmod +x aws-replication-installer-init
-./aws-replication-installer-init --region $DRS_REGION --no-prompt" 1800
+  # One line joined with && (SSM ran the multi-line form as a single line). /var/tmp and
+  # TMPDIR=/var/tmp, not /tmp: Amazon Linux 2023 mounts /tmp as a ~450 MB tmpfs, and the installer
+  # downloads ~330 MB there ("No space left on device"). No pipe, so a failed install fails.
+  local url="https://aws-elastic-disaster-recovery-$DRS_REGION.s3.$DRS_REGION.amazonaws.com/latest/linux/aws-replication-installer-init"
+  # A t3.micro has ~900 MB of RAM and no swap; the installer was killed by the OOM killer while
+  # downloading. Add a 1 GB swap file first (kept across reboots).
+  run_remote "cd /var/tmp && { swapon --show | grep -q /swapfile || { dd if=/dev/zero of=/swapfile bs=1M count=1024 status=none && chmod 600 /swapfile && mkswap /swapfile >/dev/null && swapon /swapfile && echo '/swapfile none swap defaults 0 0' >> /etc/fstab; }; } && curl -fsSo aws-replication-installer-init $url && chmod +x aws-replication-installer-init && TMPDIR=/var/tmp ./aws-replication-installer-init --region $DRS_REGION --no-prompt" 1800
 }
 
 cmd_status() {

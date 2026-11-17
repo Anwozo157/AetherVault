@@ -74,10 +74,12 @@ small cloud VM elsewhere (needs the founder's spend approval) is a more realisti
 ## Steps
 
 1. ✅ Standard account, MFA, budgets, agent access key (2026-11-17). ✅ `check` passes.
-2. `source-server.sh init-drs` (us-west-2).
-3. `source-server.sh up`, wait ~3 minutes, `verify` (heartbeat lines growing).
-4. `source-server.sh install-agent`; wait for initial sync (minutes for 8 GB). `status` shows
-   `CONTINUOUS` and a lag of seconds.
+2. ✅ `source-server.sh init-drs` (us-west-2, 2026-11-17; needed the service roles created first).
+3. ✅ `source-server.sh up`, wait ~3 minutes, `verify` (heartbeat lines growing).
+4. ✅ `source-server.sh install-agent`; initial sync. **2026-11-17: agent installed 17:08 UTC,
+   first byte 17:13, `CONTINUOUS` at 17:30 with lag `P0D` and 0 bytes backlogged (8 GiB disk, ~23
+   minutes end to end).** Took four script fixes (single-line SSM command, 1 GB swap on the
+   t3.micro, `TMPDIR=/var/tmp`, real exit status); see `docs/AWS_DR_BEST_PRACTICES.md` §2 and §4.
 5. Console: Connect your AWS account → create the token; agent deploys the collector with
    Terraform in us-west-2 (`drs_region = "us-west-2"`). Expect **LIVE · AWS DRS** within a minute.
 6. Add a Slack alert channel; stop the agent on the source for a few minutes → "Data-loss target
@@ -89,8 +91,9 @@ small cloud VM elsewhere (needs the founder's spend approval) is a more realisti
 9. Record real `DescribeSourceServers` responses (`--record`) to replace the hand-built fixtures
    and confirm the `lagDuration` format.
 10. Tear down: `terraform destroy`, disconnect and delete the source server in DRS,
-    `source-server.sh down`, delete leftover replication servers, volumes and snapshots in
-    us-west-2, delete the agent user and key; check the bill next day.
+    `source-server.sh down`, delete the DRS source network the agent created for the source VPC,
+    delete leftover replication servers, volumes and snapshots in us-west-2, delete the agent
+    user and key; check the bill next day.
 
 **Done when:** screenshots/PDF of LIVE status, an alert, and a drill evidence report with measured
 data loss and runbook ticks, all from real AWS data. That's the demo for the first pilot customer.
