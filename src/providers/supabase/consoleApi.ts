@@ -91,6 +91,7 @@ export interface RunRow {
   rpo_seconds: number | string | null;
   rpo_target_seconds: number | null;
   replication_source: 'aws-drs' | 'fixture' | null;
+  recovery_job_id?: string | null;
 }
 
 export interface RunbookRow {
@@ -240,6 +241,7 @@ export interface ConsoleApi {
   ): Promise<string>;
   disableDrillSchedule(orgId: string): Promise<void>;
   startDrill(orgId: string, source: string, target: string): Promise<string>;
+  linkRecoveryJob(runId: string, jobId: string): Promise<number>;
   listAlertChannels(orgId: string): Promise<AlertChannelRow[]>;
   listAlertDeliveries(orgId: string): Promise<AlertDeliveryRow[]>;
   addAlertChannel(
@@ -339,6 +341,12 @@ export function createSupabaseConsoleApi(client: SupabaseClient): ConsoleApi {
       call<void>(client.rpc('disable_drill_schedule', { p_org: orgId })),
     startDrill: (orgId, source, target) =>
       call<string>(client.rpc('start_drill', { p_org: orgId, p_source: source, p_target: target })),
+    linkRecoveryJob: async (runId, jobId) =>
+      Number(
+        await call<number | string>(
+          client.rpc('link_recovery_job', { p_run: runId, p_job_id: jobId }),
+        ),
+      ),
     listAlertChannels: (orgId) =>
       call<AlertChannelRow[]>(client.rpc('list_alert_channels', { p_org: orgId })),
     listAlertDeliveries: (orgId) =>

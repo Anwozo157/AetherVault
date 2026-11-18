@@ -252,6 +252,7 @@ export class SupabaseDrProvider implements DrProvider {
             r.rpo_seconds === null || r.rpo_seconds === undefined ? null : Number(r.rpo_seconds),
           rpoTargetSeconds: r.rpo_target_seconds ?? null,
           replicationSource: r.replication_source ?? null,
+          recoveryJobId: r.recovery_job_id ?? null,
         })),
       evidence: (runId) => api.drillEvidence(runId),
       getSchedule: async () => {
@@ -271,6 +272,7 @@ export class SupabaseDrProvider implements DrProvider {
         api.setDrillSchedule(org, cadence, firstRunAt, SOURCE_REGION, targetRegion),
       disableSchedule: () => api.disableDrillSchedule(org),
       startDrill: (targetRegion) => api.startDrill(org, SOURCE_REGION, targetRegion),
+      linkRecoveryJob: (runId, jobId) => api.linkRecoveryJob(runId, jobId),
     };
     this.runbooks = {
       get: async () => {

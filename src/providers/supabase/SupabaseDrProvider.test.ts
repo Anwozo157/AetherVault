@@ -162,6 +162,7 @@ class FakeServer {
           rpo_seconds: '4' as unknown as number,
           rpo_target_seconds: 60,
           replication_source: 'aws-drs' as const,
+          recovery_job_id: 'drsjob-5d5a5be173b3a4499',
         },
       ],
       drillEvidence: vi.fn(async (runId: string) => ({ run: { id: runId } }) as never),
@@ -181,6 +182,7 @@ class FakeServer {
         if (this.schedule) this.schedule = { ...this.schedule, enabled: false };
       }),
       startDrill: vi.fn(async () => 'drill-1'),
+      linkRecoveryJob: vi.fn(async () => 601),
       listAlertChannels: async () => [
         {
           id: 'ch-1',
@@ -641,7 +643,11 @@ describe('SupabaseDrProvider', () => {
       rpoSeconds: 4,
       rpoTargetSeconds: 60,
       replicationSource: 'aws-drs',
+      recoveryJobId: 'drsjob-5d5a5be173b3a4499',
     });
+    await expect(op.drills.linkRecoveryJob?.('run-9', 'drsjob-5d5a5be173b3a4499')).resolves.toBe(
+      601,
+    );
     await expect(op.drills.evidence('run-9')).resolves.toMatchObject({ run: { id: 'run-9' } });
   });
 
