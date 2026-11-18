@@ -11,8 +11,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
   four drills, snapshot experiment), with the founder's $25 cap, a stop-and-ask at $15, backups
   before and after, and the rule that the website changes only after results are in.
 - The weekly database backup of 15 Nov had failed (`SSL SYSCALL error: EOF` during the schema
-  dump); a fresh backup was taken and verified on 18 Nov. Follow-up: retry once on a dropped
-  connection.
+  dump); a fresh backup was taken and verified on 18 Nov. The backup now runs **daily** (was weekly),
+  keeps 14, and retries each dump 3 times, 1 minute apart (`scripts/backup-db.sh`, launchd plist).
 
 ### Landing page shows the real AWS test results (2026-11-18)
 

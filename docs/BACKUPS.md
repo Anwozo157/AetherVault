@@ -1,17 +1,18 @@
 # Database backups
 
 The hosted Supabase project is on the **Free plan**, which has no backups we can restore ourselves.
-Until it moves to Pro (daily managed backups, kept 7 days), a weekly job copies the database to the
-founder's Mac. **Upgrade to Supabase Pro before a customer's real data goes in** (pilot checklist).
+Until it moves to Pro (daily managed backups, kept 7 days), a daily job copies the database to the
+founder's Mac (weekly until 2026-11-18). **Upgrade to Supabase Pro before a customer's real data goes in** (pilot checklist).
 
 ## What runs
 
 - `scripts/backup-db.sh`, scheduled by launchd (`~/Library/LaunchAgents/com.aegiscorelabs.aethervault-backup.plist`,
-  a copy of `scripts/com.aegiscorelabs.aethervault-backup.plist`): **Sundays 10:00 local**; if the
+  a copy of `scripts/com.aegiscorelabs.aethervault-backup.plist`): **daily at 10:00 local**; if the
   Mac is asleep then, it runs at the next wake.
 - Output: `~/Backups/AetherVault/<UTC time>/roles.sql.gz, schema.sql.gz, data.sql.gz, cron.sql.gz`. The folder is
-  readable only by the founder's account (700/600), outside iCloud-synced folders. The newest 8 are
-  kept. Log: `~/Backups/AetherVault/backup.log`. A failure shows a macOS notification.
+  readable only by the founder's account (700/600), outside iCloud-synced folders. The newest 14 are
+  kept. Each dump is tried 3 times, 1 minute apart (the 2026-11-15 weekly run failed on a dropped
+  connection). Log: `~/Backups/AetherVault/backup.log`. A failure shows a macOS notification.
 - Uses `supabase db dump` (needs Docker; the script starts Docker if needed and quits it after) with
   the database password from the Keychain. The data dump includes `auth` (users, sessions) and every
   `public` table; the script fails if `auth.users`, `orgs` or `audit_log` is missing. `supabase db dump`
