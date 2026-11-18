@@ -4,6 +4,19 @@ Prove the whole chain with **real** AWS Elastic Disaster Recovery data, in our o
 before touching a customer: a server replicating, AetherVault showing LIVE lag, an alert, a drill
 with measured data loss and a runbook in its evidence, and failback rehearsed.
 
+## Scale test, Phase A (started 2026-11-18)
+
+Plan and prompt: `docs/AWS_SCALE_TEST_PLAN.md`, `docs/SCALE_TEST_PROMPT.md`. Cap $25 (founder).
+
+| Time (UTC)     | Step                                                                                                               |
+| -------------- | ------------------------------------------------------------------------------------------------------------------ |
+| 18 Nov 18:59   | Backups before launch: hosted database (verified), repo bundle, private folder committed                           |
+| 19:06:05       | Source server launched: t3.medium, 100 GiB gp3, PostgreSQL 16 + one row/s + pgbench at 20 tps, 72 h self-terminate |
+| 19:09          | Verified: heartbeat and database rows writing (row 137 at 19:09:18)                                                |
+| 19:09–19:16:50 | DRS agent installed (source network created for the default VPC)                                                   |
+| 19:17          | Drill launch settings: post-launch actions on; launch template v2 with a public IP (SSM reachability)              |
+| 19:18:30       | Collector redeployed in us-west-2 (Terraform: 9 added, plan reviewed); first report accepted (INITIATING)          |
+
 ## Status (2026-11-18)
 
 **Torn down** at 02:02 UTC by the agent user after the alert test (source server disconnected and

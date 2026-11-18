@@ -16,6 +16,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
   (a recovered drill server can re-run it). Tested: rendered scripts parse; the data-loss query
   returns 8.0 s on a sample and ignores rows written after the request; `cost` and the pre-flight
   `check` (EC2 dry run, quotas 8 vCPUs, DRS reachable) pass. Nothing launched.
+- Fix found at launch: the disk size was inside single quotes in `--block-device-mappings`, so it
+  never expanded (`invalid literal for int()`; nothing was created). Phase A launched 19:06 UTC;
+  timeline in `docs/AWS_LIVE_POC.md`.
 - `docs/SCALE_TEST_PROMPT.md`: two fixes from review (data loss counts only rows from before the
   request; setup must be safe to re-run).
 
