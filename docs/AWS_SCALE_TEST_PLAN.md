@@ -33,21 +33,31 @@ inside target.
 **Success:** every drill after the warm-up reaches a verified database in ≤ 15 min with ≤ 60 s of
 data loss. Report every drill, including any miss.
 
-### Cost estimate (Phase A, 3 days)
+### Cost check (2026-11-18, AWS Price List API; Phase A, 3 days)
 
-| Item                                                            | Estimate    |
-| --------------------------------------------------------------- | ----------- |
-| DRS, 1 source server ($0.028/hour × 72 h)                       | ~$2         |
-| Source t3.medium ($0.0416/hour × 72 h)                          | ~$3         |
-| Replication server t3.small ($0.0208/hour × 72 h)               | ~$1.50      |
-| Source and staging disks, 2 × 100 GiB gp3, 3 days               | ~$1.60      |
-| Snapshots (~150 GB for 3 days)                                  | ~$0.75      |
-| Cross-region transfer (~100 GB initial + write churn, $0.02/GB) | ~$3–4       |
-| 4 drill servers, ~1 h each, plus conversion                     | ~$1         |
-| **Total**                                                       | **~$13–15** |
+Prices verified 2026-11-18 from the AWS Price List API (on-demand, Linux; us-east-1 and us-west-2
+are the same for every item). Quantities are estimates.
 
-Proposed cap: **$25** (the existing budget alert). Stop and ask if the forecast passes $15. The
-write rate drives transfer cost: about 200 KB/s (~17 GB/day) keeps it in this range.
+| Item                                                                  | Price (verified)     | Estimate    |
+| --------------------------------------------------------------------- | -------------------- | ----------- |
+| DRS replication, 1 source server × 72 h                               | $0.028 / server-hour | $2.02       |
+| Source t3.medium × 72 h                                               | $0.0416 / hour       | $3.00       |
+| Replication server t3.small × 72 h                                    | $0.0208 / hour       | $1.50       |
+| Source disk + DRS staging disk, 2 × 100 GiB gp3 (staging type is GP3) | $0.08 / GB-month     | $1.60       |
+| Snapshots (point-in-time: 10 min/1 h, hourly/24 h, daily/7 days)      | $0.05 / GB-month     | ~$0.75      |
+| us-east-1 → us-west-2 transfer, ~150 GB (initial copy + write churn)  | $0.02 / GB           | ~$3.00      |
+| 5 drills (A3–A5): drill server, its disk and conversion, ~1 h each    | as above             | ~$0.75      |
+| **Total**                                                             |                      | **~$12–13** |
+
+- **The write rate is the cost risk.** Unthrottled `pgbench` can write several MB/s; 10 MB/s is
+  ~860 GB/day, ~$17/day in transfer alone. Run it rate-limited (`pgbench -R`) at ~200 KB/s
+  (~17 GB/day) and watch the backlog.
+- Cap **$25** (existing budget alert); stop and ask if the forecast passes $15.
+- Account state on 2026-11-18: budgets at $10 and $25 (warn only) are in place, but their figures
+  were last refreshed 2026-11-17 before the first test, so actual spend so far is not yet visible.
+  Check the Bills page before starting.
+- vCPU quota is now **8 per Region** (was 5). Phase A peak in us-west-2: replication server +
+  drill server + conversion server ≈ 6 vCPUs, which fits.
 
 ## Phase B: a whole application, recovered in dependency order
 
@@ -55,8 +65,8 @@ The stronger demonstration: a three-server app (database, application, web front
 together, database first, then verified end to end (a page that reads and writes through all three
 tiers). This is the "verify the whole system" decision in `docs/PRODUCT_DECISIONS.md`.
 
-**Blocker:** the account allows 5 standard vCPUs per region; three drill servers plus the
-replication server need about 8. Requesting a quota increase is free but takes days, so file it
+**Blocker:** the account now allows 8 standard vCPUs per region (checked 2026-11-18); three drill
+servers, the replication servers and DRS conversion servers need more than that at peak. Requesting a quota increase is free but takes days, so file it
 now (founder approves) and run Phase B after Phase A. Cost estimate: roughly double Phase A for
 the same three days (~$25–35); re-estimate before starting.
 
