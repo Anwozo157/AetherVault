@@ -5,6 +5,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Deployed; AWS test found already torn down (2026-11-18)
+
+- Deployed `5d233f1` (alert wording, stale-tab reload) with hosted migration `20261118000013`;
+  268 pgTAP pass on the hosted database.
+- The live AWS test had already been torn down at 02:02 UTC (CloudTrail), but STATUS still said it
+  was running. Only two 1 GB DRS snapshots remain. Failback rehearsal needs a rebuild.
+
 ### Fixes from the 2026-11-18 deploy and alert test
 
 - A console tab left open across a deploy now reloads once instead of showing "… panel failed to

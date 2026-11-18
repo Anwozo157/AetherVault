@@ -4,6 +4,13 @@ Prove the whole chain with **real** AWS Elastic Disaster Recovery data, in our o
 before touching a customer: a server replicating, AetherVault showing LIVE lag, an alert, a drill
 with measured data loss and a runbook in its evidence, and failback rehearsed.
 
+## Status (2026-11-18)
+
+**Torn down** at 02:02 UTC by the agent user after the alert test (source server disconnected and
+deleted in DRS, test instance terminated, collector destroyed). Only two 1 GB DRS base snapshots
+remain in us-west-2. The failback rehearsal (step 8) and the `--record` run (step 9) need a rebuild
+first; the founder wants the rehearsal done.
+
 ## Status (2026-11-17, evening)
 
 **Two live drills done.** Drill 1: 17 min 14 s to a launched server (first-recovery setup),
