@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Weekly backup of the hosted Supabase database to this Mac (free; until Supabase Pro adds
+# Daily backup of the hosted Supabase database to this Mac (free; until Supabase Pro adds
 # managed daily backups). Run by launchd (scripts/com.aegiscorelabs.aethervault-backup.plist)
 # or by hand: bash scripts/backup-db.sh
 #
@@ -13,7 +13,7 @@ set -euo pipefail
 export PATH="/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.local/bin"
 REPO="$HOME/Developer/AetherVault"
 DEST_ROOT="$HOME/Backups/AetherVault"
-KEEP="${KEEP:-8}"
+KEEP="${KEEP:-14}"
 STAMP="$(date -u +%Y-%m-%dT%H%M%SZ)"
 DEST="$DEST_ROOT/$STAMP"
 LOG="$DEST_ROOT/backup.log"
@@ -51,9 +51,21 @@ export SUPABASE_DB_PASSWORD
 
 mkdir -p "$DEST"
 cd "$REPO"
-npx --no-install supabase db dump --linked --role-only -f "$DEST/roles.sql" || fail "roles dump"
-npx --no-install supabase db dump --linked -f "$DEST/schema.sql" || fail "schema dump"
-npx --no-install supabase db dump --linked --data-only --use-copy -f "$DEST/data.sql" || fail "data dump"
+# A dump can fail on a dropped connection ("SSL SYSCALL error: EOF", 2026-11-15): try 3 times,
+# 1 minute apart, before giving up.
+dump() {
+  local name=$1 n
+  shift
+  for n in 1 2 3; do
+    npx --no-install supabase db dump --linked "$@" -f "$DEST/$name.sql" && return 0
+    echo "$name dump attempt $n failed"
+    ((n < 3)) && sleep 60
+  done
+  return 1
+}
+dump roles --role-only || fail "roles dump"
+dump schema || fail "schema dump"
+dump data --data-only --use-copy || fail "data dump"
 
 # Sanity check: the data dump must contain the core tables.
 for t in '"auth"."users"' '"public"."orgs"' '"public"."audit_log"'; do
