@@ -10,6 +10,7 @@ import {
   ScrollText,
   ShieldCheck,
   Users,
+  XCircle,
   type LucideIcon,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -167,12 +168,102 @@ function WindowChrome({ title, tag }: { title: string; tag: string }) {
   );
 }
 
+type LiveResult = {
+  name: string;
+  pass: boolean;
+  facts: [string, string][];
+  note: string;
+};
+
+/** Real results from our own AWS test account (docs/AWS_LIVE_POC.md, 17–18 Nov 2026). Not a customer. */
+const LIVE_RESULTS: LiveResult[] = [
+  {
+    name: 'Drill 2',
+    pass: true,
+    facts: [
+      ['App verified', '12 min 29 s'],
+      ['Data lost', 'about 8 s'],
+      ['Targets', '15 min · 1 min'],
+    ],
+    note: 'Server launched in the recovery region in 9 min 58 s; web page checked at 12 min 29 s.',
+  },
+  {
+    name: 'Drill 1',
+    pass: false,
+    facts: [
+      ['Server running', '17 min 14 s'],
+      ['Data lost', 'none'],
+      ['Target', '15 min'],
+    ],
+    note: "About 10 min of one-time AWS setup on a server's first recovery. Why we run a warm-up drill right after setup.",
+  },
+  {
+    name: 'Alert test',
+    pass: true,
+    facts: [
+      ['Slack warning', '1 min 40 s'],
+      ['After', 'replication stopped'],
+      ['Recovery notice', 'on restart'],
+    ],
+    note: 'The warning arrived before AWS itself reported replication as stalled.',
+  },
+];
+
+function LiveTestResults() {
+  return (
+    <div className="mt-12 landing-ring rounded-2xl bg-aether-panel p-5 sm:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h3 className="font-semibold text-white">Measured in a live AWS test</h3>
+        <span className="rounded-md border border-aether-cyan/30 bg-aether-cyan/10 px-2 py-0.5 text-[10px] font-mono tracking-wider text-aether-cyan">
+          REAL DATA · 17–18 NOV 2026
+        </span>
+      </div>
+      <p className="mt-2 text-sm text-zinc-400 leading-relaxed">
+        Our own AWS test account, not a customer: one test server replicating from us-east-1 to
+        us-west-2 with AWS Elastic Disaster Recovery. Times come from AWS&apos;s job logs and
+        CloudTrail. Both drills are shown, including the miss.
+      </p>
+      <ul className="mt-5 grid gap-4 md:grid-cols-3">
+        {LIVE_RESULTS.map(({ name, pass, facts, note }) => (
+          <li key={name} className="rounded-xl border border-white/10 bg-black/30 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm font-semibold text-white">{name}</span>
+              {pass ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-aether-green/40 bg-aether-green/10 px-2 py-0.5 text-[11px] font-mono font-semibold text-aether-green">
+                  <CheckCircle2 className="w-3 h-3" aria-hidden="true" />
+                  PASS
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 rounded-full border border-aether-red/40 bg-aether-red/10 px-2 py-0.5 text-[11px] font-mono font-semibold text-aether-red">
+                  <XCircle className="w-3 h-3" aria-hidden="true" />
+                  FAIL
+                </span>
+              )}
+            </div>
+            <dl className="mt-3 space-y-1.5 text-xs">
+              {facts.map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-3">
+                  <dt className="font-mono text-zinc-500">{k}</dt>
+                  <dd className="text-right font-semibold text-white">{v}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="mt-3 text-xs text-zinc-400 leading-relaxed">{note}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function EvidencePreview() {
   return (
     <div className="grid gap-4">
       <div className="landing-ring rounded-2xl bg-aether-panel p-5">
         <div className="flex items-center justify-between gap-3">
-          <span className="text-xs font-mono text-zinc-400">Drill evidence report</span>
+          <span className="text-xs font-mono text-zinc-400">
+            Drill evidence report <span className="text-aether-amber">· illustrative</span>
+          </span>
           <span className="inline-flex items-center gap-1 rounded-full border border-aether-green/40 bg-aether-green/10 px-2 py-0.5 text-[11px] font-mono font-semibold text-aether-green">
             <CheckCircle2 className="w-3 h-3" aria-hidden="true" />
             PASS
@@ -479,7 +570,7 @@ export default function LandingPage({
                 ],
                 [
                   'Honest about what it measures',
-                  'Data loss reads "not measured" until real replication data is connected. No invented numbers.',
+                  'Data loss is measured from real replication data, and reads "not measured" when none is connected. No invented numbers.',
                 ],
               ].map(([t, b]) => (
                 <div key={t} className="flex gap-4">
@@ -496,6 +587,7 @@ export default function LandingPage({
             </div>
             <EvidencePreview />
           </div>
+          <LiveTestResults />
         </Section>
 
         <Section
@@ -517,8 +609,8 @@ export default function LandingPage({
             ))}
           </div>
           <p className="mt-4 text-xs font-mono text-zinc-500">
-            Live AWS replication data in the console is in development; until then its replication
-            telemetry is simulated and labeled as such.
+            The console reads live replication status from AWS Elastic Disaster Recovery once your
+            account is connected; until then its telemetry is simulated and labeled as such.
           </p>
         </Section>
 

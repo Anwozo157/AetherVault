@@ -5,6 +5,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Landing page shows the real AWS test results (2026-11-18)
+
+- Evidence section: new "Measured in a live AWS test" panel (REAL DATA, 17–18 Nov 2026, our own
+  test account, not a customer): drill 2 PASS (app verified 12 min 29 s, ~8 s data lost), drill 1
+  FAIL (17 min 14 s against 15 min, one-time first-recovery setup), alert test PASS (Slack warning
+  1 min 40 s after replication stopped). Figures from `docs/AWS_LIVE_POC.md`.
+- The sample evidence card is now labeled "illustrative"; two stale lines updated (data loss is
+  measured from real replication data; the console reads live DRS status once an account is
+  connected).
+
 ### Pricing slide: honest feature labels (2026-11-18)
 
 - Investor deck, slide 5: "Contractual RTO SLA" and "Dedicated VPC & Air-Gapped Nodes" are now

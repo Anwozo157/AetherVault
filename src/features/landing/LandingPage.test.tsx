@@ -28,6 +28,16 @@ describe('LandingPage', () => {
     expect(screen.getByText(/SOC 2 readiness under way; no report yet/)).toBeInTheDocument();
   });
 
+  test('live AWS test results are real, dated, and show the miss', () => {
+    render(<LandingPage />);
+    expect(screen.getByText('Measured in a live AWS test')).toBeInTheDocument();
+    expect(screen.getByText(/REAL DATA · 17–18 NOV 2026/)).toBeInTheDocument();
+    expect(screen.getByText(/not a customer/)).toBeInTheDocument();
+    expect(screen.getByText('12 min 29 s')).toBeInTheDocument();
+    expect(screen.getByText('17 min 14 s')).toBeInTheDocument();
+    expect(screen.getByText('FAIL')).toBeInTheDocument();
+  });
+
   test('3D visuals load lazily (globe and replication scene)', async () => {
     render(<LandingPage />);
     expect(await screen.findByTestId('globe')).toHaveTextContent('ACTIVE_SYNC');
