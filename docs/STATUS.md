@@ -69,7 +69,7 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 
 4. **SOC 2:** program and agent prompt in `docs/SOC2_PROGRAM_PROMPT.md` (2026-11-14). Phase A (free readiness: policies, risk register, vendors, system description, calendar, first review) done. **Next (founder):** approve and sign `docs/policies/README.md` (**7 of 10 approved 2026-11-15**; Acceptable use + Access control held until the last account has MFA (4 of 5 verified 2026-11-15, FileVault on); AI use held for counsel), close the 7 private findings from the 2026-11-14 review, take the training. Then run the control calendar for a quarter. Funded steps and costs are in the program doc.
 
-5. **Landing page** built (2026-11-09) on `feat/landing-page`: ✅ `CONTACT_EMAIL` set to antonio@getaethervault.com (2026-11-11); add real console screenshots and a pilot-customer case study when available.
+5. **Landing page** shows the real AWS test results (2026-11-18, "Measured in a live AWS test"; pricing slide roadmap labels fixed the same day). Built (2026-11-09) on `feat/landing-page`: ✅ `CONTACT_EMAIL` set to antonio@getaethervault.com (2026-11-11); add real console screenshots and a pilot-customer case study when available.
 
 ## Open decisions for the founder
 
