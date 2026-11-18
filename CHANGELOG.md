@@ -5,6 +5,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Scale test, step 1: test script (2026-11-18)
+
+- `scripts/poc/source-server.sh`: instance type and disk size (`POC_INSTANCE_TYPE`, `POC_DISK_GB`),
+  `POC_LOAD=postgres` (PostgreSQL 16, one numbered row committed per second, rate-limited `pgbench`
+  at `POC_PGBENCH_TPS`, default 20), a cost safety net (the source server terminates itself after
+  `POC_MAX_HOURS`, default 72), and new commands: `drill [snapshot]`, `last-row`, `cost` (running
+  estimate at verified list prices) and `drs-down`. `verify-drill <request time>` measures data
+  loss from the database, counting only rows written before the request. Setup is safe to run twice
+  (a recovered drill server can re-run it). Tested: rendered scripts parse; the data-loss query
+  returns 8.0 s on a sample and ignores rows written after the request; `cost` and the pre-flight
+  `check` (EC2 dry run, quotas 8 vCPUs, DRS reachable) pass. Nothing launched.
+- `docs/SCALE_TEST_PROMPT.md`: two fixes from review (data loss counts only rows from before the
+  request; setup must be safe to re-run).
+
 ### Scale test prompt; backups (2026-11-18)
 
 - `docs/SCALE_TEST_PROMPT.md`: agent prompt for Phase A (100 GiB database server under load,
