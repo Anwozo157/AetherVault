@@ -1,5 +1,5 @@
 // Helpers for drill evidence: stable fingerprint, durations, file name.
-import type { DrillEvidence } from '../../domain/dr';
+import type { DrillEvidence, MeasuredRecovery, RunSummary } from '../../domain/dr';
 
 /** JSON with object keys sorted at every level, so the same evidence always hashes the same. */
 export function canonicalJson(value: unknown): string {
@@ -53,6 +53,16 @@ export function runPassed(
   return rtoMet && rpoMet !== false;
 }
 
+/** One sentence on the recovery time: measured by AWS when linked, otherwise labeled simulated. */
+export function recoverySummary(e: DrillEvidence): string {
+  const target = formatSeconds(e.objectives.rto_seconds);
+  const time = `${formatSeconds(e.results.recovery_seconds)} (target ${target})`;
+  const m = e.recovery_measured;
+  if (!m) return `${time}. Simulated: recovery is not yet run against real infrastructure.`;
+  const by = m.linked_by ? `, linked by ${m.linked_by}` : '';
+  return `${time}. Measured by AWS Elastic Disaster Recovery: job ${m.job_id} in ${m.aws_region}, from the recovery request ${new Date(m.started_at).toLocaleString()} to ${m.launched} of ${m.servers} servers launched ${new Date(m.ended_at).toLocaleString()}${by}. Does not include application checks after launch.`;
+}
+
 /** One sentence on the data-loss target, for the evidence report. */
 export function rpoSummary(e: DrillEvidence): string {
   const target = formatSeconds(e.objectives.rpo_seconds);
@@ -74,4 +84,35 @@ export function rpoSummary(e: DrillEvidence): string {
       : `all ${rep.server_count} servers replicating`;
   const where = `AWS DRS ${rep.aws_region}${rep.aws_account_id ? `, account …${rep.aws_account_id.slice(-4)}` : ''}`;
   return `${sample}${rep.rpo_met ? 'Met' : 'MISSED'}: ${lag} at launch (target ${target}); ${servers}. Measured from ${where}, collected ${new Date(rep.collected_at).toLocaleString()}.`;
+}
+
+/**
+ * The AWS DRS job that most likely carried out a run, for the console to suggest linking.
+ * Mirrors the database rules in link_recovery_job(): same kind (drill -> drill job, failover ->
+ * recovery job), completed with every server launched, the run's target Region, started between
+ * 30 minutes before and 6 hours after the run was requested, and not linked to another run.
+ * Picks the job that started closest to the request. A person still confirms the link.
+ */
+export function matchingRecovery(
+  run: RunSummary,
+  jobs: readonly MeasuredRecovery[],
+  linkedJobIds: ReadonlySet<string>,
+): MeasuredRecovery | null {
+  if (run.recoveryJobId !== null || run.approvedAt === null) return null;
+  const kind = run.kind === 'drill' ? 'drill' : 'recovery';
+  const requested = Date.parse(run.requestedAt);
+  let best: MeasuredRecovery | null = null;
+  let bestGap = Infinity;
+  for (const j of jobs) {
+    if (j.kind !== kind || j.status !== 'COMPLETED' || j.durationSeconds === null) continue;
+    if (j.launched < 1 || j.launched !== j.servers || linkedJobIds.has(j.jobId)) continue;
+    if (run.targetRegion !== `aws-${j.awsRegion}`) continue;
+    const gap = Date.parse(j.startedAt) - requested;
+    if (gap < -30 * 60_000 || gap > 6 * 3600_000) continue;
+    if (Math.abs(gap) < bestGap) {
+      best = j;
+      bestGap = Math.abs(gap);
+    }
+  }
+  return best;
 }

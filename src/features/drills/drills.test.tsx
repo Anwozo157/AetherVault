@@ -1,6 +1,11 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, test, vi } from 'vitest';
-import type { DrillEvidence, DrillsCapability, RunSummary } from '../../domain/dr';
+import type {
+  DrillEvidence,
+  DrillsCapability,
+  MeasuredRecovery,
+  RunSummary,
+} from '../../domain/dr';
 import DrillsPanel from './DrillsPanel';
 import EvidenceReport from './EvidenceReport';
 import {
@@ -8,6 +13,8 @@ import {
   evidenceFileName,
   fingerprint,
   formatSeconds,
+  matchingRecovery,
+  recoverySummary,
   rpoSummary,
   runPassed,
 } from './evidence';
@@ -206,6 +213,7 @@ describe('DrillsPanel', () => {
       rpoSeconds: null,
       rpoTargetSeconds: null,
       replicationSource: null,
+      recoveryJobId: null,
     },
     {
       id: 'r2',
@@ -224,6 +232,7 @@ describe('DrillsPanel', () => {
       rpoSeconds: null,
       rpoTargetSeconds: null,
       replicationSource: null,
+      recoveryJobId: null,
     },
   ];
   const fake = (): DrillsCapability => ({
@@ -246,7 +255,7 @@ describe('DrillsPanel', () => {
     expect(screen.getByText('Withdrawn')).toBeInTheDocument();
     expect(
       screen.getByText(
-        '1 of 1 completed drills passed: recovered within 5 min, and data loss within 30 s where measured. Recovery times are simulated until AetherVault runs recoveries in your cloud.',
+        '1 of 1 completed drills passed: recovered within 5 min, and data loss within 30 s where measured. Recovery times are simulated unless a drill is linked to the AWS job that measured it.',
       ),
     ).toBeInTheDocument();
     expect(screen.getByText('Only admins change targets.')).toBeInTheDocument();
@@ -392,6 +401,7 @@ describe('Drill schedule', () => {
           rpoSeconds: 130,
           rpoTargetSeconds: 60,
           replicationSource: 'aws-drs',
+          recoveryJobId: null,
         },
       ]),
       evidence: vi.fn(async () =>
@@ -516,5 +526,178 @@ describe('schedule helpers', () => {
     expect(relativeTime('2026-11-12T12:00:00Z', now)).toBe('in 3 days');
     expect(defaultFirstRun(new Date(2026, 10, 9, 15, 30))).toBe('2026-11-10T09:00');
     expect(toLocalInput(new Date(2026, 0, 5, 7, 4))).toBe('2026-01-05T07:04');
+  });
+});
+
+describe('recovery times measured by AWS', () => {
+  const drillRun = (over: Partial<RunSummary> = {}): RunSummary => ({
+    id: 'd2',
+    kind: 'drill',
+    trigger: 'manual',
+    sourceRegion: 'us-east-1',
+    targetRegion: 'aws-us-west-2',
+    requestedByEmail: 'op@co.com',
+    requestedAt: '2026-11-17T21:04:50Z',
+    approvedByEmail: null,
+    approvedAt: '2026-11-17T21:04:50Z',
+    outcome: 'secured',
+    recoverySeconds: 5.5,
+    rtoTargetSeconds: 900,
+    rpoMet: true,
+    rpoSeconds: 8,
+    rpoTargetSeconds: 60,
+    replicationSource: 'aws-drs',
+    recoveryJobId: null,
+    ...over,
+  });
+  const job = (over: Partial<MeasuredRecovery> = {}): MeasuredRecovery => ({
+    jobId: 'drsjob-5d5a5be173b3a4499',
+    kind: 'drill',
+    status: 'COMPLETED',
+    awsRegion: 'us-west-2',
+    startedAt: '2026-11-17T21:04:58Z',
+    endedAt: '2026-11-17T21:14:59Z',
+    durationSeconds: 601,
+    servers: 1,
+    launched: 1,
+    ...over,
+  });
+  const none = new Set<string>();
+
+  test('matchingRecovery follows the same rules as the database', () => {
+    expect(matchingRecovery(drillRun(), [job()], none)?.jobId).toBe('drsjob-5d5a5be173b3a4499');
+    // Already linked, never launched, or the job is taken by another run: no suggestion.
+    expect(matchingRecovery(drillRun({ recoveryJobId: 'x' }), [job()], none)).toBeNull();
+    expect(matchingRecovery(drillRun({ approvedAt: null }), [job()], none)).toBeNull();
+    expect(matchingRecovery(drillRun(), [job()], new Set([job().jobId]))).toBeNull();
+    // Wrong kind, unfinished, partial launch, other Region, too far away in time.
+    expect(matchingRecovery(drillRun(), [job({ kind: 'recovery' })], none)).toBeNull();
+    expect(
+      matchingRecovery(drillRun({ kind: 'failover' }), [job({ kind: 'recovery' })], none),
+    ).not.toBeNull();
+    expect(
+      matchingRecovery(drillRun(), [job({ status: 'STARTED', durationSeconds: null })], none),
+    ).toBeNull();
+    expect(matchingRecovery(drillRun(), [job({ servers: 2 })], none)).toBeNull();
+    expect(matchingRecovery(drillRun(), [job({ awsRegion: 'us-east-2' })], none)).toBeNull();
+    expect(
+      matchingRecovery(drillRun(), [job({ startedAt: '2026-11-18T04:00:00Z' })], none),
+    ).toBeNull();
+    expect(
+      matchingRecovery(drillRun(), [job({ startedAt: '2026-11-17T20:30:00Z' })], none),
+    ).toBeNull();
+    // Closest start wins.
+    const far = job({ jobId: 'drsjob-00000000000000001', startedAt: '2026-11-17T23:00:00Z' });
+    expect(matchingRecovery(drillRun(), [far, job()], none)?.jobId).toBe(
+      'drsjob-5d5a5be173b3a4499',
+    );
+  });
+
+  test('evidence says where a measured time came from, and labels a simulated one', () => {
+    const measured = evidence({
+      report_version: 5,
+      objectives: { rto_seconds: 900, rpo_seconds: 60 },
+      results: {
+        decision_seconds: null,
+        recovery_seconds: 601,
+        rto_met: true,
+        rpo_measured: true,
+        recovery_simulated: false,
+      },
+      recovery_measured: {
+        source: 'aws-drs',
+        job_id: 'drsjob-5d5a5be173b3a4499',
+        job_kind: 'drill',
+        aws_region: 'us-west-2',
+        started_at: '2026-11-17T21:04:58Z',
+        ended_at: '2026-11-17T21:14:59Z',
+        duration_seconds: 601,
+        servers: 1,
+        launched: 1,
+        linked_by: 'op@co.com',
+        linked_at: '2026-11-17T22:00:00Z',
+      },
+    });
+    const text = recoverySummary(measured);
+    expect(text).toMatch(
+      /^10 min \(target 15 min\)\. Measured by AWS Elastic Disaster Recovery: job drsjob-5d5a5be173b3a4499 in us-west-2/,
+    );
+    expect(text).toContain('1 of 1 servers launched');
+    expect(text).toContain('linked by op@co.com');
+    expect(text).not.toContain('Simulated');
+    expect(recoverySummary(evidence())).toContain('Simulated');
+  });
+
+  const panelDrills = (
+    runs: RunSummary[],
+    over: Partial<DrillsCapability> = {},
+  ): DrillsCapability => ({
+    getObjectives: vi.fn(async () => ({ rtoSeconds: 900, rpoSeconds: 60 })),
+    setObjectives: vi.fn(async () => {}),
+    listRuns: vi.fn(async () => runs),
+    evidence: vi.fn(async () => evidence()),
+    getSchedule: vi.fn(async () => null),
+    setSchedule: vi.fn(async () => '2026-12-01T17:00:00.000Z'),
+    disableSchedule: vi.fn(async () => {}),
+    startDrill: vi.fn(async () => 'd1'),
+    linkRecoveryJob: vi.fn(async () => 601),
+    ...over,
+  });
+
+  test('an operator links a drill to the AWS job after confirming', async () => {
+    let runs = [drillRun()];
+    const drills = panelDrills(runs, {
+      listRuns: vi.fn(async () => runs),
+      linkRecoveryJob: vi.fn(async () => {
+        runs = [drillRun({ recoverySeconds: 601, recoveryJobId: 'drsjob-5d5a5be173b3a4499' })];
+        return 601;
+      }),
+    });
+    render(
+      <DrillsPanel
+        drills={drills}
+        recoveries={async () => [job()]}
+        myRole="operator"
+        refreshKey={0}
+      />,
+    );
+    fireEvent.click(await screen.findByRole('button', { name: 'Use AWS time (10 min)' }));
+    expect(screen.getByText(/Permanent and audited/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Link' }));
+    await waitFor(() =>
+      expect(drills.linkRecoveryJob).toHaveBeenCalledWith('d2', 'drsjob-5d5a5be173b3a4499'),
+    );
+    expect(await screen.findByText('measured by AWS')).toBeInTheDocument();
+    expect(screen.getByText('10 min · PASS')).toBeInTheDocument();
+    expect(screen.queryByText('recovery time simulated')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Use AWS time/ })).not.toBeInTheDocument();
+  });
+
+  test('viewers see the match but cannot link; failing job loads are ignored', async () => {
+    render(
+      <DrillsPanel
+        drills={panelDrills([drillRun()])}
+        recoveries={async () => [job()]}
+        myRole="viewer"
+        refreshKey={0}
+      />,
+    );
+    expect(
+      await screen.findByText('AWS measured 10 min · an operator can link it'),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Use AWS time/ })).not.toBeInTheDocument();
+
+    render(
+      <DrillsPanel
+        drills={panelDrills([drillRun({ id: 'd3' })])}
+        recoveries={async () => {
+          throw new Error('offline');
+        }}
+        myRole="operator"
+        refreshKey={0}
+      />,
+    );
+    expect(await screen.findByTestId('drill-d3')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 });

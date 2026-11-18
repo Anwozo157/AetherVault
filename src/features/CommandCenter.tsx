@@ -146,6 +146,7 @@ export default function CommandCenter({
           <Suspense fallback={<PanelPlaceholder label="Loading drills…" />}>
             <DrillsPanel
               drills={provider.drills}
+              recoveries={provider.replication?.recoveries}
               myRole={provider.team?.myRole ?? 'viewer'}
               refreshKey={activityKey}
             />

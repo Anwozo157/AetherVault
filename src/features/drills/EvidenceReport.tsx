@@ -9,6 +9,7 @@ import {
   evidenceFileName,
   fingerprint,
   formatSeconds,
+  recoverySummary,
   rpoSummary,
   runPassed,
 } from './evidence';
@@ -24,7 +25,7 @@ export default function EvidenceReport({
   onClose: () => void;
 }) {
   const [hash, setHash] = useState<string | null>(null);
-  const { run, results, objectives, chain } = evidence;
+  const { run, results, chain } = evidence;
 
   useEffect(() => {
     let cancelled = false;
@@ -111,7 +112,7 @@ export default function EvidenceReport({
               'Recovery time',
               results.recovery_seconds === null
                 ? 'Not measured (drill did not complete)'
-                : `${formatSeconds(results.recovery_seconds)} (target ${formatSeconds(objectives.rto_seconds)}). Simulated: recovery is not yet run against real infrastructure.`,
+                : recoverySummary(evidence),
             )}
             {!isDrill && row('Time to approval', formatSeconds(results.decision_seconds))}
             {row('Data-loss target (RPO)', rpoSummary(evidence))}

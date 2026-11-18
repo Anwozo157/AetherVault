@@ -204,6 +204,8 @@ export interface RunSummary {
   rpoSeconds: number | null;
   rpoTargetSeconds: number | null;
   replicationSource: 'aws-drs' | 'fixture' | null;
+  /** AWS DRS job whose measured time is used; null: recovery time is simulated. */
+  recoveryJobId: string | null;
 }
 
 export type RunbookPhase = 'before' | 'during' | 'after';
@@ -268,6 +270,21 @@ export interface ReplicationAtLaunch {
   rpo_met: boolean | null;
 }
 
+/** AWS DRS job facts copied onto a run when an operator linked it (see link_recovery_job()). */
+export interface RecoveryMeasured {
+  source: 'aws-drs';
+  job_id: string;
+  job_kind: 'drill' | 'recovery' | 'failback';
+  aws_region: string;
+  started_at: string;
+  ended_at: string;
+  duration_seconds: number;
+  servers: number;
+  launched: number;
+  linked_by: string | null;
+  linked_at: string;
+}
+
 /** Evidence record for one failover drill (server-generated; see drill_evidence()). */
 export interface DrillEvidence {
   report_version: number;
@@ -304,6 +321,8 @@ export interface DrillEvidence {
     rpo_seconds?: number | null;
     rpo_met?: boolean | null;
   };
+  /** From report_version 5: the AWS DRS job linked to this run (null: time is simulated). */
+  recovery_measured?: RecoveryMeasured | null;
   /** From report_version 3: replication snapshot received in the 5 minutes before launch. */
   replication_at_launch?: ReplicationAtLaunch | null;
   /** From report_version 4: the run's runbook checklist (null: no runbook when it started). */
@@ -356,6 +375,11 @@ export interface DrillsCapability {
   disableSchedule(): Promise<void>;
   /** Operators and above. Starts a non-disruptive drill now; returns its run id. */
   startDrill(targetRegion: string): Promise<string>;
+  /**
+   * Operators and above. Uses an AWS DRS job's measured time for this run (permanent, audited).
+   * Returns the measured seconds. Optional: only providers with real recovery data.
+   */
+  linkRecoveryJob?(runId: string, jobId: string): Promise<number>;
 }
 
 export type AlertChannelKind = 'slack' | 'pagerduty';

@@ -1,28 +1,35 @@
 import { FileText } from 'lucide-react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import type {
   DrillEvidence,
   DrillsCapability,
+  MeasuredRecovery,
   MemberRole,
   RecoveryObjectives,
   RunSummary,
 } from '../../domain/dr';
 import DrillSchedule from './DrillSchedule';
 import EvidenceReport from './EvidenceReport';
-import { OUTCOME_LABEL, formatSeconds, runPassed } from './evidence';
+import { OUTCOME_LABEL, formatSeconds, matchingRecovery, runPassed } from './evidence';
 
 const errText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
 export default function DrillsPanel({
   drills,
+  recoveries,
   myRole,
   refreshKey,
 }: {
   drills: DrillsCapability;
+  /** Recovery jobs measured by AWS DRS (connected accounts only). */
+  recoveries?: () => Promise<MeasuredRecovery[]>;
   myRole: MemberRole;
   refreshKey: number | string;
 }) {
   const isAdmin = myRole === 'admin';
+  const canLink = (myRole === 'admin' || myRole === 'operator') && !!drills.linkRecoveryJob;
+  const [jobs, setJobs] = useState<MeasuredRecovery[]>([]);
+  const [confirming, setConfirming] = useState<string | null>(null);
   const [objectives, setObjectives] = useState<RecoveryObjectives | null>(null);
   const [rtoMin, setRtoMin] = useState('');
   const [rpoSec, setRpoSec] = useState('');
@@ -46,6 +53,28 @@ export default function DrillsPanel({
   useEffect(() => {
     void load();
   }, [load, refreshKey]);
+
+  // Measured jobs only power the "use AWS's time" suggestion; failing to load them is not an error.
+  useEffect(() => {
+    if (!recoveries) return;
+    recoveries().then(setJobs, () => setJobs([]));
+  }, [recoveries, refreshKey]);
+
+  const linkedJobIds = useMemo(
+    () => new Set((runs ?? []).flatMap((r) => (r.recoveryJobId ? [r.recoveryJobId] : []))),
+    [runs],
+  );
+
+  const link = async (runId: string, jobId: string) => {
+    setError(null);
+    try {
+      await drills.linkRecoveryJob?.(runId, jobId);
+      setConfirming(null);
+      await load();
+    } catch (e) {
+      setError(errText(e));
+    }
+  };
 
   const save = async (e: FormEvent) => {
     e.preventDefault();
@@ -148,7 +177,7 @@ export default function DrillsPanel({
         {objectives && (
           <span className="basis-full text-[11px] font-mono text-zinc-500">
             {completed.length
-              ? `${passed.length} of ${completed.length} completed drills passed: recovered within ${formatSeconds(objectives.rtoSeconds)}, and data loss within ${formatSeconds(objectives.rpoSeconds)} where measured. Recovery times are simulated until AetherVault runs recoveries in your cloud.`
+              ? `${passed.length} of ${completed.length} completed drills passed: recovered within ${formatSeconds(objectives.rtoSeconds)}, and data loss within ${formatSeconds(objectives.rpoSeconds)} where measured. Recovery times are simulated unless a drill is linked to the AWS job that measured it.`
               : 'No completed drills yet. Run one now or set a schedule below.'}
           </span>
         )}
@@ -262,9 +291,54 @@ export default function DrillsPanel({
                           {formatSeconds(r.recoverySeconds)} · {met ? 'PASS' : 'FAIL'}
                         </span>
                       )}
-                      {r.recoverySeconds !== null && (
-                        <span className="block text-aether-amber">recovery time simulated</span>
+                      {r.recoveryJobId !== null ? (
+                        <span className="block text-zinc-500">measured by AWS</span>
+                      ) : (
+                        r.recoverySeconds !== null && (
+                          <span className="block text-aether-amber">recovery time simulated</span>
+                        )
                       )}
+                      {(() => {
+                        const job = matchingRecovery(r, jobs, linkedJobIds);
+                        if (!job) return null;
+                        const label = `AWS measured ${formatSeconds(job.durationSeconds)}`;
+                        if (!canLink)
+                          return (
+                            <span className="block text-zinc-500">
+                              {label} · an operator can link it
+                            </span>
+                          );
+                        return confirming === r.id ? (
+                          <span className="flex flex-wrap items-center gap-1.5 mt-1 whitespace-normal max-w-[16rem]">
+                            <span className="text-zinc-400">
+                              Use {job.jobId} ({formatSeconds(job.durationSeconds)})? Permanent and
+                              audited.
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => void link(r.id, job.jobId)}
+                              className="px-2 py-1 rounded-lg bg-aether-cyan/15 hover:bg-aether-cyan/25 border border-aether-cyan/40 text-aether-cyan"
+                            >
+                              Link
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setConfirming(null)}
+                              className="px-2 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.1] text-zinc-300"
+                            >
+                              Cancel
+                            </button>
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setConfirming(r.id)}
+                            className="block mt-1 text-aether-cyan hover:text-white underline underline-offset-2"
+                          >
+                            Use AWS time ({formatSeconds(job.durationSeconds)})
+                          </button>
+                        );
+                      })()}
                       {r.approvedAt !== null && (
                         <span
                           className={`block ${r.rpoMet === false ? 'text-red-300' : 'text-zinc-500'}`}

@@ -84,7 +84,7 @@ select throws_ok($$select public.run_checklist((select id from run1))$$, '42501'
 -- Evidence v4 includes the checklist
 select pg_temp.login('a7000000-0000-0000-0000-000000000003');
 create temp table ev as select public.drill_evidence((select id from run1)) as j;
-select is((select j->>'report_version' from ev), '4', 'evidence is report v4');
+select is((select j->>'report_version' from ev), '5', 'evidence is report v5 (v4 added the runbook)');
 select is((select (j->'runbook'->>'completed')::int || '/' || (j->'runbook'->>'total') from ev), '1/3',
   'evidence counts completed steps');
 select is((select j->'runbook'->'steps'->1->>'checked_by' || ' · ' || (j->'runbook'->'steps'->1->>'note') from ev),

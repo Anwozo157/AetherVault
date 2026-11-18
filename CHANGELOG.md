@@ -5,6 +5,23 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Drill records use AWS's measured recovery time (2026-11-17)
+
+- An operator links a drill (or failover) to the AWS DRS job that carried it out; from then on the
+  drills table and the evidence report show AWS's measured time ("measured by AWS") instead of
+  the simulated 5.5 s, and PASS/FAIL uses it. The console suggests the matching job ("Use AWS time
+  (10 min)") and asks for confirmation. Links are permanent, audited (`run.recovery_measured`),
+  and copy the job's facts onto the run, so evidence survives the job's 400-day retention.
+- Migration `20261117000012_linked_recovery_times.sql`: `failover_runs.recovery_measured`,
+  `link_recovery_job(run, job)` (operators; same kind, completed with every server launched, same
+  Region, started 30 min before to 6 h after the request, one job per run),
+  `run_recovery_seconds()`, `list_failover_runs` returns `recovery_job_id`, evidence report v5
+  (`recovery_measured`, `recovery_simulated: false` when linked). pgTAP: 17 new tests.
+- Unlinked runs still show "recovery time simulated", unchanged.
+- `docs/MULTICLOUD_DR.md`: Azure Site Recovery REST API, jobs and read-only role confirmed from
+  Microsoft Learn; proposed Azure build plan (live test first, needs founder approval for an
+  Azure account).
+
 ### Collector Terraform pins its Region (2026-11-17)
 
 - `collector/terraform/main.tf` sets the AWS provider Region to `drs_region`. Before, it used the

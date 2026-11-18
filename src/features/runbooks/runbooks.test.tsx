@@ -38,6 +38,7 @@ const run = (id: string, over: Partial<RunSummary> = {}): RunSummary => ({
   rpoSeconds: null,
   rpoTargetSeconds: null,
   replicationSource: null,
+  recoveryJobId: null,
   ...over,
 });
 
