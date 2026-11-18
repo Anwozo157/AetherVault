@@ -298,8 +298,8 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
                   Workloads
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> AWS DRS Staging
-                  Integration (roadmap)
+                  <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> AWS DRS Live Status,
+                  Alerts & Drill Reports
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> 3D HUD & Mobile
@@ -338,7 +338,12 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
                   <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> Chaos Testing (roadmap)
                 </li>
                 <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> Two-Person Approval &
+                  Tamper-Evident Audit Log
+                </li>
+                <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> Contractual RTO SLA
+                  (roadmap)
                 </li>
               </ul>
             </div>
@@ -360,7 +365,7 @@ export default function InvestorPitchDeck({ onLaunchDemo }: InvestorPitchDeckPro
               <ul className="space-y-2 text-xs text-zinc-400">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> Dedicated VPC &
-                  Air-Gapped Nodes
+                  Air-Gapped Nodes (roadmap)
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-aether-green" /> mmWave / Carrier Direct

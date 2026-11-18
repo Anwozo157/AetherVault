@@ -5,6 +5,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Pricing slide: honest feature labels (2026-11-18)
+
+- Investor deck, slide 5: "Contractual RTO SLA" and "Dedicated VPC & Air-Gapped Nodes" are now
+  marked "(roadmap)" (no SLA is offered yet; no dedicated deployment exists). Foundation lists the
+  built AWS DRS live status, alerts and drill reports instead of "AWS DRS Staging Integration
+  (roadmap)". Enterprise Pro adds the built two-person approval and tamper-evident audit log.
+  Prices unchanged (founder decision pending). `docs/legal/CLAIMS_AUDIT.md` updated.
+
 ### Product decisions and scale test plan (2026-11-18)
 
 - `docs/PRODUCT_DECISIONS.md`: founder's decisions: onboarding warm-up drill, three recovery tiers
