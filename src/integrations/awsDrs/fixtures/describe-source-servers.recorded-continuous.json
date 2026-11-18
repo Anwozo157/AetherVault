@@ -1,0 +1,138 @@
+[
+  {
+    "items": [
+      {
+        "sourceServerID": "s-0a1b2c3d4e5f60010",
+        "arn": "arn:aws:drs:us-west-2:111122223333:source-server/s-0a1b2c3d4e5f60010",
+        "tags": {
+          "Name": "db-primary.example.internal"
+        },
+        "lastLaunchResult": "NOT_STARTED",
+        "dataReplicationInfo": {
+          "lagDuration": "P0D",
+          "replicatedDisks": [
+            {
+              "deviceName": "/dev/nvme0n1",
+              "totalStorageBytes": 107374182400,
+              "replicatedStorageBytes": 107374182400,
+              "rescannedStorageBytes": 107374182400,
+              "backloggedStorageBytes": 0,
+              "volumeStatus": "REGULAR"
+            }
+          ],
+          "dataReplicationState": "CONTINUOUS",
+          "dataReplicationInitiation": {
+            "startDateTime": "2026-11-18T19:17:54.789426+00:00",
+            "nextAttemptDateTime": "2026-11-18T21:59:00+00:00",
+            "steps": [
+              {
+                "name": "WAIT",
+                "status": "SUCCEEDED"
+              },
+              {
+                "name": "CREATE_SECURITY_GROUP",
+                "status": "SUCCEEDED"
+              },
+              {
+                "name": "LAUNCH_REPLICATION_SERVER",
+                "status": "SUCCEEDED"
+              },
+              {
+                "name": "BOOT_REPLICATION_SERVER",
+                "status": "SUCCEEDED"
+              },
+              {
+                "name": "AUTHENTICATE_WITH_SERVICE",
+                "status": "SUCCEEDED"
+              },
+              {
+                "name": "DOWNLOAD_REPLICATION_SOFTWARE",
+                "status": "SUCCEEDED"
+              },
+              {
+                "name": "CREATE_STAGING_DISKS",
+                "status": "SUCCEEDED"
+              },
+              {
+                "name": "ATTACH_STAGING_DISKS",
+                "status": "SUCCEEDED"
+              },
+              {
+                "name": "PAIR_REPLICATION_SERVER_WITH_AGENT",
+                "status": "SUCCEEDED"
+              },
+              {
+                "name": "CONNECT_AGENT_TO_REPLICATION_SERVER",
+                "status": "SUCCEEDED"
+              },
+              {
+                "name": "START_DATA_TRANSFER",
+                "status": "SUCCEEDED"
+              }
+            ]
+          },
+          "stagingAvailabilityZone": "us-west-2a"
+        },
+        "lifeCycle": {
+          "addedToServiceDateTime": "2026-11-18T19:16:12.938127+00:00",
+          "firstByteDateTime": "2026-11-18T19:22:52.797944+00:00",
+          "elapsedReplicationDuration": "PT2H42M41.997343S",
+          "lastSeenByServiceDateTime": "2026-11-18T21:58:03.684180+00:00",
+          "lastLaunch": {
+            "initiated": {}
+          }
+        },
+        "sourceProperties": {
+          "lastUpdatedDateTime": "2026-11-18T21:18:00.563944+00:00",
+          "recommendedInstanceType": "c5.large",
+          "identificationHints": {
+            "fqdn": "db-primary.example.internal",
+            "hostname": "db-primary.example.internal",
+            "awsInstanceID": "i-0a1b2c3d4e5f60010"
+          },
+          "networkInterfaces": [
+            {
+              "macAddress": "02-00-00-00-00-10",
+              "ips": ["10.0.1.10"],
+              "isPrimary": true
+            }
+          ],
+          "disks": [
+            {
+              "deviceName": "/dev/nvme0n1",
+              "bytes": 107374182400
+            }
+          ],
+          "cpus": [
+            {
+              "cores": 1,
+              "modelName": "Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz"
+            },
+            {
+              "cores": 1,
+              "modelName": "Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz"
+            }
+          ],
+          "ramBytes": 4022120448,
+          "os": {
+            "fullString": "Linux version 6.18.62-127.179.amzn2023.x86_64 (mockbuild@build-host) (gcc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5), GNU ld version 2.41-50.amzn2023.0.8) #2 SMP PREEMPT_DYNAMIC Wed Nov 11 00:36:10 UTC 2026"
+          },
+          "supportsNitroInstances": true,
+          "architecture": "x86_64"
+        },
+        "stagingArea": {
+          "status": "NOT_EXTENDED",
+          "stagingAccountID": "111122223333"
+        },
+        "sourceCloudProperties": {
+          "originAccountID": "111122223333",
+          "originRegion": "us-east-1",
+          "originAvailabilityZone": "us-east-1a"
+        },
+        "replicationDirection": "FAILOVER",
+        "sourceNetworkID": "sn-0a1b2c3d4e5f60010",
+        "agentVersion": "6.46.6.2026.315.1616"
+      }
+    ]
+  }
+]

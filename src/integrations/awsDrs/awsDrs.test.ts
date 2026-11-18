@@ -2,6 +2,7 @@ import type { DescribeJobsResponse, DescribeSourceServersResponse, Job } from '@
 import { describe, expect, test, vi } from 'vitest';
 import degraded from './fixtures/describe-source-servers.degraded.json';
 import healthy from './fixtures/describe-source-servers.healthy.json';
+import recorded from './fixtures/describe-source-servers.recorded-continuous.json';
 import {
   collectRecoveryJobs,
   collectSnapshot,
@@ -18,6 +19,7 @@ const NOW = new Date('2026-11-09T22:00:00Z');
 
 describe('parseLagSeconds', () => {
   test.each([
+    ['P0D', 0], // what real DRS returned at zero lag (recorded 2026-11-18)
     ['PT2S', 2],
     ['PT0.5S', 0.5],
     ['PT2M10S', 130],
@@ -90,6 +92,28 @@ describe('collector against recorded responses', () => {
     });
     // Nothing beyond the status fields leaves the account (no OS, IPs, tags, raw errors).
     expect(JSON.stringify(snap)).not.toMatch(/Windows|rawError|fqdn|ramBytes|tags/);
+  });
+
+  test('recorded from a real AWS account (redacted): continuous, zero lag as P0D', async () => {
+    const snap = await collectSnapshot(recordedApi(pages(recorded)), {
+      region: 'us-west-2',
+      source: 'fixture',
+      now: NOW,
+    });
+    expect(snap.servers).toHaveLength(1);
+    expect(snap.servers[0]).toMatchObject({
+      id: 's-0a1b2c3d4e5f60010',
+      hostname: 'db-primary.example.internal',
+      state: 'CONTINUOUS',
+      lag_seconds: 0,
+      lag_raw: 'P0D',
+      backlog_bytes: 0,
+      total_bytes: 100 * 1024 ** 3,
+      replicated_bytes: 100 * 1024 ** 3,
+      error: null,
+      last_launch_result: 'NOT_STARTED',
+    });
+    expect(JSON.stringify(snap)).not.toMatch(/fqdn|ramBytes|macAddress|10\.0\.1\.10/);
   });
 
   test('degraded account: backlog, stalled with error, initial sync with ETA', async () => {
