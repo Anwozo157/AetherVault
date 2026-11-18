@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Product decisions and scale test plan (2026-11-18)
+
+- `docs/PRODUCT_DECISIONS.md`: founder's decisions: onboarding warm-up drill, three recovery tiers
+  (Pilot Light, Warm Standby, Active-Active; times are estimates), Kubernetes recovery path
+  (Terraform + GitOps + Velero/AWS Backup), AWS first (no Azure/GCP work until AWS is proven).
+- `docs/AWS_SCALE_TEST_PLAN.md`: plan (not run) for a 100 GiB database server under load with
+  four drills (~$13–15 estimated), then a three-server app recovered in dependency order (needs a
+  vCPU quota increase).
+
 ### Deployed; AWS test found already torn down (2026-11-18)
 
 - Deployed `5d233f1` (alert wording, stale-tab reload) with hosted migration `20261118000013`;
