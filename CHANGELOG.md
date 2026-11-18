@@ -5,6 +5,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Fixes from the 2026-11-18 deploy and alert test
+
+- A console tab left open across a deploy now reloads once instead of showing "… panel failed to
+  load" (`src/lib/staleChunkReload.ts`, on Vite's `vite:preloadError`; at most one reload a
+  minute, none without session storage, so it cannot loop).
+- Replication at-risk alert: when only the lag is over target it now says "replication is 101 s
+  behind (target 60 s). No server reports an error; it is falling behind." instead of "0 of 1
+  servers not replicating normally". Same in the console's audit feed. Migration
+  `20261118000013_alert_wording.sql`; pgTAP 2 new tests.
+
 ### Live alert test passed (2026-11-18)
 
 - Slack alerts proven end to end with real AWS data: stopping the DRS agent on the test server

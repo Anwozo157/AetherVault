@@ -1,7 +1,7 @@
 -- pgTAP tests for AWS DRS replication ingest (Phase 4.4).
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(29);
+select plan(31);
 
 insert into auth.users (id, email, aud, role) values
   ('f1000000-0000-0000-0000-000000000001', 'admin@rep.local', 'authenticated', 'authenticated'),
@@ -116,6 +116,17 @@ select is((select count(*)::int from public.replication_lag_history('f2000000-00
 select pg_temp.login('f1000000-0000-0000-0000-000000000003');
 select throws_ok($$select public.latest_replication_snapshot('f2000000-0000-0000-0000-000000000001')$$,
   '42501', 'not a member of this organization', 'non-members cannot read replication status');
+
+-- Wording (live alert test 2026-11-18): lag over target with no server problem says so plainly.
+reset role;
+select is(public.alert_for('replication.rpo_breached',
+    '{"problem_count": 0, "server_count": 1, "max_lag_seconds": 101, "rpo_target_seconds": 60, "source": "aws-drs"}', null)->>'title',
+  'Data-loss target at risk: replication is 101 s behind (target 60 s). No server reports an error; it is falling behind.',
+  'lag-only breach does not claim "0 of 1 servers not replicating"');
+select is(public.alert_for('replication.rpo_breached',
+    '{"problem_count": 1, "server_count": 2, "max_lag_seconds": 2, "rpo_target_seconds": 60, "source": "fixture"}', null)->>'title',
+  'Data-loss target at risk [SAMPLE DATA]: 1 of 2 servers not replicating normally; worst lag 2 s (target 60 s).',
+  'a server problem keeps the server count');
 
 select * from finish();
 rollback;

@@ -807,6 +807,13 @@ describe('SupabaseDrProvider', () => {
       rpo_target_seconds: 60,
       source: 'fixture',
     });
+    server.pushAudit('replication.rpo_breached', null, {
+      problem_count: 0,
+      server_count: 1,
+      max_lag_seconds: 101,
+      rpo_target_seconds: 60,
+      source: 'aws-drs',
+    });
     server.pushAudit('replication.rpo_recovered', null, {
       max_lag_seconds: 3,
       rpo_target_seconds: 60,
@@ -820,6 +827,10 @@ describe('SupabaseDrProvider', () => {
     expect(text).toContain(
       '[SAMPLE DATA] Data-loss target at risk: 1 of 4 servers not replicating normally (worst lag 130 s, target 60 s).',
     );
+    expect(text).toContain(
+      'Data-loss target at risk: replication is 101 s behind (target 60 s); no server reports an error.',
+    );
+    expect(text).not.toContain('0 of 1 servers');
     expect(text).toContain(
       'Replication back within the data-loss target (worst lag 3 s, target 60 s).',
     );

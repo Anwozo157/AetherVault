@@ -133,7 +133,11 @@ function describeAudit(entry: AuditEntry): { level: LogEvent['level']; message: 
     case 'replication.rpo_breached':
       return {
         level: 'CRIT',
-        message: `${d.source === 'fixture' ? '[SAMPLE DATA] ' : ''}Data-loss target at risk: ${String(d.problem_count)} of ${String(d.server_count)} servers not replicating normally (worst lag ${d.max_lag_seconds === null ? 'unknown' : `${String(d.max_lag_seconds)} s`}, target ${String(d.rpo_target_seconds)} s).`,
+        message: `${d.source === 'fixture' ? '[SAMPLE DATA] ' : ''}Data-loss target at risk: ${
+          Number(d.problem_count) > 0
+            ? `${String(d.problem_count)} of ${String(d.server_count)} servers not replicating normally (worst lag ${d.max_lag_seconds === null || d.max_lag_seconds === undefined ? 'unknown' : `${String(d.max_lag_seconds)} s`}, target ${String(d.rpo_target_seconds)} s).`
+            : `replication is ${d.max_lag_seconds === null || d.max_lag_seconds === undefined ? 'an unknown time' : `${String(d.max_lag_seconds)} s`} behind (target ${String(d.rpo_target_seconds)} s); no server reports an error.`
+        }`,
       };
     case 'replication.rpo_recovered':
       return {
