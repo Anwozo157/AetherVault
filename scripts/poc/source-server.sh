@@ -348,7 +348,7 @@ cmd_up() {
     --security-group-ids "$sg" --iam-instance-profile "Name=$ROLE" --user-data "file://$ud" \
     --metadata-options HttpTokens=required,HttpEndpoint=enabled \
     --instance-initiated-shutdown-behavior terminate \
-    --block-device-mappings 'DeviceName=/dev/xvda,Ebs={VolumeSize=$DISK_GB,VolumeType=gp3,Encrypted=true,DeleteOnTermination=true}' \
+    --block-device-mappings "DeviceName=/dev/xvda,Ebs={VolumeSize=$DISK_GB,VolumeType=gp3,Encrypted=true,DeleteOnTermination=true}" \
     --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$NAME},{$TAGS}]" \
     "ResourceType=volume,Tags=[{Key=Name,Value=$NAME},{$TAGS}]" \
     --query 'Instances[0].InstanceId' --output text)"
