@@ -5,6 +5,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Live alert test passed (2026-11-18)
+
+- Slack alerts proven end to end with real AWS data: stopping the DRS agent on the test server
+  produced "Data-loss target at risk" in Slack 1 min 40 s later (before DRS itself reported
+  `STALLED`), and "Replication back within the data-loss target" after the restart. Details in
+  `docs/AWS_LIVE_POC.md` step 6. Known: the at-risk wording says "0 of 1 servers not replicating
+  normally" when only the lag is over target; fix pending.
+
 ### Drill records use AWS's measured recovery time (2026-11-17)
 
 - An operator links a drill (or failover) to the AWS DRS job that carried it out; from then on the
