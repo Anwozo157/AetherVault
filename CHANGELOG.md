@@ -5,6 +5,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Real DRS response recorded; collector memory raised (2026-11-18)
+
+- First recorded `DescribeSourceServers` response from a real AWS account (the scale-test server,
+  `CONTINUOUS`), redacted with example IDs, as fixture
+  `src/integrations/awsDrs/fixtures/describe-source-servers.recorded-continuous.json`, with a test.
+  Confirms the undocumented `lagDuration` format at zero lag: `P0D` (already parsed as 0). The
+  unredacted original stays in the private folder.
+- Collector Lambda memory 128 → 256 MB (`collector/terraform/main.tf`): runs used 111 of 128 MB.
+  Applied live during the scale test (plan showed only this change); still well inside Lambda's
+  free tier.
+
 ### Scale test, step 1: test script (2026-11-18)
 
 - `scripts/poc/source-server.sh`: instance type and disk size (`POC_INSTANCE_TYPE`, `POC_DISK_GB`),

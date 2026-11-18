@@ -95,4 +95,5 @@ alert channels subscribed to "Replication at risk" (PagerDuty resolves on recove
 - AWS does not document the format of `lagDuration`. The collector reads ISO 8601 durations
   (`PT2S`) and plain seconds and shows anything else as "lag unknown". Run `--record` on day
   one and add the real responses to `src/integrations/awsDrs/fixtures/`.
-- The sample responses in that folder are hand-built from the API reference, not recorded.
+- Seen live on 2026-11-18: zero lag is returned as `P0D` (parsed). A redacted real response is
+  in the fixtures folder (`recorded-continuous.json`); the other samples are hand-built.

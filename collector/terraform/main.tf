@@ -112,7 +112,7 @@ resource "aws_lambda_function" "collector" {
   handler          = "lambda.handler"
   filename         = var.lambda_zip
   source_code_hash = filebase64sha256(var.lambda_zip)
-  memory_size      = 128
+  memory_size      = 256 # 128 ran at 111 MB used (2026-11-18)
   timeout          = 30
   # Optional: never more than one run at a time (see var.reserved_concurrency).
   reserved_concurrent_executions = var.reserved_concurrency

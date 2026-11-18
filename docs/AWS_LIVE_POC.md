@@ -16,6 +16,9 @@ Plan and prompt: `docs/AWS_SCALE_TEST_PLAN.md`, `docs/SCALE_TEST_PROMPT.md`. Cap
 | 19:09–19:16:50 | DRS agent installed (source network created for the default VPC)                                                   |
 | 19:17          | Drill launch settings: post-launch actions on; launch template v2 with a public IP (SSM reachability)              |
 | 19:18:30       | Collector redeployed in us-west-2 (Terraform: 9 added, plan reviewed); first report accepted (INITIATING)          |
+| 21:54          | Initial sync done: 107.4 GB replicated, CONTINUOUS, lag 0 s; source still writing; cost so far ~$2.45              |
+| 21:58          | `--record` run: real response saved (private), redacted fixture added; lag format `P0D`                            |
+| 22:00          | Collector memory 128 → 256 MB (was at 111 MB used); reports still accepted                                         |
 
 ## Status (2026-11-18)
 
