@@ -3,7 +3,22 @@ import React, { Suspense, lazy, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { CONSOLE_HASH, hasBackend, routeFor, type SiteRoute } from './config/backend';
 import LandingPage from './features/landing/LandingPage';
+import { installStaleChunkReload } from './lib/staleChunkReload';
 import './index.css';
+
+// A tab left open across a deploy reloads once instead of showing "panel failed to load".
+installStaleChunkReload({
+  addEventListener: (type, listener) => window.addEventListener(type, listener),
+  storage: (() => {
+    try {
+      return window.sessionStorage;
+    } catch {
+      return null;
+    }
+  })(),
+  now: () => Date.now(),
+  reload: () => window.location.reload(),
+});
 
 // The landing page is the light first screen. The demo (3D globe, deck) and the signed-in
 // console (supabase-js) load only when visited.
