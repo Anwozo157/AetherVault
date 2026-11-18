@@ -83,6 +83,9 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 
 ## Known issues
 
+- A console tab left open across a deploy shows "… panel failed to load" for lazy panels (the old chunk file is gone) until the page is reloaded. Fix: reload once on a chunk-load error. Seen 2026-11-18.
+- Replication at-risk alert says "0 of 1 servers not replicating normally" when only the lag is over target. Fix the wording in `alert_for`.
+- Hosted console has a pending failover request from 2026-11-10 (to the GCP demo region) never approved or withdrawn; founder can withdraw it.
 - Repo lives at `~/Developer/AetherVault`. Do not move it back into iCloud.
 - Local Supabase: analytics, Studio, storage and edge runtime are disabled in `supabase/config.toml` (analytics alone used ~4 CPU cores).
 - `DEGRADED_STATE` exists in the state machine but is never entered; chaos mode only changes telemetry.
