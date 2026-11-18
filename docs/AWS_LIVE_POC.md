@@ -92,8 +92,15 @@ small cloud VM elsewhere (needs the founder's spend approval) is a more realisti
    (`drs_region = "us-west-2"`, plan reviewed then applied, local state gitignored). **2026-11-17
    18:03 UTC: first report accepted (1 server, CONTINUOUS, lag 0 s, data-loss target met); the
    console shows LIVE · AWS DRS.**
-6. Add a Slack alert channel; stop the agent on the source for a few minutes → "Data-loss target
-   at risk" alert → restart → "recovered".
+6. ✅ Alert test (2026-11-18 UTC). Slack workspace "Aegis Core Labs", channel `#aethervault-alerts`,
+   Slack app "AetherVault Alerts" (incoming-webhook scope only); the founder pasted the webhook into
+   the console (encrypted; only its last 4 characters are shown). Test alert: Sent (200). Agent
+   stopped on the source at 01:31:12 → **"Data-loss target at risk… worst lag 101 s (target 60 s)"
+   at 01:32:52** (1 min 40 s). DRS itself kept reporting `CONTINUOUS` until 01:35 (`STALLED`), so
+   the lag check, not the state, caught it first. Agent restarted at 01:35:34; DRS rescanned the
+   disk; collector saw `CONTINUOUS`, lag 0 on its 01:36:52 run → **"Replication back within the
+   data-loss target"** (Sent (200)), about 1 min 20 s after the restart. Found: the at-risk text reads "0 of 1 servers
+   not replicating normally" when only the lag is over target (wording fix pending).
 7. ✅ Drill (2026-11-17): Run drill now in AetherVault and `aws drs start-recovery --is-drill` at
    18:09:24 UTC; recovery point 18:09:33. Before launching: DRS post-launch enabled (attaches the
    role with SSM) and the DRS launch template given a public IP so the drill server can reach SSM
