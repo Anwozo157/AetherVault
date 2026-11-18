@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Scale test prompt; backups (2026-11-18)
+
+- `docs/SCALE_TEST_PROMPT.md`: agent prompt for Phase A (100 GiB database server under load,
+  four drills, snapshot experiment), with the founder's $25 cap, a stop-and-ask at $15, backups
+  before and after, and the rule that the website changes only after results are in.
+- The weekly database backup of 15 Nov had failed (`SSL SYSCALL error: EOF` during the schema
+  dump); a fresh backup was taken and verified on 18 Nov. Follow-up: retry once on a dropped
+  connection.
+
 ### Landing page shows the real AWS test results (2026-11-18)
 
 - Evidence section: new "Measured in a live AWS test" panel (REAL DATA, 17–18 Nov 2026, our own
