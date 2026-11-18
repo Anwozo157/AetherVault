@@ -1,7 +1,7 @@
 # Project Status
 
 > Living handoff document. **Every agent or contributor updates this at the end of a session.**
-> Last updated: 2026-11-18 03:1x UTC (alert wording + stale-tab fix deployed; AWS test found already torn down) by Claude Code (Opus 5.5).
+> Last updated: 2026-11-18 afternoon (pricing slide fixed, real AWS results on the landing page, brief sent to Kim) by Claude Code (Opus 5.5).
 
 ## Finding what's done (read this first)
 
@@ -53,7 +53,7 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 
 ## Next steps (in order)
 
-0. **Legal prep (`docs/LEGAL_PREP_PROMPT.md`, counsel: Kim Larsen, Stinson LLP):** T1–T15 done 2026-11-14 (public drafts in `docs/legal/`, private files in `~/Developer/AegisCoreLabs-private/legal/`). **Founder:** answer `founder-questions.md` there (entity, employment/IP, pilot-customer relationship, budget), then send the drafted email to Kim. Agent next: T16 after the answers (T6b license notices done).
+0. **Legal prep (`docs/LEGAL_PREP_PROMPT.md`, counsel: Kim Larsen, Stinson LLP):** T1–T15 done 2026-11-14 (public drafts in `docs/legal/`, private files in `~/Developer/AegisCoreLabs-private/legal/`). **Founder:** answer `founder-questions.md` there (entity, employment/IP, pilot-customer relationship, budget), then send the drafted email to Kim. **2026-11-18: Kim asked for information; founder emailed him the site and a brief (Claude doc "AetherVault: Brief for Kim Larsen", exported to PDF).** Next: the call (scope and fees), and founder answers `founder-questions.md` before it. Agent next: T16 after the answers (T6b license notices done).
 1. **3.6 hosting:** ✅ Live at **https://getaethervault.com** (2026-11-11; GitHub Pages, HTTPS enforced, old github.io URL redirects). Founder signed in and created the organization. Domain at Cloudflare (DNS + Email Routing: antonio@/support@/security@/billing@ → founder inbox); steps and records in `docs/CUSTOM_DOMAIN.md`. Resend SMTP connected 2026-11-11 (B9 done; DMARC report-only). **Next:** founder rolls the Cloudflare API token (it was pasted in chat once).
    **AWS 2026-11-14:** everything except DRS tested live in Ohio (source server via SSM; collector deployed with Terraform, runs on schedule, reaches DRS with its read-only role). Two Terraform fixes for new accounts merged. Torn down; only blocker is AWS SCP `p-1m6ffy9a` (support case number in the founder's private notes). The AWS "support-console IAM" Health notice is the same SCP, not our IAM; no action.
    **AWS 2026-11-17: unblocked.** The first account's DRS block can't be lifted (AWS-managed "projects" account), so the founder opened a standard AWS account (approved; test under $10). MFA, warn-only budgets ($10/$25) and agent access (profile `aegis-dr`) set up; `source-server.sh check` passes (DRS reachable in us-west-2; quotas 5 vCPUs / 5 Lambda per Region). The old account's agent key (profile `aegis`) can be deleted once the founder confirms we're done with it.
