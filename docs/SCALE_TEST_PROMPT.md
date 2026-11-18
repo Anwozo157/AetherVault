@@ -59,14 +59,17 @@ customer, counsel and investors.
 
 1. **Script** (free): extend `scripts/poc/source-server.sh` with instance type, disk size,
    PostgreSQL with one numbered, timestamped row committed per second, rate-limited pgbench, a
-   72-hour self-termination, and `drill`, `last-row`, `cost` and `drs-down` commands. Tests or a
+   72-hour self-termination, and `drill`, `last-row`, `cost` and `drs-down` commands. The server's
+   setup must be safe to run twice: a recovered drill server can run it again on first boot. Tests or a
    dry run where possible; commit on a branch.
 2. **Launch** (ask first): t3.medium, 100 GiB gp3, `POC_LOAD=postgres`; install the DRS agent;
    redeploy the collector so the console shows live data. Record install-to-continuous time.
 3. **Lag under load**, about 24 h: worst lag and backlog, from the collector and DRS.
 4. **Warm-up drill** (expected slow; it's the first recovery), then **drills 2–4** a few hours
    apart. For each: request time, DRS job stages, server launched, database ready, last row
-   recovered vs last row written before the request (data loss), PASS/FAIL against 15 min and
+   recovered vs last row written before the request (data loss = request time minus the newest
+   recovered row written **before** the request; the drill server keeps writing new rows once it
+   boots, so later rows don't count), PASS/FAIL against 15 min and
    60 s. Link each drill to its DRS job in the console.
 5. **Snapshot experiment:** one drill from the last finished point in time instead of a new
    snapshot. Does it remove the ~3 min wait, and at what data-loss cost?
