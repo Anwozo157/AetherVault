@@ -64,10 +64,55 @@ physical): `replicationHealth_s`, `rpoInSeconds_d`, `protectionState_s`, `failov
 `lastSuccessfulTestFailoverTime_t`; refreshed every 15 minutes. An AetherVault Azure collector
 could read these, but 15-minute freshness is coarser than AWS's per-minute status.
 
-**Unverified (to confirm before building):** the REST API for replication protected items and
-its RPO fields; a built-in read-only RBAC role for Site Recovery; Terraform `azurerm` resource
-names for Site Recovery; the per-instance price (not shown in the page text); conflicting
-statements on excluding disks for physical machines.
+**Confirmed 2026-11-17 (REST API and roles, Microsoft Learn):**
+
+- **Replicated items:** `GET …/vaults/{vault}/replicationProtectedItems?api-version=2026-11-01`
+  ([Replication Protected Items - List](https://learn.microsoft.com/en-us/rest/api/site-recovery/replication-protected-items/list)),
+  paged with `nextLink`. Fields shown in Microsoft's sample: `replicationHealth`, `protectionState`,
+  `testFailoverState`, `allowedOperations`, `currentScenario`,
+  `providerSpecificDetails.instanceType`; for Azure-to-Azure (`A2A`) also `rpoInSeconds`,
+  `lastRpoCalculatedTime` and `lastHeartbeat`. This is fresher than the 15-minute Log Analytics
+  route, so the collector should use the REST API.
+- **Jobs (measured recovery times):** `GET …/vaults/{vault}/replicationJobs`
+  ([Replication Jobs - List](https://learn.microsoft.com/en-us/rest/api/site-recovery/replication-jobs/list)):
+  `scenarioName`, `state` (NotStarted, InProgress, Succeeded, Failed, Cancelled, Suspended, Other),
+  `startTime`, `endTime`, `targetObjectName`, `errors`, `tasks`. Same role as DRS `DescribeJobs` in
+  our "Recoveries measured by AWS" table.
+- **Read-only role:** built-in **Site Recovery Reader** has only read actions, including
+  `vaults/replicationJobs/read` and
+  `vaults/replicationFabrics/replicationProtectionContainers/replicationProtectedItems/read`
+  ([built-in roles](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/management-and-governance)).
+  **Site Recovery Operator** adds test failover, cleanup and failover; it can't enable
+  replication or assign access (what AetherVault would need to start drills itself, later).
+- **Drills cost no Site Recovery fee;** the test VM's compute and storage are billed until cleanup.
+  First 31 days of protection per instance are free.
+
+**Still unverified (check in the live test):** whether Site Recovery Reader allows the
+vault-level list (the role names the nested path); the `scenarioName` values for test failover
+and failover; the RPO field for physical servers (`InMageRcm`, reported as `lastRpoInSeconds` in a
+summary, not seen verbatim); the per-instance price; Terraform `azurerm` resource names.
+
+### Azure build plan (proposed 2026-11-17, not started)
+
+1. **Live test first, cheapest shape: Azure-to-Azure.** One small Azure VM replicating to a second
+   Azure region (no on-premises appliance; the A2A fields above are the ones Microsoft documents
+   verbatim). Record real API responses (as `--record` did for AWS), confirm the Reader role and
+   job names, run a test failover and measure it. Estimate: under $10 for a 2-day test (VM, cache
+   storage, test VM; Site Recovery fee free for 31 days). **Needs the founder's approval: an Azure
+   account requires a card.**
+2. **Database:** `replication_snapshots.source` and `recovery_jobs` gain the cloud (`azure-asr`);
+   job IDs and Region patterns are AWS-shaped today and need per-cloud checks. Links from a run to
+   a job (`link_recovery_job`) match `azure-<region>` targets the same way as `aws-<region>`.
+3. **Collector:** an Azure Function (or the same CLI) with a managed identity holding Site
+   Recovery Reader, mapping replicated items and jobs to the shapes the AWS collector already
+   pushes. Terraform for the customer's subscription.
+4. **Console:** "Connect your Azure subscription" guide; Azure regions become selectable in the
+   signed-in console only after real data flows (until then they stay demo-only and simulated).
+5. **Docs:** `AZURE_DR_BEST_PRACTICES.md` and an Azure pilot checklist. For a physical-server pilot
+   the replication appliance (Windows Server, 8 cores, 16 GB) is the big extra; test it in a second
+   live run before promising Azure to a customer with physical servers.
+
+Rough effort: 1–2 weeks of build plus the live test.
 
 ## Google Cloud
 
