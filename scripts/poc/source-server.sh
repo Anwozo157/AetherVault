@@ -113,6 +113,10 @@ echo "heartbeat lines: \$(wc -l < /var/lib/aethervault/heartbeat.log)"; tail -3 
 if systemctl list-unit-files postgresql.service >/dev/null 2>&1 && [ -d /var/lib/pgsql/data ]; then
   for i in \$(seq 1 60); do sudo -u postgres psql -qAtc 'SELECT 1' >/dev/null 2>&1 && break; sleep 5; done
   echo "database ready \$(date -u +%FT%T.%3NZ)"
+  # When it was really ready, from the drill server's own log (our check above only sees it once
+  # Systems Manager connects). Reported alongside; the verified time above stays the official one.
+  echo "booted (server clock) \$(uptime -s) UTC"
+  journalctl -u postgresql -o short-iso-precise --no-pager -b 2>/dev/null | grep -m1 'Started' | sed 's/^/postgres started (server log): /'
   # Rows written on the drill server after it boots don't count: only rows from before the request.
   sudo -u postgres psql -At -v req="$req" <<'SQL'
 SELECT 'newest recovered row ' || max(seq) || ' written ' || max(written_at) AT TIME ZONE 'UTC'
