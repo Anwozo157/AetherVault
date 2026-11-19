@@ -5,6 +5,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Scale test: staging disk switched to GP3 (2026-11-19)
+
+- Founder-approved change to test the warm-up finding: the source server's DRS staging disk moved
+  from "Auto" (magnetic) to GP3. Replication was continuous again within ~1 minute (no full re-copy);
+  recovery points were slow for the first hour while the new volume loaded. Logged in
+  `docs/AWS_LIVE_POC.md`.
+
 ### Scale test: warm-up drill investigated; readiness measured on the server (2026-11-19)
 
 - `source-server.sh verify-drill` also reports the drill server's boot time and PostgreSQL's start
