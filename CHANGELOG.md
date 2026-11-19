@@ -5,6 +5,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Scale test: warm-up drill investigated; readiness measured on the server (2026-11-19)
+
+- `source-server.sh verify-drill` also reports the drill server's boot time and PostgreSQL's start
+  time from its own log, so the Systems Manager wait is visible (the verified time stays official).
+- Findings in `docs/AWS_LIVE_POC.md`: the recovered disk was ~4 min older than DRS's 0 s lag
+  suggested; likely cause is DRS's magnetic staging disk ("Auto" picks magnetic under 125 GiB).
+
 ### Scale test: warm-up drill (2026-11-19)
 
 - A3 warm-up drill on the 100 GiB server under load: launched in 11 min 2 s, database verified at

@@ -28,6 +28,25 @@ Plan and prompt: `docs/AWS_SCALE_TEST_PLAN.md`, `docs/SCALE_TEST_PROMPT.md`. Cap
 | 20:56:59.3     | Database verified (web page 200): **15 min 0.7 s, FAIL by 0.7 s** (includes ~3.5 min waiting for SSM)                  |
 | 20:57          | Newest recovered row 90787 at 20:38:03: **data loss 235.5 s, FAIL** (60 s target). Drill server terminated; ~$5.07     |
 
+### Warm-up drill: why it missed (investigated 2026-11-19)
+
+- **Data loss (235.5 s):** the recovered disk was about 4 minutes old as a whole (heartbeat file
+  ends 20:37:34, database 20:38:03), while DRS reported 0 s lag every minute before and during the
+  drill. So DRS's lag figure did not match what was actually recoverable. Most likely cause (not yet
+  proven): the staging disk is EBS **`standard` (magnetic)**. DRS's "Auto" staging type always picks
+  magnetic for disks under 125 GiB (AWS docs), and under constant writes the replication server
+  appears to fall minutes behind writing to it. Supporting signs: recovery points take 3.5–7.5 min
+  to finish (scheduled every 10 min); the drill's fresh point wasn't ready after ~3 min, so DRS
+  logged `USING_PREVIOUS_SNAPSHOT`. Not the cause: CPU (replication server ~1%, source ~3%,
+  credits rising), PostgreSQL (the file system is equally old), network (source sending ~120 KB/s).
+- **Recovery time (15 min 0.7 s):** ~3 min 17 s waiting for the fresh snapshot, 6 min 25 s
+  conversion, 1 min 15 s launch, ~3 min 35 s boot + Systems Manager connecting before our check
+  could run, 25 s check. The check now also reports boot time and PostgreSQL's own start time from
+  the drill server's log (the verified time stays official).
+- **Test next:** set this disk's staging type to GP3 (about +$0.10/day) and rerun; if data loss
+  drops to seconds, the cause is confirmed. Product: warn customers when a protected disk's staging
+  volume is magnetic, since DRS's lag then overstates how fresh a recovery will be.
+
 ## Status (2026-11-18)
 
 **Torn down** at 02:02 UTC by the agent user after the alert test (source server disconnected and
