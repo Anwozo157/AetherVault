@@ -8,17 +8,19 @@ with measured data loss and a runbook in its evidence, and failback rehearsed.
 
 Plan and prompt: `docs/AWS_SCALE_TEST_PLAN.md`, `docs/SCALE_TEST_PROMPT.md`. Cap $25 (founder).
 
-| Time (UTC)     | Step                                                                                                               |
-| -------------- | ------------------------------------------------------------------------------------------------------------------ |
-| 18 Nov 18:59   | Backups before launch: hosted database (verified), repo bundle, private folder committed                           |
-| 19:06:05       | Source server launched: t3.medium, 100 GiB gp3, PostgreSQL 16 + one row/s + pgbench at 20 tps, 72 h self-terminate |
-| 19:09          | Verified: heartbeat and database rows writing (row 137 at 19:09:18)                                                |
-| 19:09–19:16:50 | DRS agent installed (source network created for the default VPC)                                                   |
-| 19:17          | Drill launch settings: post-launch actions on; launch template v2 with a public IP (SSM reachability)              |
-| 19:18:30       | Collector redeployed in us-west-2 (Terraform: 9 added, plan reviewed); first report accepted (INITIATING)          |
-| 21:54          | Initial sync done: 107.4 GB replicated, CONTINUOUS, lag 0 s; source still writing; cost so far ~$2.45              |
-| 21:58          | `--record` run: real response saved (private), redacted fixture added; lag format `P0D`                            |
-| 22:00          | Collector memory 128 → 256 MB (was at 111 MB used); reports still accepted                                         |
+| Time (UTC)     | Step                                                                                                                   |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 18 Nov 18:59   | Backups before launch: hosted database (verified), repo bundle, private folder committed                               |
+| 19:06:05       | Source server launched: t3.medium, 100 GiB gp3, PostgreSQL 16 + one row/s + pgbench at 20 tps, 72 h self-terminate     |
+| 19:09          | Verified: heartbeat and database rows writing (row 137 at 19:09:18)                                                    |
+| 19:09–19:16:50 | DRS agent installed (source network created for the default VPC)                                                       |
+| 19:17          | Drill launch settings: post-launch actions on; launch template v2 with a public IP (SSM reachability)                  |
+| 19:18:30       | Collector redeployed in us-west-2 (Terraform: 9 added, plan reviewed); first report accepted (INITIATING)              |
+| 21:54          | Initial sync done: 107.4 GB replicated, CONTINUOUS, lag 0 s; source still writing; cost so far ~$2.45                  |
+| 21:58          | `--record` run: real response saved (private), redacted fixture added; lag format `P0D`                                |
+| 22:00          | Collector memory 128 → 256 MB (was at 111 MB used); reports still accepted                                             |
+| 21:47–21:51    | Collector: lag 641 → 881 s while CONTINUOUS (sync point frozen ~21:36), "at risk"; back to 0 s at 21:52. Cause TBD     |
+| 19 Nov 13:25   | 1,087 readings, no gaps or errors; 0 s lag since 21:52; cost ~$4.21. Phases: sync 19:24–20:06, first snapshot to 21:41 |
 
 ## Status (2026-11-18)
 
