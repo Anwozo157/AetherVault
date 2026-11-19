@@ -8,25 +8,28 @@ with measured data loss and a runbook in its evidence, and failback rehearsed.
 
 Plan and prompt: `docs/AWS_SCALE_TEST_PLAN.md`, `docs/SCALE_TEST_PROMPT.md`. Cap $25 (founder).
 
-| Time (UTC)     | Step                                                                                                                   |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| 18 Nov 18:59   | Backups before launch: hosted database (verified), repo bundle, private folder committed                               |
-| 19:06:05       | Source server launched: t3.medium, 100 GiB gp3, PostgreSQL 16 + one row/s + pgbench at 20 tps, 72 h self-terminate     |
-| 19:09          | Verified: heartbeat and database rows writing (row 137 at 19:09:18)                                                    |
-| 19:09–19:16:50 | DRS agent installed (source network created for the default VPC)                                                       |
-| 19:17          | Drill launch settings: post-launch actions on; launch template v2 with a public IP (SSM reachability)                  |
-| 19:18:30       | Collector redeployed in us-west-2 (Terraform: 9 added, plan reviewed); first report accepted (INITIATING)              |
-| 21:54          | Initial sync done: 107.4 GB replicated, CONTINUOUS, lag 0 s; source still writing; cost so far ~$2.45                  |
-| 21:58          | `--record` run: real response saved (private), redacted fixture added; lag format `P0D`                                |
-| 22:00          | Collector memory 128 → 256 MB (was at 111 MB used); reports still accepted                                             |
-| 21:47–21:51    | Collector: lag 641 → 881 s while CONTINUOUS (sync point frozen ~21:36), "at risk"; back to 0 s at 21:52. Cause TBD     |
-| 19 Nov 13:25   | 1,087 readings, no gaps or errors; 0 s lag since 21:52; cost ~$4.21. Phases: sync 19:24–20:06, first snapshot to 21:41 |
-| 19 Nov 19:30   | A2 done: 1,068 readings since 21:52, all 0 s lag, no gaps                                                              |
-| 20:41:58.6     | **A3 warm-up drill** requested (`drsjob-5c7b7278ee5b49559`); last source row before request: 91006 at 20:41:44         |
-| 20:45:16       | DRS: `USING_PREVIOUS_SNAPSHOT` (new snapshot not ready after ~3 min); conversion 20:45:17–20:51:42                     |
-| 20:53:00.4     | Server launched: **11 min 2 s**                                                                                        |
-| 20:56:59.3     | Database verified (web page 200): **15 min 0.7 s, FAIL by 0.7 s** (includes ~3.5 min waiting for SSM)                  |
-| 20:57          | Newest recovered row 90787 at 20:38:03: **data loss 235.5 s, FAIL** (60 s target). Drill server terminated; ~$5.07     |
+| Time (UTC)     | Step                                                                                                                                                                                                                         |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 18 Nov 18:59   | Backups before launch: hosted database (verified), repo bundle, private folder committed                                                                                                                                     |
+| 19:06:05       | Source server launched: t3.medium, 100 GiB gp3, PostgreSQL 16 + one row/s + pgbench at 20 tps, 72 h self-terminate                                                                                                           |
+| 19:09          | Verified: heartbeat and database rows writing (row 137 at 19:09:18)                                                                                                                                                          |
+| 19:09–19:16:50 | DRS agent installed (source network created for the default VPC)                                                                                                                                                             |
+| 19:17          | Drill launch settings: post-launch actions on; launch template v2 with a public IP (SSM reachability)                                                                                                                        |
+| 19:18:30       | Collector redeployed in us-west-2 (Terraform: 9 added, plan reviewed); first report accepted (INITIATING)                                                                                                                    |
+| 21:54          | Initial sync done: 107.4 GB replicated, CONTINUOUS, lag 0 s; source still writing; cost so far ~$2.45                                                                                                                        |
+| 21:58          | `--record` run: real response saved (private), redacted fixture added; lag format `P0D`                                                                                                                                      |
+| 22:00          | Collector memory 128 → 256 MB (was at 111 MB used); reports still accepted                                                                                                                                                   |
+| 21:47–21:51    | Collector: lag 641 → 881 s while CONTINUOUS (sync point frozen ~21:36), "at risk"; back to 0 s at 21:52. Cause TBD                                                                                                           |
+| 19 Nov 13:25   | 1,087 readings, no gaps or errors; 0 s lag since 21:52; cost ~$4.21. Phases: sync 19:24–20:06, first snapshot to 21:41                                                                                                       |
+| 19 Nov 19:30   | A2 done: 1,068 readings since 21:52, all 0 s lag, no gaps                                                                                                                                                                    |
+| 20:41:58.6     | **A3 warm-up drill** requested (`drsjob-5c7b7278ee5b49559`); last source row before request: 91006 at 20:41:44                                                                                                               |
+| 20:45:16       | DRS: `USING_PREVIOUS_SNAPSHOT` (new snapshot not ready after ~3 min); conversion 20:45:17–20:51:42                                                                                                                           |
+| 20:53:00.4     | Server launched: **11 min 2 s**                                                                                                                                                                                              |
+| 20:56:59.3     | Database verified (web page 200): **15 min 0.7 s, FAIL by 0.7 s** (includes ~3.5 min waiting for SSM)                                                                                                                        |
+| 20:57          | Newest recovered row 90787 at 20:38:03: **data loss 235.5 s, FAIL** (60 s target). Drill server terminated; ~$5.07                                                                                                           |
+| 21:26          | Founder approved: staging disk AUTO (magnetic) → **GP3** (3,000 IOPS, 125 MB/s). DRS built a new GP3 volume from a snapshot; RESCAN ~1 min, CONTINUOUS 21:27:52, lag 0 s throughout                                          |
+| 21:42–21:51    | Magnetic staging volume detached, then deleted by DRS                                                                                                                                                                        |
+| 21:27–22:31    | Transition: no recovery points 21:40–22:10; 22:20 point started 22:25, 52% at 22:31 (new volume lazily loading from its snapshot, likely). Drill 2 waits until two points finish on time (deadline 01:15 UTC, else tomorrow) |
 
 ### Warm-up drill: why it missed (investigated 2026-11-19)
 
