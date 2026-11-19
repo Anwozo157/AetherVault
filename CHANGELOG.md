@@ -5,6 +5,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Scale test: warm-up drill (2026-11-19)
+
+- A3 warm-up drill on the 100 GiB server under load: launched in 11 min 2 s, database verified at
+  15 min 0.7 s (FAIL by 0.7 s), 235.5 s of data lost (FAIL; DRS fell back to the previous point in
+  time after ~3 min). Recorded in `docs/AWS_LIVE_POC.md`.
+
 ### Fix: drill request time on macOS (2026-11-19)
 
 - `source-server.sh drill` printed `...T20:41:57.3NZ` on macOS (BSD `date` has no `%N`); it now
