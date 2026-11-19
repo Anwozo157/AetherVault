@@ -21,6 +21,12 @@ Plan and prompt: `docs/AWS_SCALE_TEST_PLAN.md`, `docs/SCALE_TEST_PROMPT.md`. Cap
 | 22:00          | Collector memory 128 → 256 MB (was at 111 MB used); reports still accepted                                             |
 | 21:47–21:51    | Collector: lag 641 → 881 s while CONTINUOUS (sync point frozen ~21:36), "at risk"; back to 0 s at 21:52. Cause TBD     |
 | 19 Nov 13:25   | 1,087 readings, no gaps or errors; 0 s lag since 21:52; cost ~$4.21. Phases: sync 19:24–20:06, first snapshot to 21:41 |
+| 19 Nov 19:30   | A2 done: 1,068 readings since 21:52, all 0 s lag, no gaps                                                              |
+| 20:41:58.6     | **A3 warm-up drill** requested (`drsjob-5c7b7278ee5b49559`); last source row before request: 91006 at 20:41:44         |
+| 20:45:16       | DRS: `USING_PREVIOUS_SNAPSHOT` (new snapshot not ready after ~3 min); conversion 20:45:17–20:51:42                     |
+| 20:53:00.4     | Server launched: **11 min 2 s**                                                                                        |
+| 20:56:59.3     | Database verified (web page 200): **15 min 0.7 s, FAIL by 0.7 s** (includes ~3.5 min waiting for SSM)                  |
+| 20:57          | Newest recovered row 90787 at 20:38:03: **data loss 235.5 s, FAIL** (60 s target). Drill server terminated; ~$5.07     |
 
 ## Status (2026-11-18)
 
