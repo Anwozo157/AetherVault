@@ -5,6 +5,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Fix: drill request time on macOS (2026-11-19)
+
+- `source-server.sh drill` printed `...T20:41:57.3NZ` on macOS (BSD `date` has no `%N`); it now
+  prints milliseconds via Python on both macOS and Linux. Measurements were unaffected: drills use
+  AWS's job creation time as the request time.
+
 ### Real DRS response recorded; collector memory raised (2026-11-18)
 
 - First recorded `DescribeSourceServers` response from a real AWS account (the scale-test server,
