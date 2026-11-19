@@ -394,7 +394,8 @@ cmd_drill() {
   [[ -n $src && $src != None ]] || { echo "no DRS source server in $DRS_REGION"; exit 1; }
   spec="sourceServerID=$src"
   [[ -z $snap ]] || spec="$spec,recoverySnapshotID=$snap"
-  echo "requested $(date -u +%FT%T.%3NZ)"
+  # macOS date has no %N; python gives milliseconds on both macOS and Linux.
+  echo "requested $(python3 -c 'import datetime as d; print(d.datetime.now(d.timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z"))')"
   d drs start-recovery --is-drill --source-servers "$spec" --query 'job.[jobID,creationDateTime]' --output text
 }
 
