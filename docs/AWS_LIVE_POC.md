@@ -40,6 +40,35 @@ Plan and prompt: `docs/AWS_SCALE_TEST_PLAN.md`, `docs/SCALE_TEST_PROMPT.md`. Cap
 | 20 Nov 18:40      | Overnight: 1,076 readings, all 0 s lag, no gaps; ~$6.65. Morning drill window missed (founder away)                                                                                                                                |
 | 18:41:39.9        | **Drill 3** requested (`drsjob-56c721aa9861f7205`); last source row 169316 at 18:41:24. Laptop closed before verify: verify later with `verify-drill 2026-11-20T18:41:39.890Z` (server log gives PostgreSQL start), then terminate |
 | 18:45             | Founder: finish today. Source shutoff moved from ~19:05 to **05:00 UTC 21 Nov (midnight ET)** via SSM (`shutdown -c`, `shutdown -P 05:00`); still terminates itself then. DRS resources need `drs-down` separately                 |
+| 18:47:43          | Drill 3: `USING_PREVIOUS_SNAPSHOT` after 6 min 3 s; conversion 18:47:44–18:53:13                                                                                                                                                   |
+| 18:54:33.4        | Drill 3 server launched: **12 min 53.5 s**                                                                                                                                                                                         |
+| 18:57:50.4        | Drill 3 PostgreSQL started (drill server's own log; booted 18:57:20): **16 min 10.5 s, FAIL**. Not verified live (laptop closed); checked 21:24                                                                                    |
+| 21:25             | Drill 3 newest recovered row 169222 at 18:39:49.9: **data loss 110.0 s, FAIL**. Drill server terminated 21:25:58                                                                                                                   |
+| 21:26:33.7        | **A5 drill** requested from the newest finished point `pit-5a99f7c7f1fec4531` (started 21:14:39.8; the 21:24 point still pending); last source row 179101 at 21:26:19                                                              |
+| 21:26:36–21:31:32 | A5: no snapshot wait; conversion started 3 s after the request                                                                                                                                                                     |
+| 21:32:49.5        | A5 server launched: **6 min 15.8 s**                                                                                                                                                                                               |
+| 21:36:14.0        | A5 database verified (PostgreSQL started 21:36:12.5): **9 min 40.3 s, PASS**                                                                                                                                                       |
+| 21:36             | A5 newest recovered row 178408 at 21:14:38.3 (1.5 s before the point started): **data loss 715.4 s, FAIL**. Terminated 21:37:20; ~$6.99                                                                                            |
+| 21:37:59.7        | **Drill 4** requested (`drsjob-5745bb63343f74921`); last source row 179779 at 21:37:44.5                                                                                                                                           |
+| 21:42:55.8        | Drill 4: fresh snapshot finished (4 min 54 s), **no fallback**; conversion 21:42:56–21:48:15                                                                                                                                       |
+| 21:49:31.3        | Drill 4 server launched: **11 min 31.6 s**                                                                                                                                                                                         |
+| 21:52:17.2        | Drill 4 database verified (PostgreSQL started 21:52:13.5): **14 min 17.5 s, PASS**                                                                                                                                                 |
+| 21:52             | Drill 4 newest recovered row 179794 at 21:37:59.680 (30 ms before the request): **data loss 0.0 s, PASS**. Kept for failback                                                                                                       |
+| 21:4x             | Failback prep: DRS initialized in us-east-1; replication template copied from us-west-2 (t3.small, GP3, same point-in-time policy)                                                                                                 |
+| 21:53             | **Failback started:** `reverse-replication` from the drill 4 server (allowed on a drill instance) → new source server in us-east-1                                                                                                 |
+
+### Drills summary (Phase A, 100 GiB, PostgreSQL under constant writes)
+
+| Drill                 | Staging  | Recovery (≤ 15 min) | Data lost (≤ 60 s) | Notes                                                                          |
+| --------------------- | -------- | ------------------- | ------------------ | ------------------------------------------------------------------------------ |
+| Warm-up, 19 Nov 20:41 | magnetic | 15:00.7 FAIL        | 235.5 s FAIL       | first recovery; fell back after 3 min 17 s                                     |
+| 2, 20 Nov 00:29       | GP3      | 14:56.2 PASS        | 125.2 s FAIL       | fell back after 5 min 40 s                                                     |
+| 3, 20 Nov 18:41       | GP3      | 16:10.5 FAIL        | 110.0 s FAIL       | time from the drill server's log (not checked live); fell back after 6 min 3 s |
+| A5, 20 Nov 21:26      | GP3      | 9:40.3 PASS         | 715.4 s FAIL       | recovered from the newest finished point on purpose                            |
+| 4, 20 Nov 21:37       | GP3      | 14:17.5 PASS        | 0.0 s PASS         | fresh snapshot finished in 4 min 54 s; no fallback                             |
+
+Normal drills after the warm-up: 2 of 3 within 15 min, 1 of 3 within 60 s (median 110 s, worst 125.2 s). The
+plan's success bar (every drill after the warm-up within both targets) was **not met**.
 
 ### Drill 2: what it changed (2026-11-20)
 

@@ -5,6 +5,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Scale test: drills 3, A5 and 4; failback started (2026-11-20)
+
+- Drill 3: 16 min 10.5 s (FAIL; from the drill server's log), 110.0 s lost (FAIL). A5 (newest finished
+  point on purpose): 9 min 40.3 s (PASS), 715.4 s lost (FAIL). Drill 4: 14 min 17.5 s (PASS), 0.0 s lost
+  (PASS; fresh snapshot finished before DRS's wait ran out). Success bar not met: 2 of 3 normal drills
+  within 15 min, 1 of 3 within 60 s. Summary table in `docs/AWS_LIVE_POC.md`.
+- Failback rehearsal started: DRS initialized in us-east-1, reverse replication from the drill 4 server.
+
 ### Scale test: drill 2 on GP3 (2026-11-20)
 
 - Drill 2: database verified at 14 min 56.2 s (PASS), 125.2 s of data lost (FAIL). Revised cause:
