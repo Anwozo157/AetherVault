@@ -5,6 +5,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Scale test: failback blocked by an AWS account hold; torn down (2026-11-20)
+
+- Failback stalled: DRS could not launch its us-east-1 replication server; CloudTrail shows `RunInstances`
+  refused with `Client.Blocked` (AWS put a hold on the account). Not a product or setup fault.
+- Torn down on the founder's OK: all instances, DRS source servers, disks and snapshots in both regions;
+  source role and security group. Collector Lambda could not be destroyed (Lambda API refused under the
+  hold); its schedule is disabled so it no longer runs. Spend ~$8.40 of the $25 cap.
+
 ### Scale test: drills 3, A5 and 4; failback started (2026-11-20)
 
 - Drill 3: 16 min 10.5 s (FAIL; from the drill server's log), 110.0 s lost (FAIL). A5 (newest finished

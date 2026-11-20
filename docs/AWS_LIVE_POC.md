@@ -56,6 +56,10 @@ Plan and prompt: `docs/AWS_SCALE_TEST_PLAN.md`, `docs/SCALE_TEST_PROMPT.md`. Cap
 | 21:52             | Drill 4 newest recovered row 179794 at 21:37:59.680 (30 ms before the request): **data loss 0.0 s, PASS**. Kept for failback                                                                                                       |
 | 21:4x             | Failback prep: DRS initialized in us-east-1; replication template copied from us-west-2 (t3.small, GP3, same point-in-time policy)                                                                                                 |
 | 21:53             | **Failback started:** `reverse-replication` from the drill 4 server (allowed on a drill instance) → new source server in us-east-1                                                                                                 |
+| 21:54:37          | **Failback blocked by AWS:** DRS could not launch its us-east-1 replication server (`FAILED_TO_LAUNCH_REPLICATION_SERVER`); CloudTrail `RunInstances` → `Client.Blocked` ("account is currently blocked"). AWS hold on the account |
+| 22:33–22:50       | Torn down (founder approved): reverse replication stopped and source server deleted (us-east-1), drill 4 server terminated, both DRS source servers deleted, source instance + SG + role deleted, leftover DRS snapshots deleted   |
+| 22:50             | Collector: `terraform destroy` refused (Lambda calls return 403 under the hold); its schedule rule **disabled** instead, so it no longer runs. Lambda, role, log group and rule remain (~$0); destroy once the hold is lifted      |
+| 22:5x             | Checked both regions: no instances, volumes, snapshots, Elastic IPs or DRS source servers. Spend ~$8.40 (cap $25). Failback rehearsal not done; needs the hold lifted and a rebuild                                                |
 
 ### Drills summary (Phase A, 100 GiB, PostgreSQL under constant writes)
 
