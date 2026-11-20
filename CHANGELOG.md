@@ -5,6 +5,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Scale test: drill 2 on GP3 (2026-11-20)
+
+- Drill 2: database verified at 14 min 56.2 s (PASS), 125.2 s of data lost (FAIL). Revised cause:
+  DRS snapshots run one at a time and take ~4–5 min under this load, so a drill falls back to the last
+  finished point; data loss depends on when that point started. Magnetic staging probably not the
+  main cause. Details in `docs/AWS_LIVE_POC.md`.
+
 ### Scale test: staging disk switched to GP3 (2026-11-19)
 
 - Founder-approved change to test the warm-up finding: the source server's DRS staging disk moved
