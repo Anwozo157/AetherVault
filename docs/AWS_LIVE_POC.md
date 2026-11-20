@@ -39,7 +39,7 @@ Plan and prompt: `docs/AWS_SCALE_TEST_PLAN.md`, `docs/SCALE_TEST_PROMPT.md`. Cap
 | 00:44             | Newest recovered row 104375 at 00:27:03 (3 s before the 00:27:06 point): **data loss 125.2 s, FAIL**. Terminated                                                                                                                   |
 | 20 Nov 18:40      | Overnight: 1,076 readings, all 0 s lag, no gaps; ~$6.65. Morning drill window missed (founder away)                                                                                                                                |
 | 18:41:39.9        | **Drill 3** requested (`drsjob-56c721aa9861f7205`); last source row 169316 at 18:41:24. Laptop closed before verify: verify later with `verify-drill 2026-11-20T18:41:39.890Z` (server log gives PostgreSQL start), then terminate |
-| ~19:05            | Source server self-terminates (72 h safety net; no extension approved). DRS server, staging disk, snapshots keep billing until `drs-down`                                                                                          |
+| 18:45             | Founder: finish today. Source shutoff moved from ~19:05 to **05:00 UTC 21 Nov (midnight ET)** via SSM (`shutdown -c`, `shutdown -P 05:00`); still terminates itself then. DRS resources need `drs-down` separately                 |
 
 ### Drill 2: what it changed (2026-11-20)
 
