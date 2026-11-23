@@ -4,6 +4,9 @@ Prove the whole chain with **real** AWS Elastic Disaster Recovery data, in our o
 before touching a customer: a server replicating, AetherVault showing LIVE lag, an alert, a drill
 with measured data loss and a runbook in its evidence, and failback rehearsed.
 
+> **2026-11-22:** the test account is suspended pending AWS identity verification (deadline 26 Nov 2026);
+> it stays the single AWS account for this test (founder's decision). Failback resumes once it's restored.
+
 ## Scale test, Phase A (started 2026-11-18)
 
 Plan and prompt: `docs/AWS_SCALE_TEST_PLAN.md`, `docs/SCALE_TEST_PROMPT.md`. Cap $25 (founder).
