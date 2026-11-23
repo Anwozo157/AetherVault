@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### AWS: one account going forward (2026-11-22)
+
+- The DR test account's hold is now a suspension pending identity verification; closure deadline 26 Nov 2026. Founder chose it as the single AWS account for AetherVault. The first ("projects") account can't
+  run DRS without a paid support plan and an irreversible switch, so it will be retired. Docs only.
+
 ### Scale test: failback blocked by an AWS account hold; torn down (2026-11-20)
 
 - Failback stalled: DRS could not launch its us-east-1 replication server; CloudTrail shows `RunInstances`

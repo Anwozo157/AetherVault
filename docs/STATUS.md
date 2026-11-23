@@ -1,7 +1,7 @@
 # Project Status
 
 > Living handoff document. **Every agent or contributor updates this at the end of a session.**
-> Last updated: 2026-11-20 ~23:00 UTC (failback blocked by AWS account hold; torn down) by Claude Code (Opus 5.5).
+> Last updated: 2026-11-22 (AWS: DR test account suspended pending verification; founder chose it as the single AWS home) by Claude Code (Opus 5.5).
 
 ## Finding what's done (read this first)
 
@@ -73,6 +73,8 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 5. **Landing page** shows the real AWS test results (2026-11-18, "Measured in a live AWS test"; pricing slide roadmap labels fixed the same day). Built (2026-11-09) on `feat/landing-page`: ✅ `CONTACT_EMAIL` set to antonio@getaethervault.com (2026-11-11); add real console screenshots and a pilot-customer case study when available.
 
 ## Open decisions for the founder
+
+- **AWS, decided 2026-11-22: the standard DR test account is AetherVault's single AWS home.** Its hold became a suspension for identity verification (AWS fraud prevention); AWS closes the account and deletes its data if documents aren't received by **26 Nov 2026**. **Founder:** upload the full set through that account's Support Center (payment-method statement, government ID, business documents). Agent access is refused until it's restored. Then: re-check access, `terraform destroy` the collector leftovers, rebuild and rehearse failback. The first (AWS "projects") account can't run DRS without a paid support plan and an irreversible Advanced Features switch (AWS Support, 17 Nov), so it will be retired once the DR account is back (founder's OK before closing; its promotional credits are lost). AWS accounts can't be merged.
 
 - **Back up the private folder** `~/Developer/AegisCoreLabs-private/`: it exists only on this Mac (no remote, on purpose). Use an encrypted backup (Time Machine to an encrypted disk, or an encrypted disk image in iCloud Drive).
 
