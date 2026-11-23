@@ -5,6 +5,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Backups wait for the network after the Mac wakes (2026-11-22)
+
+- The daily database backup failed on 21 and 22 Nov ("could not translate host name"): it ran at the
+  10:00 wake before the network was back, and all three retries fell inside that gap. The script now
+  waits up to 10 minutes for the database host to resolve before dumping. Ran it twice by hand: both OK.
+- Health check the same day: verify, coverage, 268 pgTAP, 13 console E2E, `npm audit` (0) and CI all
+  green. One Playwright test (mobile, hold Space to fail over) fails on this Mac only; CI passes it.
+
 ### AWS: one account going forward (2026-11-22)
 
 - The DR test account's hold is now a suspension pending identity verification; closure deadline 26 Nov 2026. Founder chose it as the single AWS account for AetherVault. The first ("projects") account can't

@@ -51,6 +51,16 @@ export SUPABASE_DB_PASSWORD
 
 mkdir -p "$DEST"
 cd "$REPO"
+# Right after the Mac wakes, the network may not be back yet; the 2026-11-21 and 2026-11-22 runs
+# failed on "could not translate host name". Wait up to 10 minutes for the database host to resolve.
+DB_HOST="$(sed -E 's#^[^@]*@([^:/]+).*#\1#' supabase/.temp/pooler-url 2>/dev/null || true)"
+if [[ -n $DB_HOST ]]; then
+  for _ in $(seq 1 60); do
+    dscacheutil -q host -a name "$DB_HOST" | grep -q ip_address && break
+    sleep 10
+  done
+  dscacheutil -q host -a name "$DB_HOST" | grep -q ip_address || fail "network not ready ($DB_HOST did not resolve within 10 minutes)"
+fi
 # A dump can fail on a dropped connection ("SSL SYSCALL error: EOF", 2026-11-15): try 3 times,
 # 1 minute apart, before giving up.
 dump() {

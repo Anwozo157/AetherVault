@@ -12,7 +12,9 @@ founder's Mac (weekly until 2026-11-18). **Upgrade to Supabase Pro before a cust
 - Output: `~/Backups/AetherVault/<UTC time>/roles.sql.gz, schema.sql.gz, data.sql.gz, cron.sql.gz`. The folder is
   readable only by the founder's account (700/600), outside iCloud-synced folders. The newest 14 are
   kept. Each dump is tried 3 times, 1 minute apart (the 2026-11-15 weekly run failed on a dropped
-  connection). Log: `~/Backups/AetherVault/backup.log`. A failure shows a macOS notification.
+  connection). Before dumping, it waits up to 10 minutes for the database host to resolve, because
+  right after the Mac wakes the network may not be back (runs on 2026-11-21 and 2026-11-22 failed that
+  way). Log: `~/Backups/AetherVault/backup.log`. A failure shows a macOS notification.
 - Uses `supabase db dump` (needs Docker; the script starts Docker if needed and quits it after) with
   the database password from the Keychain. The data dump includes `auth` (users, sessions) and every
   `public` table; the script fails if `auth.users`, `orgs` or `audit_log` is missing. `supabase db dump`
