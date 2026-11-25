@@ -9,6 +9,9 @@ export default defineConfig({
   fullyParallel: true,
   // Each page renders WebGL in software (no GPU in headless/CI); more workers starve the CPU.
   workers: 2,
+  // Locally the globe renders in software on a busy Mac and can stall the page for seconds;
+  // allow more time there. CI keeps Playwright's defaults (30 s per test, 5 s per expect).
+  ...(isCI ? {} : { timeout: 60_000, expect: { timeout: 15_000 } }),
   forbidOnly: isCI,
   retries: isCI ? 1 : 0,
   reporter: isCI ? [['github'], ['html', { open: 'never' }]] : 'list',
