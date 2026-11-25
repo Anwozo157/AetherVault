@@ -143,6 +143,60 @@ describe('MockDrProvider failover lifecycle', () => {
     expect(backend.getState()).toBe(SystemState.SECURED);
   });
 
+  test('chaos at rest enters the degraded state, and turning it off recovers', () => {
+    const backend = track(new MockDrProvider());
+    const states: SystemState[] = [];
+    backend.onStateChange((s) => states.push(s));
+    backend.setChaosMode(true);
+    expect(backend.getState()).toBe(SystemState.DEGRADED);
+    backend.setChaosMode(false);
+    expect(backend.getState()).toBe(SystemState.IDLE);
+    expect(states).toEqual([SystemState.DEGRADED, SystemState.IDLE]);
+  });
+
+  test('a degraded system can fail over and resets back to degraded while chaos is on', async () => {
+    const backend = track(new MockDrProvider());
+    backend.setChaosMode(true);
+    const run = backend.triggerFailover('us-east-1', 'gcp-us-central1');
+    expect(backend.getState()).toBe(SystemState.REPLICATING);
+    await vi.advanceTimersByTimeAsync(6000);
+    await run;
+    expect(backend.getState()).toBe(SystemState.SECURED);
+    backend.resetToStandby();
+    expect(backend.getState()).toBe(SystemState.DEGRADED);
+  });
+
+  test('abort returns to degraded while chaos is on', async () => {
+    const backend = track(new MockDrProvider());
+    backend.setChaosMode(true);
+    void backend.triggerFailover('us-east-1', 'gcp-us-central1');
+    expect(backend.abortFailover()).toBe(true);
+    expect(backend.getState()).toBe(SystemState.DEGRADED);
+    expect(backend.abortFailover()).toBe(false); // nothing in flight
+  });
+
+  test('chaos toggled mid-failover does not interrupt it and applies once it settles', async () => {
+    const backend = track(new MockDrProvider());
+    const run = backend.triggerFailover('us-east-1', 'gcp-us-central1');
+    backend.setChaosMode(true);
+    expect(backend.getState()).toBe(SystemState.REPLICATING);
+    await vi.advanceTimersByTimeAsync(6000);
+    await run;
+    expect(backend.getState()).toBe(SystemState.SECURED);
+    backend.resetToStandby();
+    expect(backend.getState()).toBe(SystemState.DEGRADED);
+  });
+
+  test('telemetry keeps streaming while degraded', () => {
+    const backend = track(new MockDrProvider());
+    const telemetry = vi.fn();
+    backend.onDrTelemetryUpdate(telemetry);
+    backend.setChaosMode(true);
+    vi.advanceTimersByTime(1000);
+    expect(telemetry).toHaveBeenCalledTimes(2);
+    expect(telemetry.mock.lastCall?.[0].drsAgentStatus).toBe('SYNCHRONIZING');
+  });
+
   test('exposes snapshots for initial render and declares itself simulated', () => {
     const backend = track(new MockDrProvider());
     expect(backend.isSimulated).toBe(true);

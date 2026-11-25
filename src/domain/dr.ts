@@ -23,16 +23,26 @@ export const ALLOWED_TRANSITIONS: Readonly<Record<SystemState, readonly SystemSt
   [SystemState.FAILOVER_TRIGGERED]: [SystemState.REROUTING_TRAFFIC, SystemState.IDLE],
   [SystemState.REROUTING_TRAFFIC]: [SystemState.SECURED],
   [SystemState.SECURED]: [SystemState.IDLE],
-  [SystemState.DEGRADED]: [SystemState.IDLE],
+  // A degraded primary is exactly when an operator may need to fail over.
+  [SystemState.DEGRADED]: [SystemState.IDLE, SystemState.REPLICATING],
 };
 
 export function canTransition(from: SystemState, to: SystemState): boolean {
   return ALLOWED_TRANSITIONS[from].includes(to);
 }
 
+/** At rest (healthy or degraded), with no failover in flight: a failover can be started. */
+export function isAtRest(state: SystemState): boolean {
+  return state === SystemState.IDLE || state === SystemState.DEGRADED;
+}
+
 /** States in which an in-flight failover can still be safely aborted. */
 export function isAbortable(state: SystemState): boolean {
-  return canTransition(state, SystemState.IDLE) && state !== SystemState.SECURED;
+  return (
+    canTransition(state, SystemState.IDLE) &&
+    state !== SystemState.SECURED &&
+    state !== SystemState.DEGRADED
+  );
 }
 
 export interface BasicMetrics {

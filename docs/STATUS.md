@@ -1,7 +1,7 @@
 # Project Status
 
 > Living handoff document. **Every agent or contributor updates this at the end of a session.**
-> Last updated: 2026-11-25 (local E2E timeouts fixed) by Claude Code (Opus 5.5).
+> Last updated: 2026-11-25 (local E2E timeouts fixed; chaos mode enters the degraded state) by Claude Code (Opus 5.5).
 
 ## Finding what's done (read this first)
 
@@ -91,6 +91,6 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 - Hosted console has a pending failover request from 2026-11-10 (to the GCP demo region) never approved or withdrawn; founder can withdraw it.
 - Repo lives at `~/Developer/AetherVault`. Do not move it back into iCloud.
 - Local Supabase: analytics, Studio, storage and edge runtime are disabled in `supabase/config.toml` (analytics alone used ~4 CPU cores).
-- `DEGRADED_STATE` exists in the state machine but is never entered; chaos mode only changes telemetry.
+- ~~`DEGRADED_STATE` never entered~~ **Fixed 2026-11-25:** chaos mode in the public demo now enters and leaves it (console unchanged).
 - Supabase CLI 3.0 is available (repo pins 2.122.0); upgrade as its own tested task.
 - Deck cites "MarketsandMarkets, Jan 2026"; the verified press release is dated 14 May 2026 with the same figures. Confirm the report's own publication month.

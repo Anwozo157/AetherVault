@@ -5,6 +5,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Chaos mode now puts the demo into a degraded state (2026-11-25)
+
+- In the public demo, turning on chaos mode only made the telemetry look bad; the system state stayed
+  "active sync" even though the state machine has a degraded state. Now chaos at rest moves the
+  system to `DEGRADED_STATE` and turning it off returns it to active sync. A degraded system can
+  still fail over (that's when you'd need to); abort or reset returns to degraded while chaos is on,
+  and chaos toggled mid-failover applies once the run settles. Mid-failover, the state card and globe
+  show the real step instead of the chaos label. `isAbortable()` no longer reports the degraded
+  state as abortable. Signed-in console unchanged (its state comes from the server).
+  New unit tests (domain + provider) and a desktop/mobile browser test; checked in Chrome.
+
 ### Local browser tests no longer time out on a busy Mac (2026-11-25)
 
 - The public-site browser tests failed on the founder's Mac but passed in CI: a different test each

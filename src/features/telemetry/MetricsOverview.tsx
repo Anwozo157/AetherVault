@@ -1,5 +1,5 @@
 import { Activity, CloudLightning, Server } from 'lucide-react';
-import type { BasicMetrics, DrTelemetry, SystemState } from '../../domain/dr';
+import { isAtRest, type BasicMetrics, type DrTelemetry, type SystemState } from '../../domain/dr';
 import MetricCard from './MetricCard';
 import TelemetrySparkline from './TelemetrySparkline';
 
@@ -17,6 +17,8 @@ export default function MetricsOverview({
   telemetry,
   chaosActive,
 }: MetricsOverviewProps) {
+  // Mid-failover the card shows the real step even with chaos on.
+  const degraded = chaosActive && isAtRest(state);
   return (
     <>
       <MetricCard
@@ -34,8 +36,8 @@ export default function MetricsOverview({
       <MetricCard
         icon={<Server className="w-5 h-5 text-gray-400" />}
         label="System State"
-        value={chaosActive ? 'DEGRADED JITTER' : state.replace(/_/g, ' ')}
-        color={chaosActive ? 'text-aether-red' : 'text-white'}
+        value={degraded ? 'DEGRADED JITTER' : state.replace(/_/g, ' ')}
+        color={degraded ? 'text-aether-red' : 'text-white'}
       />
       <MetricCard
         icon={<CloudLightning className="w-5 h-5 text-gray-400" />}
