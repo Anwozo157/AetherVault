@@ -1,7 +1,7 @@
 # Project Status
 
 > Living handoff document. **Every agent or contributor updates this at the end of a session.**
-> Last updated: 2026-11-22 (AWS account decision; health check; backup fix) by Claude Code (Opus 5.5).
+> Last updated: 2026-11-25 (local E2E timeouts fixed) by Claude Code (Opus 5.5).
 
 ## Finding what's done (read this first)
 
@@ -86,7 +86,7 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 
 ## Known issues
 
-- **Local-only E2E failure (2026-11-22):** `e2e/app.spec.ts` "keyboard: holding Space runs the failover to completion" fails on the founder's Mac in the mobile (Pixel 7) project, with installed Chrome and with bundled Chromium; CI (Linux) passes it. The failover itself completes (checked step by step); the status card stays on "DNS cutover" during the test, likely because the 3D globe stalls rendering in headless mobile emulation on macOS ("GPU stall due to ReadPixels"). Investigate before relying on local E2E alone.
+- ~~Local-only E2E failure (2026-11-22)~~ **Fixed 2026-11-25:** timeouts, not a bug. The software-rendered globe stalls the page on this memory-starved Mac and delays the simulated failover; local runs now allow more time (CI unchanged). See CHANGELOG.
 
 - Hosted console has a pending failover request from 2026-11-10 (to the GCP demo region) never approved or withdrawn; founder can withdraw it.
 - Repo lives at `~/Developer/AetherVault`. Do not move it back into iCloud.

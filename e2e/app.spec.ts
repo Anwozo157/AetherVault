@@ -69,8 +69,10 @@ test.describe('Mission Control', () => {
     await page.waitForTimeout(1400);
     await page.keyboard.up(' ');
 
+    // The simulated run takes ~5.5 s of timers, but software-rendered WebGL can block the main
+    // thread and delay them on a loaded machine; this checks completion, not speed.
     await expect(page.getByText('TARGET SECURED', { exact: true }).last()).toBeVisible({
-      timeout: 10_000,
+      timeout: 30_000,
     });
     await page.getByRole('button', { name: 'Reset to Standby' }).click();
     await expect(page.getByRole('button', { name: /1-CLICK FAILOVER/ })).toBeVisible();

@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Local browser tests no longer time out on a busy Mac (2026-11-25)
+
+- The public-site browser tests failed on the founder's Mac but passed in CI: a different test each
+  run, always on a timeout. Cause: each page draws the 3D globe in software, and on a machine short
+  of memory that blocks the page for seconds, delaying the simulated failover's timers (it was still
+  on its last step, "DNS cutover", when the 10 s check ran out). Locally, tests now get 60 s and
+  each check 15 s (CI keeps the defaults), and the hold-Space test waits up to 30 s for completion.
+  What the tests check is unchanged.
+
 ### Backups wait for the network after the Mac wakes (2026-11-22)
 
 - The daily database backup failed on 21 and 22 Nov ("could not translate host name"): it ran at the
