@@ -8,14 +8,15 @@ export default function AmbientBackground({
   state: SystemState;
   chaosActive: boolean;
 }) {
-  const primary = chaosActive
+  const degraded = chaosActive || state === SystemState.DEGRADED;
+  const primary = degraded
     ? '#FF3B30'
     : state === SystemState.SECURED
       ? '#00FF9D'
       : state === SystemState.IDLE
         ? '#00F0FF'
         : '#FFB800';
-  const secondary = chaosActive
+  const secondary = degraded
     ? '#FF9500'
     : state === SystemState.SECURED
       ? '#00FF9D'

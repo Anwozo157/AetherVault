@@ -90,6 +90,22 @@ test.describe('Mission Control', () => {
     expect(fits).toBe(true);
   });
 
+  test('chaos mode degrades the system, which can still fail over', async ({ page }) => {
+    await page.goto('/#/demo');
+    await page.getByRole('button', { name: /Chaos/ }).click();
+    await expect(page.getByText('Failover status: DEGRADED STATE')).toBeAttached();
+    await page.getByRole('button', { name: /1-CLICK FAILOVER/ }).focus();
+    await page.keyboard.down(' ');
+    await page.waitForTimeout(1400);
+    await page.keyboard.up(' ');
+    await expect(page.getByRole('button', { name: 'Abort Failover' })).toBeVisible();
+    await page.getByRole('button', { name: 'Abort Failover' }).click();
+    // Chaos is still on, so the aborted run settles back to degraded, not healthy.
+    await expect(page.getByText('Failover status: DEGRADED STATE')).toBeAttached();
+    await page.getByRole('button', { name: /Chaos/ }).click();
+    await expect(page.getByText('Failover status: ACTIVE SYNC')).toBeAttached();
+  });
+
   test('no horizontal page scroll', async ({ page }) => {
     await page.goto('/#/demo');
     const overflow = await page.evaluate(

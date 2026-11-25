@@ -10,6 +10,7 @@ import {
   Unsubscribe,
   canTransition,
   isAbortable,
+  isAtRest,
 } from '../domain/dr';
 
 const MAX_LOGS = 50;
@@ -62,6 +63,8 @@ export class MockDrProvider implements DrProvider {
 
   public setChaosMode(enabled: boolean) {
     this.isChaos = enabled;
+    // At rest, the system state follows chaos; mid-failover it applies once the run settles.
+    this.settleAtRest();
     if (enabled) {
       this.pushLog(
         'WARN',
@@ -84,7 +87,7 @@ export class MockDrProvider implements DrProvider {
   }
 
   private tickTelemetry() {
-    if (this.currentState === SystemState.IDLE) {
+    if (isAtRest(this.currentState)) {
       // Simulate real-time replication lag fluctuations
       const baseLag = this.isChaos
         ? Math.floor(Math.random() * 120 + 85)
@@ -173,7 +176,7 @@ export class MockDrProvider implements DrProvider {
   }
 
   public async triggerFailover(sourceRegion: string, targetRegion: string): Promise<void> {
-    if (this.currentState !== SystemState.IDLE) return;
+    if (!isAtRest(this.currentState)) return;
     const run = ++this.runId;
 
     this.pushLog(
@@ -217,11 +220,12 @@ export class MockDrProvider implements DrProvider {
   }
 
   public abortFailover(): boolean {
-    if (!isAbortable(this.currentState) || this.currentState === SystemState.IDLE) return false;
+    if (!isAbortable(this.currentState)) return false;
 
     this.runId++;
     this.cancelPendingDelay();
     this.updateState(SystemState.IDLE);
+    this.settleAtRest();
     this.pushLog(
       'WARN',
       'CORE',
@@ -236,6 +240,7 @@ export class MockDrProvider implements DrProvider {
     if (this.currentState !== SystemState.SECURED) return;
 
     this.updateState(SystemState.IDLE);
+    this.settleAtRest();
     this.pushLog(
       'INFO',
       'CORE',
@@ -298,6 +303,15 @@ export class MockDrProvider implements DrProvider {
     return () => {
       this.logListeners.delete(listener);
     };
+  }
+
+  /** At rest, the state is DEGRADED while chaos is on and IDLE (active sync) otherwise. */
+  private settleAtRest() {
+    if (this.isChaos && this.currentState === SystemState.IDLE) {
+      this.updateState(SystemState.DEGRADED);
+    } else if (!this.isChaos && this.currentState === SystemState.DEGRADED) {
+      this.updateState(SystemState.IDLE);
+    }
   }
 
   private updateState(newState: SystemState) {

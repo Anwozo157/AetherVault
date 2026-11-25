@@ -37,8 +37,8 @@ const EARTH_RADIUS_KM = 6371;
 type Phase = 'sync' | 'inflight' | 'secured' | 'chaos';
 
 function phaseOf(status: string, chaos: boolean): Phase {
-  if (chaos) return 'chaos';
-  if (status === 'ACTIVE_SYNC') return 'sync';
+  if (status === 'DEGRADED_STATE') return 'chaos';
+  if (status === 'ACTIVE_SYNC') return chaos ? 'chaos' : 'sync';
   if (status === 'TARGET_SECURED') return 'secured';
   return 'inflight';
 }

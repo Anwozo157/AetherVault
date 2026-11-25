@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Suspense, lazy, useState } from 'react';
 import { SOURCE_REGION, targetRegionsFor } from '../config/regions';
-import { SystemState } from '../domain/dr';
+import { isAtRest } from '../domain/dr';
 import { useDrSession } from '../hooks/useDrSession';
 import { useFailoverRun } from '../hooks/useFailoverRun';
 import ErrorBoundary from '../components/ErrorBoundary';
@@ -56,7 +56,7 @@ export default function CommandCenter({
   const approvals = provider.approvals;
   // With a server backend, everyone sees the open run's target, not their own selection.
   const targetRegion = run?.targetRegion ?? selectedTarget;
-  const viewOnly = !!approvals && !approvals.canRequest() && state === SystemState.IDLE;
+  const viewOnly = !!approvals && !approvals.canRequest() && isAtRest(state);
 
   const handleAbort = () => {
     if (provider.abortFailover()) sound.stopHoldCharge();
@@ -70,7 +70,7 @@ export default function CommandCenter({
         targetRegion={targetRegion}
         regions={regions}
         onTargetRegionChange={setSelectedTarget}
-        regionLocked={state !== SystemState.IDLE || !!run}
+        regionLocked={!isAtRest(state) || !!run}
         chaosActive={chaosActive}
         onToggleChaos={onToggleChaos}
         showAudit={!!provider.audit}

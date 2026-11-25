@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { SystemState, isAbortable } from '../../domain/dr';
+import { SystemState, isAbortable, isAtRest } from '../../domain/dr';
 import { sound } from '../../lib/audioEffects';
 
 export const HOLD_SECONDS = 1.2;
@@ -79,7 +79,7 @@ export default function FailoverControl({
         Failover status: {state.replace(/_/g, ' ')}
       </p>
       <AnimatePresence mode="wait">
-        {state === SystemState.IDLE ? (
+        {isAtRest(state) ? (
           <div className="flex flex-col items-center">
             <motion.button
               key="trigger"

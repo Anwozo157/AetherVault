@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ALLOWED_TRANSITIONS, SystemState, canTransition, isAbortable } from './dr';
+import { ALLOWED_TRANSITIONS, SystemState, canTransition, isAbortable, isAtRest } from './dr';
 
 describe('failover state machine rules', () => {
   test('every state has a transition entry', () => {
@@ -26,5 +26,20 @@ describe('failover state machine rules', () => {
     expect(isAbortable(SystemState.FAILOVER_TRIGGERED)).toBe(true);
     expect(isAbortable(SystemState.REROUTING_TRAFFIC)).toBe(false);
     expect(isAbortable(SystemState.SECURED)).toBe(false);
+  });
+
+  test('a degraded system can fail over or recover, and has nothing to abort', () => {
+    expect(canTransition(SystemState.IDLE, SystemState.DEGRADED)).toBe(true);
+    expect(canTransition(SystemState.DEGRADED, SystemState.IDLE)).toBe(true);
+    expect(canTransition(SystemState.DEGRADED, SystemState.REPLICATING)).toBe(true);
+    expect(canTransition(SystemState.DEGRADED, SystemState.SECURED)).toBe(false);
+    expect(isAbortable(SystemState.DEGRADED)).toBe(false);
+    expect(isAbortable(SystemState.IDLE)).toBe(false);
+  });
+
+  test('only healthy and degraded count as at rest', () => {
+    for (const state of Object.values(SystemState)) {
+      expect(isAtRest(state)).toBe(state === SystemState.IDLE || state === SystemState.DEGRADED);
+    }
   });
 });
