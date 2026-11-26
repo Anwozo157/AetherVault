@@ -5,6 +5,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Docs: multicloud research done (2026-11-26)
+
+- `docs/MULTICLOUD_DR.md`: Google Cloud researched from Google's docs. Verdict (C): Compute Engine
+  VMs get continuous cross-region block replication (Persistent Disk Asynchronous Replication,
+  target RPO ~1 min); no first-party on-premises option; Backup and DR Service is scheduled backup.
+  Drills clone secondary disks; health from Cloud Monitoring; no job-history API. Google column in
+  the comparison table. Azure confirmations: Site Recovery Reader lacks the vault-level item read
+  (walk fabrics → containers → items), A2A fields, jobs fields, $25/month per protected VM after 31
+  free days (Azure Retail Prices API), Flex Consumption for the collector, azurerm resource names.
+  Google prices stay unverified (pricing pages render client-side).
+- New `docs/MULTICLOUD_ACCOUNT_SETUP.md`: founder checklist for both clouds (free trials that don't
+  bill without an upgrade, MFA, budgets that only alert, allowed-region policies, `az login` and
+  Google service-account impersonation with no key files, optional automatic stop of test VMs).
+- Build prompts updated with the findings and the founder-approved caps ($10/$25 alerts, stop and
+  ask at $10, spend nothing until authorized).
+
 ### Docs: multicloud prompts for Azure and Google Cloud (2026-11-26)
 
 - Founder decision: start Azure and Google Cloud now, the same way we did AWS, everything in

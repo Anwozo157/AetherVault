@@ -1,7 +1,7 @@
 # Azure build prompt: collector, infrastructure as code, live test
 
-> Agent prompt, written 2026-11-26 at the founder's request. **Run it only after
-> `docs/MULTICLOUD_RESEARCH_PROMPT.md` is finished** (its findings may edit this file). Paste it into
+> Agent prompt, written 2026-11-26 at the founder's request. Research finished
+> 2026-11-26 (`docs/MULTICLOUD_DR.md`, `docs/MULTICLOUD_ACCOUNT_SETUP.md`); Phase 1 needs no account. Paste it into
 > a new session, or point the agent at this file. Google Cloud has its own prompt:
 > `docs/GCP_BUILD_PROMPT.md`.
 
@@ -27,7 +27,7 @@ Every AWS piece gets an Azure counterpart with the same shape, so the two read a
 | AWS (exists)                                                    | Azure (you build)                                                                                                                                                                                    |
 | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `src/integrations/awsDrs/` + `fixtures/`                        | `src/integrations/azureAsr/` + `fixtures/`                                                                                                                                                           |
-| `collector/` (CLI `--fixture`, `--dry-run`, `--record`; Lambda) | `collector-azure/` (same flags; Azure Function)                                                                                                                                                      |
+| `collector/` (CLI `--fixture`, `--dry-run`, `--record`; Lambda) | `collector-azure/` (same flags; Azure Function on Flex Consumption)                                                                                                                                  |
 | `collector/terraform/` (read-only role, every minute)           | `collector-azure/terraform/` (managed identity with Site Recovery Reader, timer every minute)                                                                                                        |
 | Account setup by hand (MFA, budgets, agent key)                 | `infra/accounts/azure/` Terraform (budgets, allowed regions, resource group, deployer role, state storage)                                                                                           |
 | `scripts/poc/source-server.sh`                                  | `scripts/poc/azure-source.sh`, same commands (`check`, `up`, `verify`, `enable-replication`, `status`, `drill`, `verify-drill`, `last-row`, `cost`, `down`), calling Terraform in `infra/poc/azure/` |
@@ -43,12 +43,15 @@ fork per cloud. Map Azure's data into the shapes AWS already uses.
 
 - **Ask before:** opening or changing any account, every `terraform apply` or `destroy`, launching
   anything, each drill, deleting anything you didn't create.
-- **No stored secrets.** The founder signs in with `az login`; you work in that session. No client
+- **No stored secrets.** The founder signs in with `az login` (MFA is mandatory for create, update
+  and delete through the CLI and IaC); you work in that session. No client
   secrets or keys in files, chat, Terraform variables or state. The collector uses a **managed
   identity**; its only secret is the AetherVault ingest token, kept in Key Vault (or an app setting
   marked sensitive) and in the macOS Keychain, never in the repo.
 - **Least privilege:** the collector gets **Site Recovery Reader** only, scoped to the vault's
-  resource group. Write roles (Site Recovery Operator) are for the live test's operator, never the
+  resource group. That role lacks the vault-level `vaults/replicationProtectedItems/read`, so the
+  collector walks fabrics → protection containers → protected items (all readable with it). Only if
+  that fails in the live test, propose a custom read-only role to the founder. Write roles (Site Recovery Operator) are for the live test's operator, never the
   collector.
 - **Terraform state** holds the ingest token: remote state in an encrypted, versioned storage
   account created by `infra/accounts/azure/`, or local and gitignored (as `collector/terraform/` is
@@ -63,10 +66,13 @@ fork per cloud. Map Azure's data into the shapes AWS already uses.
 
 ## Budget
 
-Founder sets the caps before Phase 3. **Proposed** (not yet approved): budget alerts at $10 and $25,
-stop and ask if your running estimate passes $10. Billing lags, so `azure-source.sh cost` keeps your
-own estimate; run it every 12 hours and after every drill. Remember the 31 free days of Site
-Recovery per instance; VM, disk, storage and transfer still cost money.
+**Approved by the founder 2026-11-26:** budget alerts at $10 and $25; **stop and ask if your
+running estimate passes $10.** Spend nothing until the founder authorizes each step. Start on the
+**free account with its spending limit on**; never upgrade to pay-as-you-go without the founder's
+explicit OK. Billing lags 8–24 hours, so `azure-source.sh cost` keeps your own estimate; run it
+every 12 hours and after every drill. Site Recovery is free for the first 31 days per VM, then
+$25/month: **tear down within 31 days.** VM, disk, cache storage and transfer still use credit.
+If the trial refuses Site Recovery, stop and report; don't work around it.
 
 ## Phase 1: build with no account ($0)
 

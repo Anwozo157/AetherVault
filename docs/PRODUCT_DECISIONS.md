@@ -54,6 +54,10 @@ everything automated and in infrastructure as code. Order: research
 continues in parallel (account verification, 130 GiB scale test, failback). New regions stay
 demo-only and labeled simulated until real data flows. Oracle Cloud maybe later.
 
+**Caps (founder, 2026-11-26):** budget alerts at $10 and $25 per cloud's live test; the agent stops
+and asks at $10; nothing is spent until the founder authorizes it. Start on the free trials;
+upgrading needs a separate OK. Google v1 covers Compute Engine VMs only (Asynchronous Replication).
+
 _Superseded (2026-11-18):_ no Azure or Google Cloud work until AWS is fully proven.
 
 ## Roadmap (in order)

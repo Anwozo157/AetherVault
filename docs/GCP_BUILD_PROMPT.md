@@ -1,8 +1,7 @@
 # Google Cloud build prompt: collector, infrastructure as code, live test
 
-> Agent prompt, written 2026-11-26 at the founder's request. **Run it only after
-> `docs/MULTICLOUD_RESEARCH_PROMPT.md` is finished and the Google Cloud verdict is recorded in
-> `docs/MULTICLOUD_DR.md`.** The planned order is Azure first (`docs/AZURE_BUILD_PROMPT.md`), then
+> Agent prompt, written 2026-11-26 at the founder's request. Research finished 2026-11-26;
+> the verdict is in Step 0 and `docs/MULTICLOUD_DR.md`. The planned order is Azure first (`docs/AZURE_BUILD_PROMPT.md`), then
 > this. Paste it into a new session, or point the agent at this file.
 
 ---
@@ -22,7 +21,30 @@ verdict, service, APIs, roles, costs), `docs/MULTICLOUD_ACCOUNT_SETUP.md`,
 
 ## Step 0: check the verdict
 
-The research gave Google Cloud a verdict. Confirm it with the founder before building:
+**Research verdict (2026-11-26): (C).** Compute Engine VMs get continuous block replication between
+regions through **Persistent Disk Asynchronous Replication** (target RPO about 1 minute, not
+configurable); on-premises servers have no first-party option; Backup and DR Service is
+scheduled backup. Recommendation: build path (A) below for Compute Engine VMs, and say plainly that
+on-premises servers aren't supported on Google. Details and sources: `docs/MULTICLOUD_DR.md`.
+
+What Asynchronous Replication changes compared with AWS:
+
+- **No agent** on the VM; replication is per disk (consistency groups for multi-disk servers).
+- **Drill:** clone the secondary disks (`disks.bulkInsert` from a consistency group in the
+  secondary region), boot a test VM, delete both. Confirm in the live test that replication keeps
+  running during the clone.
+- **Health:** Cloud Monitoring `disk/async_replication/time_since_last_replication` (the RPO, in
+  seconds) plus the disk's `resourceStatus` replication state. Confirm the metric prefix and state
+  values in the live test.
+- **No job-history API:** AetherVault measures drill and failover times itself from each step's
+  Compute operation start and end.
+- **No point-in-time history:** the secondary is a live mirror. Drills always use the latest
+  replicated data.
+- **Read-only role:** likely `roles/compute.viewer` + `roles/monitoring.viewer` (unverified);
+  confirm, or propose a custom role with `compute.disks.get`, `compute.disks.list` and
+  `monitoring.timeSeries.list`.
+
+Confirm the verdict with the founder before building:
 
 - **(A) Continuous replication exists:** build it exactly like AWS and Azure (below).
 - **(B) Backup-based only:** build it as a **backup-based tier**. Data loss can't be lower than the
@@ -31,13 +53,13 @@ The research gave Google Cloud a verdict. Confirm it with the founder before bui
   matches the interval.
 - **(C) Don't build yet:** stop, and record the decision in `docs/PRODUCT_DECISIONS.md`.
 
-Below, `<service>` means the Google service the research chose.
+Below, `async-pd` means Persistent Disk Asynchronous Replication.
 
 ## Mirror AWS, piece by piece
 
 | AWS (exists)                                                    | Google Cloud (you build)                                                                                                                                                                         |
 | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `src/integrations/awsDrs/` + `fixtures/`                        | `src/integrations/gcp<Service>/` + `fixtures/`                                                                                                                                                   |
+| `src/integrations/awsDrs/` + `fixtures/`                        | `src/integrations/gcpAsyncPd/` + `fixtures/`                                                                                                                                                     |
 | `collector/` (CLI `--fixture`, `--dry-run`, `--record`; Lambda) | `collector-gcp/` (same flags; Cloud Run job or Cloud Function, per the research)                                                                                                                 |
 | `collector/terraform/` (read-only role, every minute)           | `collector-gcp/terraform/` (service account with the read-only role, Cloud Scheduler every minute)                                                                                               |
 | Account setup by hand (MFA, budgets, agent key)                 | `infra/accounts/gcp/` Terraform (APIs, budgets, allowed regions, deployer service account, org policy blocking service-account keys, state bucket)                                               |
@@ -49,7 +71,7 @@ Below, `<service>` means the Google service the research chose.
 
 Shared code stays shared: the snapshot shape, ingest function, alerts, drills and evidence don't
 fork per cloud. If the Azure build already added multi-cloud groundwork (source values, region
-checks), extend it with `gcp-<service>` instead of adding a second mechanism.
+checks), extend it with `gcp-async-pd` instead of adding a second mechanism.
 
 ## Safety (non-negotiable)
 
@@ -72,25 +94,30 @@ checks), extend it with `gcp-<service>` instead of adding a second mechanism.
 
 ## Budget
 
-Founder sets the caps before Phase 3. **Proposed** (not yet approved): budget alerts at $10 and $25,
-stop and ask if your running estimate passes $10. If the research found a safe automated stop
-(budget → Pub/Sub → function that stops the test VMs), build it in `infra/accounts/gcp/` and test it
-before Phase 3. `gcp-source.sh cost` keeps your own estimate; run it every 12 hours and after every
+**Approved by the founder 2026-11-26:** budget alerts at $10 and $25; **stop and ask if your
+running estimate passes $10.** Spend nothing until the founder authorizes each step. Start on the
+**Free Trial** (it never bills unless the founder upgrades); never upgrade without the founder's
+explicit OK. Google budgets only alert. Build an automatic stop in `infra/accounts/gcp/` that
+**stops the labeled test VMs** (budget → Pub/Sub → function), never one that removes billing
+(Google warns resources "might be irretrievably deleted"), and test it before Phase 3. Prices were
+unverified in the research: get them from the Cloud Billing Catalog API or pricing calculator and
+put an itemized estimate before the founder before Phase 3. If the trial refuses Asynchronous
+Replication, stop and report. `gcp-source.sh cost` keeps your own estimate; run it every 12 hours and after every
 drill.
 
 ## Phase 1: build with no account ($0)
 
-On a branch (`feat/gcp-<service>`), small commits, `npm run verify` before each:
+On a branch (`feat/gcp-async-pd`), small commits, `npm run verify` before each:
 
-1. Multi-cloud groundwork for `gcp-<service>` (migration + pgTAP tests, `npm run db:test`).
-2. `src/integrations/gcp<Service>/`: map the health and job APIs from the research to the existing
+1. Multi-cloud groundwork for `gcp-async-pd` (migration + pgTAP tests, `npm run db:test`).
+2. `src/integrations/gcpAsyncPd/`: map the health and job APIs from the research to the existing
    snapshot and recovery-job shapes; fixtures hand-built from Google's documented samples and marked
    as such; tests for healthy, degraded, stalled and paged responses.
 3. `collector-gcp/`: CLI (`--fixture`, `--dry-run`, `--record`) and the Cloud Run or Function entry
    point; package script.
 4. Terraform, validated but not applied: `collector-gcp/terraform/`, `infra/accounts/gcp/`,
    `infra/poc/gcp/` (two regions; a small Linux VM with PostgreSQL writing one numbered, timestamped
-   row per second, set up the same way as the AWS source server; `<service>` protection into the
+   row per second, set up the same way as the AWS source server; Asynchronous Replication of its disks into the
    second region; an isolated network for drills). Self-terminate safety net like the AWS one.
 5. `scripts/poc/gcp-source.sh` with the commands in the table, wrapping Terraform and `gcloud`.
 6. CI: make sure the Terraform checks (`fmt`, `validate`, IaC scan) cover the new folders.
