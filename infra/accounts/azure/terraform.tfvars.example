@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars (gitignored) and fill in. Never commit the real file.
+subscription_id = "00000000-0000-0000-0000-000000000000"
+alert_emails    = ["billing@getaethervault.com"]
+# budget_amounts  = [10, 25]          # founder-approved caps (USD per month)
+# source_location = "eastus"
+# target_location = "westus2"

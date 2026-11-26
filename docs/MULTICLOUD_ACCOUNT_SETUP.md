@@ -26,8 +26,9 @@ founder, and the agent stops before it.
 
 ## Before either account: shared steps
 
-1. Use the company email (antonio@ / billing@ on getaethervault.com) and real business details,
-   matching the card. A company card is best.
+1. Pay with your **personal card** (Aegis Core Labs has no business bank account yet). Sign up
+   with your real name, address and phone, matching that card. The company email
+   (antonio@ / billing@ on getaethervault.com) is fine for the sign-in.
 2. Use a password from the password manager, plus a **passkey or security key** for MFA. Store
    recovery codes in the Keychain plus an offline copy (`docs/SECURITY.md`). Never paste them in chat.
 3. Write the new account in the `docs/SECURITY.md` credential table (item names only).

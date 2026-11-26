@@ -59,10 +59,17 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
   Compute Engine VMs via Persistent Disk Asynchronous Replication, none first-party for on-premises.
   **Caps approved 2026-11-26: alerts $10 and $25 per cloud, agent stops and asks at $10; spend
   nothing until authorized.** **Founder next:** open accounts per `docs/MULTICLOUD_ACCOUNT_SETUP.md`
-  (free trials, no upgrade) when ready. **Agent next:** `docs/AZURE_BUILD_PROMPT.md` Phase 1 ($0, no
-  account), then `docs/GCP_BUILD_PROMPT.md`.
-- **AWS (2026-11-26):** verification documents submitted; no reply yet. If none by ~1 Dec, open a new
-  account (company card, real details) and rerun the scale test at 130 GiB (cap to be approved).
+  (free trials, no upgrade) when ready. **Built 2026-11-26 (branch `feat/azure-asr`):** multi-cloud groundwork migration; Azure test
+  environment in Terraform (`infra/accounts/azure`, `infra/poc/azure`) + `scripts/poc/azure-source.sh`;
+  CI Terraform checks; `docs/AZURE_LIVE_POC.md`. Order switched: live test first, collector after.
+  **Founder next:** Azure free account (personal card, spending limit on), MFA, `az login`.
+  **Agent next:** `check`, then the live test with approval at each step.
+- **AWS (2026-11-26, checked read-only):** verification documents submitted; no reply yet. The DR test
+  account's key is still rejected. The first account reports ACTIVE but a new AWS policy
+  (`p-w8q5iueo`) now blocks EC2, Lambda and DRS there; this month's bill is $0. **Don't open a third
+  account while both are under review.** Founder: contact AWS Support about both.
+  Earlier plan: If none by ~1 Dec, open a new
+  account (personal card, real details; see the note above about both accounts) and rerun the scale test at 130 GiB (cap to be approved).
 
 0. **Legal prep (`docs/LEGAL_PREP_PROMPT.md`, counsel: Kim Larsen, Stinson LLP):** T1–T15 done 2026-11-14 (public drafts in `docs/legal/`, private files in `~/Developer/AegisCoreLabs-private/legal/`). **Founder:** answer `founder-questions.md` there (entity, employment/IP, pilot-customer relationship, budget), then send the drafted email to Kim. **2026-11-18: Kim asked for information; founder emailed him the site and a brief (Claude doc "AetherVault: Brief for Kim Larsen", exported to PDF).** Next: the call (scope and fees), and founder answers `founder-questions.md` before it. Agent next: T16 after the answers (T6b license notices done).
 1. **3.6 hosting:** ✅ Live at **https://getaethervault.com** (2026-11-11; GitHub Pages, HTTPS enforced, old github.io URL redirects). Founder signed in and created the organization. Domain at Cloudflare (DNS + Email Routing: antonio@/support@/security@/billing@ → founder inbox); steps and records in `docs/CUSTOM_DOMAIN.md`. Resend SMTP connected 2026-11-11 (B9 done; DMARC report-only). **Next:** founder rolls the Cloudflare API token (it was pasted in chat once).
