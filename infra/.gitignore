@@ -1,0 +1,11 @@
+# Terraform working files. State holds resource IDs (and, for collectors, the ingest token):
+# never commit it. Provider lock files ARE committed (pinned provider checksums).
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+backend.tf
+tfplan
+*.tfplan
+crash.log

@@ -1,0 +1,40 @@
+#cloud-config
+# AetherVault Azure test server: PostgreSQL with one numbered, timestamped row per second, the
+# same measurement the AWS scale test used. Data loss after a drill = request time minus the
+# newest row written BEFORE the request that the recovered server still has.
+# Safe to run twice: a recovered drill copy boots with this already applied.
+package_update: true
+packages:
+  - postgresql
+write_files:
+  - path: /usr/local/bin/aethervault-heartbeat.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      # One row per second, each in its own committed transaction.
+      set -u
+      until sudo -u postgres psql -qtAc 'select 1' >/dev/null 2>&1; do sleep 2; done
+      sudo -u postgres psql -qtAc "create table if not exists heartbeat (
+        id bigserial primary key, written_at timestamptz not null default clock_timestamp())"
+      while true; do
+        sudo -u postgres psql -qtAc 'insert into heartbeat default values' >/dev/null 2>&1
+        sleep 1
+      done
+  - path: /etc/systemd/system/aethervault-heartbeat.service
+    content: |
+      [Unit]
+      Description=AetherVault heartbeat writer (one row per second)
+      After=postgresql.service
+      Requires=postgresql.service
+
+      [Service]
+      ExecStart=/usr/local/bin/aethervault-heartbeat.sh
+      Restart=always
+      RestartSec=2
+
+      [Install]
+      WantedBy=multi-user.target
+runcmd:
+  - systemctl enable --now postgresql
+  - systemctl daemon-reload
+  - systemctl enable --now aethervault-heartbeat.service

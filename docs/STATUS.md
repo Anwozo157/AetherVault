@@ -59,8 +59,11 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
   Compute Engine VMs via Persistent Disk Asynchronous Replication, none first-party for on-premises.
   **Caps approved 2026-11-26: alerts $10 and $25 per cloud, agent stops and asks at $10; spend
   nothing until authorized.** **Founder next:** open accounts per `docs/MULTICLOUD_ACCOUNT_SETUP.md`
-  (free trials, no upgrade) when ready. **Agent next:** `docs/AZURE_BUILD_PROMPT.md` Phase 1 ($0, no
-  account), then `docs/GCP_BUILD_PROMPT.md`.
+  (free trials, no upgrade) when ready. **Built 2026-11-26 (branch `feat/azure-asr`):** multi-cloud groundwork migration; Azure test
+  environment in Terraform (`infra/accounts/azure`, `infra/poc/azure`) + `scripts/poc/azure-source.sh`;
+  CI Terraform checks; `docs/AZURE_LIVE_POC.md`. Order switched: live test first, collector after.
+  **Founder next:** Azure free account (personal card, spending limit on), MFA, `az login`.
+  **Agent next:** `check`, then the live test with approval at each step.
 - **AWS (2026-11-26, checked read-only):** verification documents submitted; no reply yet. The DR test
   account's key is still rejected. The first account reports ACTIVE but a new AWS policy
   (`p-w8q5iueo`) now blocks EC2, Lambda and DRS there; this month's bill is $0. **Don't open a third

@@ -5,6 +5,25 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Azure live test environment in Terraform (2026-11-26)
+
+- Founder switched the Azure order: live test first, then collector and console built on Azure's
+  real recorded responses (`docs/AZURE_BUILD_PROMPT.md`).
+- `infra/accounts/azure`: one-time subscription guardrails as code: budget alerts ($10, $25; actual
+  and forecast), built-in Azure Policy for allowed regions (East US, West US 2) and small VM sizes,
+  tagged resource groups, private Terraform state storage (Entra ID only, versioned).
+- `infra/poc/azure`: Azure-to-Azure Site Recovery test: Ubuntu 24.04 B2ats_v2 server with PostgreSQL
+  writing one row per second (cloud-init), no inbound ports, daily auto-deallocate safety net;
+  recovery and isolated drill networks in West US 2; vault, fabrics, containers, 1-day replication
+  policy, mappings and the replicated VM behind `enable_replication`.
+- `scripts/poc/azure-source.sh`: the AWS script's commands for Azure (`check`, `up`, `verify`,
+  `enable-replication`, `status`, `record`, `drill`, `verify-drill`, `drill-cleanup`, `last-row`,
+  `jobs`, `cost`, `down`); every apply, drill and destroy needs `POC_APPROVE=yes`; no secrets; reads
+  Site Recovery through the fabric → container → item path.
+- CI: new `terraform` job (fmt, validate every folder without credentials, Checkov report).
+- `docs/AZURE_LIVE_POC.md` (plan, steps, open items), `infra/README.md`. Validated with azurerm
+  4.81; nothing applied.
+
 ### Multi-cloud groundwork in the database (2026-11-26)
 
 - Migration `20261126000014_multicloud_groundwork.sql` (Azure build, Phase 1 step 1): replication

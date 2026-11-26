@@ -135,6 +135,13 @@ Browser A (operator)            Supabase (Postgres + Auth + Realtime)          B
 - **Public build:** no `VITE_SUPABASE_*` env, so no sign-in link and `#/console` explains that the
   console isn't deployed.
 
+- **Multi-cloud (2026-11-26):** migration `20261126000014` lets snapshots and recovery jobs carry
+  `azure-asr` (Azure regions, Azure job GUIDs; `valid_cloud_region()`); `link_recovery_job` matches
+  `azure-<region>` targets. Infrastructure as code lives in `infra/`: `infra/accounts/azure`
+  (subscription guardrails, applied once) and `infra/poc/azure` (Azure Site Recovery live test,
+  driven by `scripts/poc/azure-source.sh`). See `infra/README.md`, `docs/AZURE_LIVE_POC.md`. CI job
+  `terraform` runs fmt, validate and Checkov on every Terraform folder.
+
 ## Tooling
 
 Vite 8 (base `./` for GitHub Pages), Tailwind v3 via PostCSS with `aether-*` tokens, Vitest +

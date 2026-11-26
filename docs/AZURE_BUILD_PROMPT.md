@@ -74,6 +74,18 @@ every 12 hours and after every drill. Site Recovery is free for the first 31 day
 $25/month: **tear down within 31 days.** VM, disk, cache storage and transfer still use credit.
 If the trial refuses Site Recovery, stop and report; don't work around it.
 
+## Order (changed by the founder, 2026-11-26)
+
+Live test first, then the collector and console, built on Azure's **real** recorded responses
+(the AWS test also ran before its collector was finished):
+
+1. ✅ Multi-cloud groundwork migration (Phase 1 step 1), 2026-11-26.
+2. ✅ Test environment: `infra/accounts/azure`, `infra/poc/azure`, `scripts/poc/azure-source.sh`,
+   CI Terraform checks (Phase 1 steps 4–6, test parts), 2026-11-26. Validated, not applied.
+3. Founder opens the Azure free account (Phase 2), then the live test (Phase 3) with `record`.
+4. Then Phase 1 steps 2–3 (`src/integrations/azureAsr/`, `collector-azure/` + its Terraform) from
+   the recorded responses, the console guide, and the rest of the docs.
+
 ## Phase 1: build with no account ($0)
 
 On a branch (`feat/azure-asr`), small commits, `npm run verify` before each:
