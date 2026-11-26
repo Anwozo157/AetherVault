@@ -1,5 +1,7 @@
 # Multicloud DR: Azure and Google Cloud research
 
+> **2026-11-26:** multicloud work approved by the founder. Next: `docs/MULTICLOUD_RESEARCH_PROMPT.md`.
+
 Goal: protect customer servers into **AWS, Azure or Google Cloud** with the same AetherVault
 experience we built for AWS: a read-only collector for replication health, measured RPO in drill
 evidence, scheduled drills, runbooks and alerts. AWS is done
@@ -143,5 +145,9 @@ Each cloud needs:
 3. A **setup guide** in the console (like Connect your AWS account) and a best-practices doc.
 4. Its own **pilot checklist**: the Azure replication appliance is the big extra.
 
-Recommended order: finish proving AWS with live data first (one cloud working for real beats three
+**Prompts (2026-11-26):** research `docs/MULTICLOUD_RESEARCH_PROMPT.md`, then
+`docs/AZURE_BUILD_PROMPT.md`, then `docs/GCP_BUILD_PROMPT.md` (founder decision in
+`docs/PRODUCT_DECISIONS.md` §4; the order below is superseded).
+
+Recommended order (2026-11-10): finish proving AWS with live data first (one cloud working for real beats three
 on paper), then Azure (closest model to AWS), then Google Cloud once its model is confirmed.

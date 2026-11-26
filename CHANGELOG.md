@@ -5,6 +5,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Docs: multicloud prompts for Azure and Google Cloud (2026-11-26)
+
+- Founder decision: start Azure and Google Cloud now, the same way we did AWS, everything in
+  infrastructure as code (`docs/PRODUCT_DECISIONS.md` §4, superseding "AWS first").
+- `docs/MULTICLOUD_RESEARCH_PROMPT.md`: Google Cloud research in full (deciding question: continuous
+  replication or backup-only), the open Azure items, a verified account-setup checklist for the
+  founder (`docs/MULTICLOUD_ACCOUNT_SETUP.md`, to be written), and an AWS-to-Azure/Google layout table.
+- `docs/AZURE_BUILD_PROMPT.md` and `docs/GCP_BUILD_PROMPT.md`: mirror each AWS piece (integration,
+  collector + Terraform, account baseline, POC script, live-test evidence, best practices, console
+  guide); build with no account first ($0), then account setup, then a live test like the AWS one on
+  17 Nov. Guardrails: no stored keys (`az login`, `gcloud` impersonation, managed identities),
+  least-privilege read-only collectors, tagged resources, caps proposed for founder approval.
+
 ### Chaos mode now puts the demo into a degraded state (2026-11-25)
 
 - In the public demo, turning on chaos mode only made the telemetry look bad; the system state stayed
