@@ -54,10 +54,13 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 ## Next steps (in order)
 
 - **Multicloud (founder, 2026-11-26):** Azure and Google Cloud start now, the same way as AWS, all in
-  infrastructure as code. Run `docs/MULTICLOUD_RESEARCH_PROMPT.md` first (allow web access to
-  `docs.cloud.google.com`), then the founder opens accounts per `docs/MULTICLOUD_ACCOUNT_SETUP.md`,
-  then `docs/AZURE_BUILD_PROMPT.md`, then `docs/GCP_BUILD_PROMPT.md`. Caps for each live test need
-  the founder's approval (proposed $10 stop-and-ask, $25 alert).
+  infrastructure as code. **Research done 2026-11-26** (`docs/MULTICLOUD_DR.md`): Azure confirmed
+  ($25/month per protected VM after 31 free days); Google verdict (C), continuous replication for
+  Compute Engine VMs via Persistent Disk Asynchronous Replication, none first-party for on-premises.
+  **Caps approved 2026-11-26: alerts $10 and $25 per cloud, agent stops and asks at $10; spend
+  nothing until authorized.** **Founder next:** open accounts per `docs/MULTICLOUD_ACCOUNT_SETUP.md`
+  (free trials, no upgrade) when ready. **Agent next:** `docs/AZURE_BUILD_PROMPT.md` Phase 1 ($0, no
+  account), then `docs/GCP_BUILD_PROMPT.md`.
 - **AWS (2026-11-26):** verification documents submitted; no reply yet. If none by ~1 Dec, open a new
   account (company card, real details) and rerun the scale test at 130 GiB (cap to be approved).
 

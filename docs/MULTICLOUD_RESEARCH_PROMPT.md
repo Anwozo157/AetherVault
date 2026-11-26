@@ -3,6 +3,8 @@
 > Agent prompt, written 2026-11-26 at the founder's request. Paste it into a new session, or point
 > the agent at this file. It runs **before** any Azure or Google Cloud account exists and before any
 > code. Its outputs feed `docs/AZURE_BUILD_PROMPT.md` and `docs/GCP_BUILD_PROMPT.md`.
+> **Done 2026-11-26:** results in `docs/MULTICLOUD_DR.md` and `docs/MULTICLOUD_ACCOUNT_SETUP.md`;
+> the build prompts were updated. Rerun only to refresh the research.
 > Order of work: this prompt → founder opens accounts → Azure build → Google Cloud build.
 
 ---
