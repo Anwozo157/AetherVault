@@ -5,6 +5,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Multi-cloud groundwork in the database (2026-11-26)
+
+- Migration `20261126000014_multicloud_groundwork.sql` (Azure build, Phase 1 step 1): replication
+  snapshots accept source `azure-asr` with Azure region names (`valid_cloud_region()`), and never an
+  AWS account ID; recovery jobs gain a `source` column (Azure jobs use the job's GUID name);
+  `ingest_recovery_jobs()` takes an optional `p_source` (default `aws-drs`, so deployed AWS
+  collectors keep working); `link_recovery_job()` matches Azure jobs to runs targeting
+  `azure-<region>` and records the cloud in the evidence; `list_recovery_jobs()` returns the cloud.
+  AWS behavior and messages unchanged. 20 new pgTAP tests (288 pass). Not yet applied to the hosted
+  database.
+
 ### Roadmap: one ladder per cloud, providers, path to enterprise buyers (2026-11-26)
 
 - `docs/PRODUCT_DECISIONS.md`: big clouds only (AWS, Azure, Google Cloud, maybe Oracle), one at a time, and a blocked account on one cloud never halts testing on the others. The roadmap is now one ladder every cloud climbs (small server, scale test, whole application with failback, Kubernetes, Warm Standby, Active-Active), with the 18–20 Nov AWS scale test result (only 1 of 5 drills met both targets; data loss missed in 4). New section: the path to enterprise and government buyers such as the FAA (pilot, SOC 2 Type II, regulated industries, federal subcontracting, FedRAMP), labeled as a goal, not a claim.
