@@ -60,12 +60,38 @@ upgrading needs a separate OK. Google v1 covers Compute Engine VMs only (Asynchr
 
 _Superseded (2026-11-18):_ no Azure or Google Cloud work until AWS is fully proven.
 
-## Roadmap (in order)
+**Providers (founder, 2026-11-26):** the big clouds only: AWS, Azure, Google Cloud, then maybe
+Oracle Cloud. **One cloud at a time**, but a slow or blocked account on one cloud (for example
+AWS's identity review of a personal account) never halts testing on the others. A business
+account (LLC, EIN) comes later; until then tests run on personal accounts, with real details that
+match the founder's ID and card.
 
-1. Bigger-server test with a real write load, 3–4 drills for consistency (plan:
-   `docs/AWS_SCALE_TEST_PLAN.md`).
-2. Investigate drill 2's ~3 min snapshot fallback.
-3. Pilot customer, with drill reports as evidence (needs the legal steps with counsel first).
-4. Design the Kubernetes recovery path and a test plan for a small EKS cluster.
-5. Warm Standby tier, then Active-Active.
-6. SOC 2 work throughout.
+## Roadmap (in order; updated 2026-11-26)
+
+Each cloud climbs the same ladder. A step is done only when its drills meet target **every time**,
+reported with every miss.
+
+1. **Small server tests:** one server replicating to a second region, drills measuring recovery
+   time and data loss. AWS done 2026-11-17 (best drill 12 min 29 s, ~8 s lost). Azure next, then
+   Google Cloud.
+2. **Scale test:** a ~100 GiB database under constant writes, repeated drills. AWS run 18–20 Nov:
+   of 5 drills, recovery time missed in 2 (by 0.7 s and 1 min 10 s) and **data loss missed in 4**; only drill 4 met both (DRS snapshots fall behind under writes; see `docs/AWS_LIVE_POC.md`). Fix and rerun on AWS once the account is restored.
+3. **A whole application** recovered in dependency order (data first, then apps), then failback.
+4. **A small Kubernetes cluster** (section 3), then larger clusters.
+5. **Warm Standby tier, then Active-Active**, first in one cloud, then across two clouds.
+6. **SOC 2 throughout;** pilot customer with drill reports as evidence (legal steps with counsel first).
+
+## Path to enterprise and government buyers (goal, not a claim)
+
+The long-term goal is that agencies such as the FAA could use AetherVault. That is a multi-year
+path with gates beyond the technology, in roughly this order:
+
+1. Commercial pilot customer.
+2. SOC 2 Type II report (`docs/SOC2_PROGRAM_PROMPT.md`).
+3. Regulated industries (healthcare, finance), which need Warm Standby or Active-Active.
+4. Government work as a subcontractor to an established federal contractor.
+5. FedRAMP authorization (likely Moderate or High; usually needs an agency sponsor), running in the
+   government regions (AWS GovCloud, Azure Government).
+6. Direct agency contracts.
+
+Nothing public may suggest any of this is in place until it is (`AGENTS.md` rule 2).

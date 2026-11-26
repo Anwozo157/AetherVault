@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Roadmap: one ladder per cloud, providers, path to enterprise buyers (2026-11-26)
+
+- `docs/PRODUCT_DECISIONS.md`: big clouds only (AWS, Azure, Google Cloud, maybe Oracle), one at a time, and a blocked account on one cloud never halts testing on the others. The roadmap is now one ladder every cloud climbs (small server, scale test, whole application with failback, Kubernetes, Warm Standby, Active-Active), with the 18–20 Nov AWS scale test result (only 1 of 5 drills met both targets; data loss missed in 4). New section: the path to enterprise and government buyers such as the FAA (pilot, SOC 2 Type II, regulated industries, federal subcontracting, FedRAMP), labeled as a goal, not a claim.
+
 ### Docs: multicloud research done (2026-11-26)
 
 - `docs/MULTICLOUD_DR.md`: Google Cloud researched from Google's docs. Verdict (C): Compute Engine
