@@ -47,8 +47,14 @@ DRS copies machine disks; it is not the right tool for Kubernetes. For clusters:
 
 ## 4. Clouds
 
-No Azure or Google Cloud work until AWS is fully proven (supersedes the build plan in
-`docs/MULTICLOUD_DR.md`, which stays as research). Oracle Cloud maybe later.
+**Updated 2026-11-26 (founder):** start Azure and Google Cloud now, **the same way we did AWS**,
+everything automated and in infrastructure as code. Order: research
+(`docs/MULTICLOUD_RESEARCH_PROMPT.md`) → founder opens accounts → Azure build
+(`docs/AZURE_BUILD_PROMPT.md`) → Google Cloud build (`docs/GCP_BUILD_PROMPT.md`). AWS work
+continues in parallel (account verification, 130 GiB scale test, failback). New regions stay
+demo-only and labeled simulated until real data flows. Oracle Cloud maybe later.
+
+_Superseded (2026-11-18):_ no Azure or Google Cloud work until AWS is fully proven.
 
 ## Roadmap (in order)
 
