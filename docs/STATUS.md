@@ -1,7 +1,7 @@
 # Project Status
 
 > Living handoff document. **Every agent or contributor updates this at the end of a session.**
-> Last updated: 2026-11-26 (multicloud prompts; AWS verification pending) by Claude Code (Opus 5.5).
+> Last updated: 2026-11-27 (Azure account baseline applied) by Claude Code (Opus 5.5).
 
 ## Finding what's done (read this first)
 
@@ -62,8 +62,10 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
   (free trials, no upgrade) when ready. **Built 2026-11-26 (branch `feat/azure-asr`):** multi-cloud groundwork migration; Azure test
   environment in Terraform (`infra/accounts/azure`, `infra/poc/azure`) + `scripts/poc/azure-source.sh`;
   CI Terraform checks; `docs/AZURE_LIVE_POC.md`. Order switched: live test first, collector after.
-  **Founder next:** Azure free account (personal card, spending limit on), MFA, `az login`.
-  **Agent next:** `check`, then the live test with approval at each step.
+  **2026-11-27:** Azure free account open (Free Trial, spending limit on), CLI signed in;
+  `infra/accounts/azure` applied with approval (budgets, policies, resource groups, state storage);
+  `check` passes. Free trial credit lasts 30 days, so the test must finish (and be torn down) by
+  ~25 Dec; the script's teardown date is 18 Dec. **Agent next:** step 3 `up` (plan, founder approval).
 - **AWS (2026-11-26, checked read-only):** verification documents submitted; no reply yet. The DR test
   account's key is still rejected. The first account reports ACTIVE but a new AWS policy
   (`p-w8q5iueo`) now blocks EC2, Lambda and DRS there; this month's bill is $0. **Don't open a third

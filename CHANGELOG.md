@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Azure account baseline applied (2026-11-27)
+
+- Founder opened the Azure free account (Free Trial, spending limit on) and signed in the CLI.
+  `infra/accounts/azure` applied with approval: budgets $10 and $25, region and VM-size policies,
+  resource groups, private state storage; resource providers registered. `check` passes; no drift.
+- Fix: the azurerm provider now skips the storage data plane (`features.storage.data_plane_available
+= false`). The state account disables shared keys, so the provider's key-based reads of queue
+  settings failed with 403 `KeyBasedAuthenticationNotPermitted`.
+
 ### Azure live test environment in Terraform (2026-11-26)
 
 - Founder switched the Azure order: live test first, then collector and console built on Azure's
