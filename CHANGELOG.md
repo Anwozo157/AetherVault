@@ -5,6 +5,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Azure live test: protected and first drill (2026-11-27)
+
+- Source region moved to North Central US: this free trial can't create VMs in East US and most
+  other US regions (`NotAvailableForSubscription`). Recovery stays in West US 2.
+- Fix: the test server pins the Ubuntu 24.04 LTS azure kernel (`6.8.0-1070-azure`) in cloud-init
+  and holds kernel packages. The current image's `7.0.0-1020-azure` kernel is newer than the Site
+  Recovery agent installed (9.68.7978.1), so protection failed with error 151141.
+- Fix: `azure-source.sh cost` read the wrong disk-size field (`diskSizeGB`); `check` shows the
+  source region's Basv2 quota.
+- Live results (`docs/AZURE_LIVE_POC.md`): protected with health Normal and RPO 105–111 s on the
+  free trial; warm-up drill recovered a working database in West US 2 in 3 min 55 s (PASS against
+  15 min) with 306.7 s data loss (FAIL against 60 s; Azure makes recovery points every 5 minutes).
+
 ### Azure account baseline applied (2026-11-27)
 
 - Founder opened the Azure free account (Free Trial, spending limit on) and signed in the CLI.

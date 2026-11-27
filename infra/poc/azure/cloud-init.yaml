@@ -3,10 +3,33 @@
 # same measurement the AWS scale test used. Data loss after a drill = request time minus the
 # newest row written BEFORE the request that the recovered server still has.
 # Safe to run twice: a recovered drill copy boots with this already applied.
+# Kernel pin: the Site Recovery agent supports only listed kernels, and Microsoft's Ubuntu 24.04
+# image can ship a newer kernel than the agent knows (2026-11-27: image 7.0.0-1020-azure, agent
+# 9.68.7978.1 tops out at 7.0.0-1017 / 6.8.0-1070; error 151141). Pin the 24.04 LTS azure kernel
+# from Microsoft's list and hold kernel updates for the test:
+# https://github.com/Azure/Azure-SiteRecovery/tree/main/MobilityAgent/AzureToAzure/SupportedKernels
 package_update: true
 packages:
   - postgresql
 write_files:
+  - path: /usr/local/bin/aethervault-pin-kernel.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      # Install and boot the pinned kernel once; a no-op (no reboot) when already running it,
+      # as on a recovered drill copy.
+      set -eu
+      K=6.8.0-1070-azure
+      [ "$(uname -r)" = "$K" ] && exit 0
+      DEBIAN_FRONTEND=noninteractive apt-get install -y "linux-image-$K" "linux-modules-$K"
+      # Hold the kernel metapackages so unattended upgrades can't move past the agent's list.
+      for p in "linux-image-$K" "linux-modules-$K" linux-azure linux-image-azure linux-headers-azure linux-tools-azure linux-cloud-tools-azure; do
+        dpkg -s "$p" >/dev/null 2>&1 && apt-mark hold "$p"
+      done
+      sed -i "s|^GRUB_DEFAULT=.*|GRUB_DEFAULT=\"Advanced options for Ubuntu>Ubuntu, with Linux $K\"|" /etc/default/grub
+      sed -i "/^GRUB_DEFAULT=/d" /etc/default/grub.d/*.cfg 2>/dev/null || true
+      update-grub
+      systemctl reboot
   - path: /usr/local/bin/aethervault-heartbeat.sh
     permissions: '0755'
     content: |
@@ -38,3 +61,5 @@ runcmd:
   - systemctl enable --now postgresql
   - systemctl daemon-reload
   - systemctl enable --now aethervault-heartbeat.service
+  # Last: may reboot once into the pinned kernel (services above start again on boot).
+  - /usr/local/bin/aethervault-pin-kernel.sh

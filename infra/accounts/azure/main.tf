@@ -68,7 +68,7 @@ variable "budget_start" {
 variable "source_location" {
   description = "Region the test server runs in."
   type        = string
-  default     = "eastus"
+  default     = "northcentralus"
 }
 
 variable "target_location" {

@@ -2,5 +2,5 @@
 subscription_id = "00000000-0000-0000-0000-000000000000"
 alert_emails    = ["billing@getaethervault.com"]
 # budget_amounts  = [10, 25]          # founder-approved caps (USD per month)
-# source_location = "eastus"
+# source_location = "northcentralus"
 # target_location = "westus2"

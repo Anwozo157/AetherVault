@@ -137,7 +137,7 @@ cmd_check() {
   say "Resource groups"
   az group list --query "[?tags.project=='aethervault'].[name,location]" -o tsv
   say "vCPU quota (source region)"
-  az vm list-usage -l eastus --query "[?contains(name.value,'BS') || name.value=='cores'].[name.localizedValue,currentValue,limit]" -o tsv 2>/dev/null || true
+  az vm list-usage -l "$(az group show -n rg-aethervault-poc-source --query location -o tsv 2>/dev/null || echo northcentralus)" --query "[?contains(name.value,'BS') || contains(name.value,'Basv2') || name.value=='cores'].[name.localizedValue,currentValue,limit]" -o tsv 2>/dev/null || true
   say "Teardown date (inside the 31 free Site Recovery days): $(expires)"
 }
 
@@ -229,7 +229,7 @@ for rg in (src, tgt):
         total += c
         lines.append(f"{rg}  VM {vm['name']} {vm['hardwareProfile']['vmSize']}  {h:6.1f} h  ${c:.2f} (list; $0 within free B-series hours)")
     for d in az("disk", "list", "-g", rg):
-        lines.append(f"{rg}  disk {d['name']} {d['diskSizeGb']} GiB {d['sku']['name']}  (small; check Cost Management)")
+        lines.append(f"{rg}  disk {d['name']} {d['diskSizeGB']} GiB {d['sku']['name']}  (small; check Cost Management)")
 lines.append(f"Site Recovery: free for the first {FREE_DAYS} days per VM, then ${ASR_MONTH:.0f}/month: tear down before day {FREE_DAYS}")
 print("\n".join(lines))
 print(f"Estimated compute so far at list price: ${total:.2f}. Stop and ask the founder past $10.")
