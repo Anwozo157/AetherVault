@@ -30,7 +30,14 @@ provider "azurerm" {
   # From provider 4.0 the subscription must be explicit: ARM_SUBSCRIPTION_ID or this variable.
   subscription_id = var.subscription_id
   # Authenticates with the founder's Azure CLI session (`az login`); no secrets on disk.
-  features {}
+  features {
+    storage {
+      # The state account disables shared keys. Without this, the provider reads queue and
+      # static-website settings through the storage data plane with account keys and gets 403
+      # (KeyBasedAuthenticationNotPermitted). Everything here is managed through Azure Resource Manager.
+      data_plane_available = false
+    }
+  }
 }
 
 # ---------------------------------------------------------------------------

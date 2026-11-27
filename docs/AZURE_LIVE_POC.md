@@ -5,8 +5,8 @@ Recovery data in our own subscription, before any customer. A server replicates 
 region to another, we run non-disruptive drills, measure recovery time and data loss from the
 database itself, and save Azure's real API responses so the collector is built on facts.
 
-> **Status (2026-11-26):** test environment built and validated (Terraform + script); not applied.
-> Waiting for the founder's Azure free account. Order changed by the founder on 2026-11-26: live
+> **Status (2026-11-27):** account open (Free Trial, spending limit on); step 2 done (guardrails
+> applied, `check` passes). Next: step 3, `up`, with the founder's approval. Order changed by the founder on 2026-11-26: live
 > test first, collector and console after (built on the recorded responses).
 
 ## Setup
@@ -63,5 +63,7 @@ From the research (`docs/MULTICLOUD_DR.md`), not yet confirmed by Microsoft's do
 
 _(Filled in during the test: timestamps in UTC, as in `docs/AWS_LIVE_POC.md`.)_
 
-| Time (UTC) | Step | Result |
-| ---------- | ---- | ------ |
+| Time (UTC)        | Step | Result                                                                                                                                                                                  |
+| ----------------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-27 ~21:2x | 1    | Free account open; `az login`; offer `FreeTrial_2014-09-01`, spending limit On                                                                                                          |
+| 2026-11-27 21:3x  | 2    | `infra/accounts/azure` applied (budgets, 2 policies, 3 resource groups, state storage, providers registered); one provider fix (storage data plane); quotas 4 vCPUs per region, Basv2 4 |
