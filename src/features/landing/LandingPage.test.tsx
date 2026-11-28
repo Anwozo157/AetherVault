@@ -45,20 +45,24 @@ describe('LandingPage', () => {
     expect(within(azure).getByText('Measured in a live Azure test')).toBeInTheDocument();
     expect(within(azure).getByText(/REAL DATA · 27–28 NOV 2026/)).toBeInTheDocument();
     expect(within(azure).getByText(/not a customer/)).toBeInTheDocument();
-    // Recovery times (docs/AZURE_LIVE_POC.md) and the data lost on each drill.
+    // Site Recovery drills (docs/AZURE_LIVE_POC.md): recovery time and data lost.
     for (const t of [
       '3 min 55 s',
       '3 min 57 s',
       '3 min 56 s',
+      '3 min 22 s',
       '5 min 7 s',
       '4 min 4 s',
       '6 min 15 s',
+      '5 min 26 s',
     ]) {
       expect(within(azure).getByText(t)).toBeInTheDocument();
     }
-    // Every drill missed the 1-minute data-loss target, so none may be shown as a pass.
-    expect(within(azure).getAllByText('FAIL')).toHaveLength(3);
-    expect(within(azure).queryByText('PASS')).not.toBeInTheDocument();
+    // Every Site Recovery drill missed the 1-minute data-loss target; only the standby passed.
+    expect(within(azure).getAllByText('FAIL')).toHaveLength(4);
+    expect(within(azure).getAllByText('PASS')).toHaveLength(1);
+    expect(within(azure).getByText('0.17 s · 0.27 s')).toBeInTheDocument();
+    expect(within(azure).getByText(/promoted by hand/)).toBeInTheDocument();
   });
 
   test('no claim of Azure product support beyond the measured test', () => {
