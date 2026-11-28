@@ -18,7 +18,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
   CI now formats, validates and scans this folder too.
 - **Console labels Azure data:** the replication panel reads "LIVE · AZURE SITE RECOVERY" and
   "Replication · Azure Site Recovery" for `azure-asr` snapshots (no account number shown), and
-  drill evidence names Azure Site Recovery as the source.
+  drill evidence names Azure Site Recovery as the source; "Recoveries measured by Azure" lists
+  test failovers with Azure's job times. Checked in a browser (desktop and 390 px) with the real
+  test vault pushing into local Supabase.
 
 ### Azure: database-level standby meets the 60 s target (2026-11-28)
 

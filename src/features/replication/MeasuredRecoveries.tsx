@@ -25,26 +25,32 @@ export function formatDuration(seconds: number | null): string {
 export default function MeasuredRecoveries({
   recoveries,
   rtoTargetSeconds,
+  cloud = 'aws',
 }: {
   recoveries: MeasuredRecovery[];
+  /** Which cloud measured the jobs (the replication source that reported them). */
+  cloud?: 'aws' | 'azure';
   /** The organization's recovery time target, when known. */
   rtoTargetSeconds?: number;
 }) {
   if (recoveries.length === 0) return null;
+  const by = cloud === 'azure' ? 'Azure' : 'AWS';
   return (
     <div className="flex flex-col gap-2" data-testid="measured-recoveries">
       <div>
         <h3 className="text-[11px] font-mono uppercase tracking-widest text-white">
-          Recoveries measured by AWS
+          {`Recoveries measured by ${by}`}
         </h3>
         <p className="text-[11px] font-mono text-zinc-400 mt-1 max-w-2xl">
-          Real recovery times from AWS Elastic Disaster Recovery: from the recovery request until
-          the recovery servers launched. Checking that your applications work adds time on top.
+          {cloud === 'azure'
+            ? 'Real recovery times from Azure Site Recovery: from the test failover or failover request until the job finished with the VM created in the recovery region.'
+            : 'Real recovery times from AWS Elastic Disaster Recovery: from the recovery request until the recovery servers launched.'}{' '}
+          Checking that your applications work adds time on top.
         </p>
       </div>
       <div className="overflow-x-auto rounded-2xl border border-white/10">
         <table className="w-full text-left text-[11px] font-mono">
-          <caption className="sr-only">Recovery jobs measured by AWS, newest first</caption>
+          <caption className="sr-only">Recovery jobs measured by {by}, newest first</caption>
           <thead className="text-zinc-500 uppercase tracking-widest text-[10px]">
             <tr>
               <th scope="col" className="px-3 py-2">
@@ -112,7 +118,7 @@ export default function MeasuredRecoveries({
                         {met === null ? '' : met ? ' · within target' : ' · over target'}
                       </span>
                     )}
-                    <span className="block text-zinc-500">measured by AWS</span>
+                    <span className="block text-zinc-500">measured by {by}</span>
                   </td>
                 </tr>
               );

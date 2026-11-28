@@ -511,7 +511,11 @@ export default function ReplicationPanel({
         </>
       )}
 
-      <MeasuredRecoveries recoveries={recoveries} rtoTargetSeconds={rtoTarget} />
+      <MeasuredRecoveries
+        recoveries={recoveries}
+        rtoTargetSeconds={rtoTarget}
+        cloud={status?.source === 'azure-asr' ? 'azure' : 'aws'}
+      />
 
       {status !== undefined && (
         <ConnectAwsWizard
