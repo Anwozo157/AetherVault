@@ -8,6 +8,9 @@ vi.mock('../topology/GlobalTopologyCanvas', () => ({
 }));
 vi.mock('./ReplicationScene3D', () => ({ default: () => <div data-testid="scene-3d" /> }));
 
+const verdicts = (el: HTMLElement) =>
+  [...el.querySelectorAll('[data-verdict]')].map((v) => v.getAttribute('data-verdict'));
+
 describe('LandingPage', () => {
   test('one headline, and every demo link opens the demo route', () => {
     render(<LandingPage />);
@@ -36,7 +39,14 @@ describe('LandingPage', () => {
     expect(within(aws).getByText(/not a customer/)).toBeInTheDocument();
     expect(within(aws).getByText('12 min 29 s')).toBeInTheDocument();
     expect(within(aws).getByText('17 min 14 s')).toBeInTheDocument();
-    expect(within(aws).getAllByText('FAIL')).toHaveLength(1);
+    // Drill 1 missed recovery time only; drill 2 passed both; the alert test passed.
+    expect(verdicts(aws)).toEqual([
+      'Recovery PASS',
+      'Data loss PASS',
+      'Recovery FAIL',
+      'Data loss PASS',
+      'PASS',
+    ]);
   });
 
   test('live Azure test results are real, dated, and show every data-loss miss', () => {
@@ -58,9 +68,13 @@ describe('LandingPage', () => {
     ]) {
       expect(within(azure).getByText(t)).toBeInTheDocument();
     }
-    // Every Site Recovery drill missed the 1-minute data-loss target; only the standby passed.
-    expect(within(azure).getAllByText('FAIL')).toHaveLength(4);
-    expect(within(azure).getAllByText('PASS')).toHaveLength(1);
+    // Every Site Recovery drill met the recovery target and missed the 1-minute data-loss target;
+    // the standby met both.
+    expect(verdicts(azure)).toEqual([
+      ...Array(4).fill(['Recovery PASS', 'Data loss FAIL']).flat(),
+      'Recovery PASS',
+      'Data loss PASS',
+    ]);
     expect(within(azure).getByText('0.17 s · 0.27 s')).toBeInTheDocument();
     expect(within(azure).getByText(/promoted by hand/)).toBeInTheDocument();
   });

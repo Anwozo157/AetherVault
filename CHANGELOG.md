@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+- **Landing page: one badge per target** on the live-test cards ("Recovery PASS · Data loss FAIL")
+  instead of a single PASS/FAIL, so a drill that met the recovery target but missed the data-loss
+  target reads as exactly that. Same numbers, nothing hidden.
+
 - **Azure Site Recovery collector** (`collector-azure/`, `src/integrations/azureAsr/`): reads one
   Recovery Services vault with GETs only (managed identity or `az login`), maps protected items to
   the shared replication snapshot (`azure-asr`, RPO from `rpoInSeconds`, no subscription ID) and
