@@ -14,8 +14,11 @@ Rules:
 
 - **Nothing is applied without the founder's OK.** Scripts plan first and apply only with
   `POC_APPROVE=yes`.
-- **No secrets** in variables, files or state: Azure uses the signed-in CLI session; collectors
-  use managed identities. Real IDs go in `*.tfvars` (gitignored) or the private folder.
+- **No secrets** in variables or files: Azure uses the signed-in CLI session; collectors use
+  managed identities. Real IDs go in `*.tfvars` (gitignored) or the private folder.
+- **State does hold secrets:** the azurerm provider records storage account keys and connection
+  strings in state (found 2026-11-28). That is why state lives only in the private, Entra-only state
+  account; never copy it into git (local backups stay as files, gitignored).
 - **State is never committed** (`.gitignore`); provider lock files are, so provider versions and
   checksums are pinned.
 - **Azure state is remote** (since 2026-11-28): both Azure folders keep state in the private storage

@@ -11,6 +11,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
   the private folder, so no IDs in the repo). State migrated from this Mac into the private state
   account (Entra ID only, versioned); local copies backed up privately, then removed. Both plans
   show no changes afterwards. `azure-source.sh` passes the backend config on `init`.
+- Docs: `infra/README.md` no longer claims state has no secrets; azurerm stores storage account
+  keys in state, so it stays in the private state account only.
 - Fix: the state account's Storage Blob Data Contributor assignment had vanished after the account
   was re-created under the same name; re-created and imported into state.
 
