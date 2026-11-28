@@ -17,6 +17,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 - Live results (`docs/AZURE_LIVE_POC.md`): protected with health Normal and RPO 105–111 s on the
   free trial; warm-up drill recovered a working database in West US 2 in 3 min 55 s (PASS against
   15 min) with 306.7 s data loss (FAIL against 60 s; Azure makes recovery points every 5 minutes).
+  Drill 2 (2026-11-28 00:05 UTC): 3 min 57 s recovery (PASS), 243.9 s data loss (FAIL).
 
 ### Azure account baseline applied (2026-11-27)
 
