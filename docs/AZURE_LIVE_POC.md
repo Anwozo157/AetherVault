@@ -18,11 +18,15 @@ database itself, and save Azure's real API responses so the collector is built o
 
 Why data loss fails: test failover through the API uses the latest _processed_ recovery point, and
 Azure creates crash-consistent points only every 5 minutes, so loss is roughly the RPO (~1–2 min)
-plus up to 5 minutes. Drill 3 tried the portal's "Latest (lowest RPO)": no gain, because replication itself was ~4+
-minutes behind (RPO 255 s; agent heartbeat also late). **Open:** why the RPO rose from ~1–2 min to
-4+ min after the drills (CPU credits ruled out: rising, CPU ~3%; next suspects the Standard cache
-storage account and drill cleanup activity). Meeting 60 s with Site Recovery looks unlikely;
-database-level replication is the likely tier for that.
+plus up to 5 minutes. Drills 3 and 4 tried the portal's "Latest (lowest RPO)": both recovered from the ordinary 5-minute
+point (job records), with high and with low lag, so on test failover it gives no gain.
+**Server-level Azure Site Recovery is stuck at minutes of data loss.**
+
+**Database-level tier (experiment B, `infra/poc/azure/db-standby.tf`):** a PostgreSQL streaming
+standby in West US 2 next to Site Recovery. Two promote drills: **data loss 0.27 s and 0.17 s (no
+rows lost), promote to writable 0.28 s and 0.30 s.** Caveats: async replication (a few hundred ms can
+be lost); promote is manual here (no failure detection or app reconnect measured); the standby
+is a second always-on VM (~$0.01/h list, inside the free B-series hours here).
 
 ## Setup
 
@@ -115,3 +119,8 @@ _(Filled in during the test: timestamps in UTC, as in `docs/AWS_LIVE_POC.md`.)_
 | 2026-11-27 23:50       | 7    | `TestFailoverCleanup` started; drill VM deleted. Billed so far $0.00; estimate $0.01                                                                                                                                                                                                                                                                                                                                                                |
 | 2026-11-28 00:05:03    | 7    | **Drill 2** (1 h 19 min after drill 1, run early at the founder's OK): Azure job 00:05:09–00:08:28 (3 min 19 s); PostgreSQL ready 00:08:59. **Recovery 3 min 57 s: PASS.** Newest row 00:00:59.120 (the 00:00:59 point). **Data loss 243.9 s: FAIL.** Cleanup started 00:09; responses recorded. Billed $0.00; estimate $0.01                                                                                                                       |
 | 2026-11-28 00:27:15    | 7    | **Drill 3, "Latest (lowest RPO)" from the portal** (founder asked): RPO had risen to 255 s (00:15). Azure job 00:27:22–00:30:37 (3 min 15 s); PostgreSQL ready 00:31:10. **Recovery 3 min 56 s: PASS.** Newest row 00:21:00.199, the same point "Latest processed" offered. **Data loss 374.8 s: FAIL.** "Latest" gained nothing: no newer data had reached Azure. Request time taken just after the click (overstates loss by ~1 s). Cleanup 00:31 |
+| 2026-11-28 00:51:27    | 7    | **Drill 4, "Latest (lowest RPO)" with low lag** (RPO 74 s): job 00:51:34–00:54:11; DB ready 00:54:48. **Recovery 3 min 22 s: PASS.** Job record: recovery point 00:46:00, the ordinary 5-minute point. **Data loss 326.1 s: FAIL.** Conclusion: on test failover, "Latest" behaves like "Latest processed"                                                                                                                                          |
+| 2026-11-28 00:54–00:57 | B    | **Database standby built** (`db-standby`): second B2ats_v2 VM in West US 2 (10.20.2.0/24), global VNet peering, PostgreSQL 16 async streaming replication with a slot. Replay lag 0.05 s; standby 0.2–1.0 s behind                                                                                                                                                                                                                                  |
+| 2026-11-28 01:13       | B    | DB drill (first version): 0.14 s / 15 s, **discarded**: request time taken on the Mac ~15 s before the promote, so the standby kept receiving rows. Drill fixed to take the failure moment on the standby                                                                                                                                                                                                                                           |
+| 2026-11-28 01:28:31    | B    | **DB drill 1:** failure moment 01:28:30.907 (on the standby), newest source row 01:28:30.634. **Data loss 0.272 s (no rows lost). Promote to writable 0.283 s.** Azure Run Command adds ~11 s to reach the VM (tooling, not the database)                                                                                                                                                                                                           |
+| 2026-11-28 01:34:41    | B    | **DB drill 2:** **data loss 0.172 s, promote 0.297 s.** Standby re-seeded and streaming again (01:40)                                                                                                                                                                                                                                                                                                                                               |
