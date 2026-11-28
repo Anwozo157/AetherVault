@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Landing page: live Azure test results (2026-11-28)
+
+- "Measured in a live Azure test" panel beside the AWS one: all three drills from 27–28 Nov with
+  recovery times (3:55, 3:57, 3:56) and data lost (5 min 7 s, 4 min 4 s, 6 min 15 s), each marked
+  FAIL for missing the 1-minute data-loss target. Labeled as our own subscription, not a customer.
+- The results panel is now one component fed per cloud. Tests pin the Azure numbers, require every
+  Azure card to show FAIL, and fail if the page claims Azure product support.
+- Checked in a real browser at desktop width and at 390 px.
+
 ### Azure Terraform state moved to Azure storage (2026-11-28)
 
 - `infra/accounts/azure` and `infra/poc/azure` use an `azurerm` backend (partial config; settings in
