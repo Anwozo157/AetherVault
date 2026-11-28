@@ -11,3 +11,4 @@ test-results
 dist-console
 dist-collector
 !.env.production
+dist-collector-azure/

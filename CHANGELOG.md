@@ -5,6 +5,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+- **Azure Site Recovery collector** (`collector-azure/`, `src/integrations/azureAsr/`): reads one
+  Recovery Services vault with GETs only (managed identity or `az login`), maps protected items to
+  the shared replication snapshot (`azure-asr`, RPO from `rpoInSeconds`, no subscription ID) and
+  test failovers/failovers to recovery jobs. Same flags as the AWS collector (`--fixture`,
+  `--dry-run`, `--record`, `--watch`); `npm run collector:azure:package` builds the Functions zip.
+  Fixtures are redacted recordings from our own test subscription plus marked hand-built variants.
+  A dry run against the live test vault on 28 Nov mapped 1 VM (CONTINUOUS) and all 4 drills.
+
 ### Azure: database-level standby meets the 60 s target (2026-11-28)
 
 - `infra/poc/azure/db-standby.tf` (off by default): PostgreSQL streaming standby in West US 2, global
