@@ -18,6 +18,9 @@
 #   last-row            newest row on the source server
 #   jobs                recent Site Recovery jobs with start/end times (measured recovery time)
 #   cost                running estimate at list prices (billing lags 8-24 h)
+#   db-standby          plan the PostgreSQL streaming standby in the recovery region (experiment;
+#                       POC_APPROVE=yes applies); db-status shows its lag; db-drill promotes it and
+#                       measures; db-reseed rebuilds it from the primary after a drill
 #   down                plan destroy of everything `up`/`enable-replication` made; POC_APPROVE=yes
 #                       applies; then lists anything still tagged project=aethervault
 #
@@ -62,6 +65,9 @@ expires() {
   cat "$PRIV/expires"
 }
 
+# Whether the database standby experiment is on; kept privately so other commands keep it.
+db_standby_flag() { [[ -f $PRIV/db-standby ]] && cat "$PRIV/db-standby" || echo false; }
+
 ensure_key() {
   mkdir -p "$PRIV" && chmod 700 "$PRIV"
   # Throwaway key: Azure requires one for Linux VMs. No inbound port is open; never used to log in.
@@ -79,11 +85,13 @@ tf_vars() {
     "-var=enable_replication=$repl" \
     "-var=expires=$(expires)" \
     "-var=auto_shutdown_time=$SHUTDOWN" \
-    "-var=alert_email=${POC_ALERT_EMAIL:-}"
+    "-var=alert_email=${POC_ALERT_EMAIL:-}" \
+    "-var=enable_db_standby=$(db_standby_flag)"
 }
 
 plan_apply() {
-  local repl="$1" destroy="${2:-}"
+  local repl="$1"; shift
+  local -a extra=("$@")
   local -a vars=()
   local line
   # bash 3.2 (macOS) has no mapfile.
@@ -91,7 +99,7 @@ plan_apply() {
   [[ -f $PRIV/backend-poc.hcl ]] || die "missing $PRIV/backend-poc.hcl (remote state settings; see infra/README.md)"
   tf init -input=false -backend-config="$PRIV/backend-poc.hcl" >/dev/null
   # State lives in the private Azure storage account (Entra ID only), never in the repo.
-  tf plan -input=false $destroy "${vars[@]}" -out=tfplan
+  tf plan -input=false ${extra[@]+"${extra[@]}"} "${vars[@]}" -out=tfplan
   approved || return 0
   tf apply -input=false tfplan
   rm -f "$TF_DIR/tfplan"
@@ -238,9 +246,56 @@ PY
   echo "Actual (lags 8-24 h): az consumption usage list --top 20 -o table"
 }
 
+db_vm() { out db_standby_vm_name; }
+
+cmd_db_standby() {
+  echo true >"$PRIV/db-standby"
+  say "Plan: PostgreSQL streaming standby in the recovery region (second small VM, VNet peering)"
+  plan_apply true
+}
+
+cmd_db_status() {
+  [[ -n $(db_vm) ]] || die "no standby (run db-standby)"
+  say "Primary: replication connections"
+  run_on "$(source_rg)" "$(out source_vm_name)" \
+    'sudo -u postgres psql -Atc "select application_name, state, sync_state, coalesce(replay_lag::text, '"'"'0'"'"') from pg_stat_replication"'
+  say "Standby: in recovery, replay delay, newest row"
+  run_on "$(target_rg)" "$(db_vm)" \
+    'sudo -u postgres psql -Atc "select pg_is_in_recovery(), now() - pg_last_xact_replay_timestamp(), max(written_at) from heartbeat"; date -u +%FT%T.%3NZ'
+}
+
+# A real failover of the database tier: promote the standby, then measure. The source keeps
+# running; afterwards the standby has diverged and must be rebuilt with db-reseed.
+cmd_db_drill() {
+  [[ -n $(db_vm) ]] || die "no standby (run db-standby)"
+  echo "Promotes the standby to a writable primary (it stops following the source; db-reseed rebuilds it)."
+  approved || return 0
+  local req; req="$(now_iso)"; echo "requested (this Mac) $req"
+  # The "disaster" moment T is taken on the standby itself, immediately before promoting, so
+  # rows that arrive during the Run Command start-up don't count in our favour. Data loss is
+  # T minus the newest source row the standby had; Run Command overhead is reported separately.
+  run_on "$(target_rg)" "$(db_vm)" '
+    T=$(sudo -u postgres psql -Atc "select clock_timestamp()")
+    sudo -u postgres psql -Atc "select pg_promote(true, 60)" >/dev/null
+    W=$(sudo -u postgres psql -Atc "insert into heartbeat default values returning clock_timestamp()" | head -1)
+    sudo -u postgres psql -Atc "select '"'"'T (failure)       '"'"' || '"'"'$T'"'"',
+      '"'"'newest source row '"'"' || max(written_at) from heartbeat where written_at < '"'"'$T'"'"'::timestamptz and id < (select max(id) from heartbeat)" -F " "
+    echo "writable at       $W"
+    sudo -u postgres psql -Atc "select '"'"'data loss         '"'"' || round(extract(epoch from '"'"'$T'"'"'::timestamptz - max(written_at))::numeric, 3) || '"'"' s'"'"',
+      '"'"'promote to write  '"'"' || round(extract(epoch from '"'"'$W'"'"'::timestamptz - '"'"'$T'"'"'::timestamptz)::numeric, 3) || '"'"' s'"'"'
+      from heartbeat where written_at < '"'"'$T'"'"'::timestamptz and id < (select max(id) from heartbeat)" -F " | "'
+  echo "finished (this Mac) $(now_iso)  (includes Azure Run Command start-up)"
+}
+
+cmd_db_reseed() {
+  say "Plan: rebuild the standby from the primary (re-runs the seed Run Command)"
+  plan_apply true "-replace=azurerm_virtual_machine_run_command.standby_seed[0]"
+}
+
 cmd_down() {
   say "Plan: destroy everything this test created (the resource groups stay; they belong to infra/accounts/azure)"
   plan_apply true -destroy
+  rm -f "$PRIV/db-standby"
   say "Anything still tagged project=aethervault (resource groups are expected)"
   az resource list --tag project=aethervault --query '[].[type,name,resourceGroup]' -o tsv
 }
@@ -259,6 +314,10 @@ main() {
     verify-drill) cmd_verify_drill "$@" ;;
     drill-cleanup) cmd_drill_cleanup ;;
     last-row) cmd_last_row ;;
+    db-standby) cmd_db_standby ;;
+    db-status) cmd_db_status ;;
+    db-drill) cmd_db_drill ;;
+    db-reseed) cmd_db_reseed ;;
     jobs) cmd_jobs ;;
     cost) cmd_cost ;;
     down) cmd_down ;;

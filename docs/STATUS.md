@@ -71,6 +71,10 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
   `docs/AZURE_LIVE_POC.md`. **Agent next:** 24 h lag record (auto-shutdown off, founder OK), spaced
   drills, test whether the API can use "Latest (lowest RPO)", then the Azure collector on the
   recorded responses.
+  **2026-11-28 (later):** drill 4 ("Latest", low lag) still 326 s lost; **database standby
+  experiment meets the target: 0.27 s and 0.17 s lost, writable in 0.3 s** (`db-standby.tf`).
+  Standby VM left running (auto-shutdown 23:00 ET); landing page shows the Azure drills (merged,
+  not pushed or deployed).
   **2026-11-28:** pushed to GitHub; Azure Terraform state moved into the private Azure storage
   account (backend settings: `~/Developer/AegisCoreLabs-private/azure-poc/backend-*.hcl`).
 - **AWS (2026-11-26, checked read-only):** verification documents submitted; no reply yet. The DR test

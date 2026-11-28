@@ -5,6 +5,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Azure: database-level standby meets the 60 s target (2026-11-28)
+
+- `infra/poc/azure/db-standby.tf` (off by default): PostgreSQL streaming standby in West US 2, global
+  VNet peering, replication role and slot; password random, in private state only, delivered via
+  Run Command protected parameters. `azure-source.sh db-standby | db-status | db-drill | db-reseed`.
+- Live: two promote drills lost **0.27 s and 0.17 s** of data (target 60 s) and were writable in
+  0.28–0.30 s. Site Recovery drill 4 ("Latest (lowest RPO)" at 74 s lag) still lost 326 s: on test
+  failover "Latest" uses the 5-minute point.
+- Drill measurement fix: the failure moment is taken on the standby, not the Mac (a first run that
+  flattered the result was discarded and is recorded as such).
+
 ### Landing page: live Azure test results (2026-11-28)
 
 - "Measured in a live Azure test" panel beside the AWS one: all three drills from 27–28 Nov with
