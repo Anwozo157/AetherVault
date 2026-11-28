@@ -1,7 +1,7 @@
 # Project Status
 
 > Living handoff document. **Every agent or contributor updates this at the end of a session.**
-> Last updated: 2026-11-28 (Azure protected; two drills) by Claude Code (Opus 5.5).
+> Last updated: 2026-11-28 (Azure protected; three drills) by Claude Code (Opus 5.5).
 
 ## Finding what's done (read this first)
 
@@ -65,8 +65,8 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
   **2026-11-27/28 Azure live test (founder: "get something on the board"):** free trial (spending
   limit on); source moved to North Central US (East US closed to the trial); kernel pinned (Site
   Recovery agent didn't support the image's 7.0.0-1020 kernel). Protected, health Normal, RPO
-  ~1–2 min. **Two drills: recovery 3:55 and 3:57 (PASS vs 15 min); data loss 306.7 s and 243.9 s
-  (FAIL vs 60 s; 5-minute recovery points).** Spend ~$0.01. Replication left running; auto-shutdown
+  ~1–2 min. **Three drills: recovery 3:55, 3:57, 3:56 (PASS vs 15 min); data loss 306.7 s, 243.9 s,
+  374.8 s (FAIL vs 60 s; 5-minute recovery points; "Latest (lowest RPO)" gave no gain).** Spend ~$0.01. Replication left running; auto-shutdown
   23:00 US Eastern daily; **teardown by 2026-12-18** (`azure-source.sh down`). Details:
   `docs/AZURE_LIVE_POC.md`. **Agent next:** 24 h lag record (auto-shutdown off, founder OK), spaced
   drills, test whether the API can use "Latest (lowest RPO)", then the Azure collector on the
