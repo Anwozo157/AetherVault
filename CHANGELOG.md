@@ -21,6 +21,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
   drill evidence names Azure Site Recovery as the source; "Recoveries measured by Azure" lists
   test failovers with Azure's job times. Checked in a browser (desktop and 390 px) with the real
   test vault pushing into local Supabase.
+- `scripts/poc/azure-lag-record.sh`: 24 h record (hourly RPO and standby samples, drills spread
+  through the day), re-enables auto-shutdown when it ends.
 
 ### Azure: database-level standby meets the 60 s target (2026-11-28)
 
