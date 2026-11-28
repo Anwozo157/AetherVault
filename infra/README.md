@@ -18,6 +18,18 @@ Rules:
   use managed identities. Real IDs go in `*.tfvars` (gitignored) or the private folder.
 - **State is never committed** (`.gitignore`); provider lock files are, so provider versions and
   checksums are pinned.
+- **Azure state is remote** (since 2026-11-28): both Azure folders keep state in the private storage
+  account that `accounts/azure` creates (Entra ID only, no account keys, versioned, 30-day soft
+  delete), keys `accounts-azure.tfstate` and `poc-azure.tfstate`. Backend settings live outside the
+  repo in `~/Developer/AegisCoreLabs-private/azure-poc/backend-{accounts,poc}.hcl`:
+
+  ```sh
+  terraform -chdir=infra/accounts/azure init -backend-config=$HOME/Developer/AegisCoreLabs-private/azure-poc/backend-accounts.hcl
+  ```
+
+  `scripts/poc/azure-source.sh` passes `backend-poc.hcl` itself. Access needs the **Storage Blob
+  Data Contributor** role on that account (Owner alone is not enough for blob data).
+
 - **Everything is tagged** `project=aethervault`, `env`, `owner`, `expires`, so teardown checks find it.
 - CI runs `terraform fmt -check`, `terraform validate` and a Checkov scan on every folder.
 

@@ -20,6 +20,12 @@
 # $25/month: tear down inside 31 days.
 
 terraform {
+  # Remote state in the private storage account from infra/accounts/azure (Entra ID only, no
+  # account keys, versioned). Settings live outside the repo:
+  #   terraform init -backend-config=~/Developer/AegisCoreLabs-private/azure-poc/backend-poc.hcl
+  # CI validates with -backend=false and needs no credentials.
+  backend "azurerm" {}
+
   required_version = ">= 1.9"
   required_providers {
     azurerm = {

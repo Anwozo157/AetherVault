@@ -90,6 +90,13 @@ From the research (`docs/MULTICLOUD_DR.md`), not yet confirmed by Microsoft's do
    silently break protection; AetherVault should compare each protected VM's kernel with Microsoft's
    published list (`Azure/Azure-SiteRecovery`, `MobilityAgent/AzureToAzure/SupportedKernels`).
 
+3. **Role assignment lost on a same-name re-create (2026-11-28).** Re-creating the state storage
+   account under the same name (region move) left Terraform recording a new Storage Blob Data
+   Contributor assignment that Azure no longer had (`RoleAssignmentNotFound`); likely the old
+   account's asynchronous cleanup removed it. Found when the state migration got 403
+   `AuthorizationPermissionMismatch`; re-created and imported. Lesson: after replacing a resource
+   with the same name, re-check its role assignments.
+
 ## Evidence
 
 _(Filled in during the test: timestamps in UTC, as in `docs/AWS_LIVE_POC.md`.)_

@@ -71,6 +71,8 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
   `docs/AZURE_LIVE_POC.md`. **Agent next:** 24 h lag record (auto-shutdown off, founder OK), spaced
   drills, test whether the API can use "Latest (lowest RPO)", then the Azure collector on the
   recorded responses.
+  **2026-11-28:** pushed to GitHub; Azure Terraform state moved into the private Azure storage
+  account (backend settings: `~/Developer/AegisCoreLabs-private/azure-poc/backend-*.hcl`).
 - **AWS (2026-11-26, checked read-only):** verification documents submitted; no reply yet. The DR test
   account's key is still rejected. The first account reports ACTIVE but a new AWS policy
   (`p-w8q5iueo`) now blocks EC2, Lambda and DRS there; this month's bill is $0. **Don't open a third

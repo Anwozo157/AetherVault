@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Azure Terraform state moved to Azure storage (2026-11-28)
+
+- `infra/accounts/azure` and `infra/poc/azure` use an `azurerm` backend (partial config; settings in
+  the private folder, so no IDs in the repo). State migrated from this Mac into the private state
+  account (Entra ID only, versioned); local copies backed up privately, then removed. Both plans
+  show no changes afterwards. `azure-source.sh` passes the backend config on `init`.
+- Fix: the state account's Storage Blob Data Contributor assignment had vanished after the account
+  was re-created under the same name; re-created and imported into state.
+
 ### Azure live test: protected and first drill (2026-11-27)
 
 - Source region moved to North Central US: this free trial can't create VMs in East US and most
