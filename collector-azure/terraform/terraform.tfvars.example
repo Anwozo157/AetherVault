@@ -1,0 +1,8 @@
+subscription_id      = "00000000-0000-0000-0000-000000000000"
+resource_group_name  = "rg-aethervault-poc-target"
+location             = "westus2"
+vault_id             = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc"
+vault_region         = "westus2"
+aethervault_url      = "https://<project-ref>.supabase.co"
+aethervault_anon_key = "<public anon key>"
+# ingest_token: pass with TF_VAR_ingest_token from the console, never in this file.

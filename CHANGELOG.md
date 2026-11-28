@@ -12,6 +12,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
   `--dry-run`, `--record`, `--watch`); `npm run collector:azure:package` builds the Functions zip.
   Fixtures are redacted recordings from our own test subscription plus marked hand-built variants.
   A dry run against the live test vault on 28 Nov mapped 1 VM (CONTINUOUS) and all 4 drills.
+- **Collector Terraform** (`collector-azure/terraform/`, validated, not applied): Flex Consumption
+  Function app with a system-assigned identity that holds only Site Recovery Reader on the vault;
+  key-less deployment storage; ingest token as an app setting (so state uses the remote backend).
+  CI now formats, validates and scans this folder too.
 
 ### Azure: database-level standby meets the 60 s target (2026-11-28)
 
