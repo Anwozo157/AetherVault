@@ -88,8 +88,9 @@ plan_apply() {
   local line
   # bash 3.2 (macOS) has no mapfile.
   while IFS= read -r line; do vars+=("$line"); done < <(tf_vars "$repl")
-  tf init -input=false >/dev/null
-  # State lives in this folder (gitignored); it holds resource IDs only, no secrets.
+  [[ -f $PRIV/backend-poc.hcl ]] || die "missing $PRIV/backend-poc.hcl (remote state settings; see infra/README.md)"
+  tf init -input=false -backend-config="$PRIV/backend-poc.hcl" >/dev/null
+  # State lives in the private Azure storage account (Entra ID only), never in the repo.
   tf plan -input=false $destroy "${vars[@]}" -out=tfplan
   approved || return 0
   tf apply -input=false tfplan
