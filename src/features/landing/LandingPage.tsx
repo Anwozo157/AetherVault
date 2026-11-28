@@ -170,7 +170,8 @@ function WindowChrome({ title, tag }: { title: string; tag: string }) {
 
 type LiveResult = {
   name: string;
-  pass: boolean;
+  /** One badge per target, e.g. [['Recovery', true], ['Data loss', false]]; '' = overall. */
+  verdicts: [string, boolean][];
   facts: [string, string][];
   note: string;
 };
@@ -179,7 +180,10 @@ type LiveResult = {
 const LIVE_RESULTS: LiveResult[] = [
   {
     name: 'Drill 2',
-    pass: true,
+    verdicts: [
+      ['Recovery', true],
+      ['Data loss', true],
+    ],
     facts: [
       ['App verified', '12 min 29 s'],
       ['Data lost', 'about 8 s'],
@@ -189,7 +193,10 @@ const LIVE_RESULTS: LiveResult[] = [
   },
   {
     name: 'Drill 1',
-    pass: false,
+    verdicts: [
+      ['Recovery', false],
+      ['Data loss', true],
+    ],
     facts: [
       ['Server running', '17 min 14 s'],
       ['Data lost', 'none'],
@@ -199,7 +206,7 @@ const LIVE_RESULTS: LiveResult[] = [
   },
   {
     name: 'Alert test',
-    pass: true,
+    verdicts: [['', true]],
     facts: [
       ['Slack warning', '1 min 40 s'],
       ['After', 'replication stopped'],
@@ -213,7 +220,10 @@ const LIVE_RESULTS: LiveResult[] = [
 const AZURE_RESULTS: LiveResult[] = [
   {
     name: 'Warm-up drill',
-    pass: false,
+    verdicts: [
+      ['Recovery', true],
+      ['Data loss', false],
+    ],
     facts: [
       ['Database working', '3 min 55 s'],
       ['Data lost', '5 min 7 s'],
@@ -223,7 +233,10 @@ const AZURE_RESULTS: LiveResult[] = [
   },
   {
     name: 'Drill 2',
-    pass: false,
+    verdicts: [
+      ['Recovery', true],
+      ['Data loss', false],
+    ],
     facts: [
       ['Database working', '3 min 57 s'],
       ['Data lost', '4 min 4 s'],
@@ -233,7 +246,10 @@ const AZURE_RESULTS: LiveResult[] = [
   },
   {
     name: 'Drill 3',
-    pass: false,
+    verdicts: [
+      ['Recovery', true],
+      ['Data loss', false],
+    ],
     facts: [
       ['Database working', '3 min 56 s'],
       ['Data lost', '6 min 15 s'],
@@ -243,7 +259,10 @@ const AZURE_RESULTS: LiveResult[] = [
   },
   {
     name: 'Drill 4',
-    pass: false,
+    verdicts: [
+      ['Recovery', true],
+      ['Data loss', false],
+    ],
     facts: [
       ['Database working', '3 min 22 s'],
       ['Data lost', '5 min 26 s'],
@@ -253,7 +272,10 @@ const AZURE_RESULTS: LiveResult[] = [
   },
   {
     name: 'Database standby (2 drills)',
-    pass: true,
+    verdicts: [
+      ['Recovery', true],
+      ['Data loss', true],
+    ],
     facts: [
       ['Writable after', '0.3 s'],
       ['Data lost', '0.17 s · 0.27 s'],
@@ -302,6 +324,25 @@ const LIVE_PANELS: LivePanel[] = [
   },
 ];
 
+/** One PASS/FAIL badge, optionally naming the target it was judged against. */
+function Verdict({ target, ok }: { target: string; ok: boolean }) {
+  const Icon = ok ? CheckCircle2 : XCircle;
+  return (
+    <span
+      data-verdict={`${target ? `${target} ` : ''}${ok ? 'PASS' : 'FAIL'}`}
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-mono font-semibold ${
+        ok
+          ? 'border-aether-green/40 bg-aether-green/10 text-aether-green'
+          : 'border-aether-red/40 bg-aether-red/10 text-aether-red'
+      }`}
+    >
+      <Icon className="w-3 h-3" aria-hidden="true" />
+      {target && <span className="font-normal opacity-80">{target}</span>}
+      {ok ? 'PASS' : 'FAIL'}
+    </span>
+  );
+}
+
 function LiveTestResults({ cloud, title, badge, intro, results }: LivePanel) {
   return (
     <div
@@ -316,21 +357,15 @@ function LiveTestResults({ cloud, title, badge, intro, results }: LivePanel) {
       </div>
       <p className="mt-2 text-sm text-zinc-400 leading-relaxed">{intro}</p>
       <ul className="mt-5 grid gap-4 md:grid-cols-3">
-        {results.map(({ name, pass, facts, note }) => (
+        {results.map(({ name, verdicts, facts, note }) => (
           <li key={name} className="rounded-xl border border-white/10 bg-black/30 p-4">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col items-start gap-2">
               <span className="text-sm font-semibold text-white">{name}</span>
-              {pass ? (
-                <span className="inline-flex items-center gap-1 rounded-full border border-aether-green/40 bg-aether-green/10 px-2 py-0.5 text-[11px] font-mono font-semibold text-aether-green">
-                  <CheckCircle2 className="w-3 h-3" aria-hidden="true" />
-                  PASS
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 rounded-full border border-aether-red/40 bg-aether-red/10 px-2 py-0.5 text-[11px] font-mono font-semibold text-aether-red">
-                  <XCircle className="w-3 h-3" aria-hidden="true" />
-                  FAIL
-                </span>
-              )}
+              <span className="flex flex-wrap gap-1.5">
+                {verdicts.map(([target, ok]) => (
+                  <Verdict key={target || 'overall'} target={target} ok={ok} />
+                ))}
+              </span>
             </div>
             <dl className="mt-3 space-y-1.5 text-xs">
               {facts.map(([k, v]) => (
