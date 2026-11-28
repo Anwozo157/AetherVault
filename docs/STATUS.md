@@ -73,8 +73,9 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
   recorded responses.
   **2026-11-28 (later):** drill 4 ("Latest", low lag) still 326 s lost; **database standby
   experiment meets the target: 0.27 s and 0.17 s lost, writable in 0.3 s** (`db-standby.tf`).
-  Standby VM left running (auto-shutdown 23:00 ET); landing page shows the Azure drills (merged,
-  not pushed or deployed).
+  Standby VM left running (auto-shutdown 23:00 ET); landing page shows the Azure drills and
+  the standby result (**deployed `db3753c`, 2026-11-28**; CI green). Hosted DB migration
+  `20261126000014_multicloud_groundwork` is NOT applied yet (founder approval; the site does not need it).
   **2026-11-28:** pushed to GitHub; Azure Terraform state moved into the private Azure storage
   account (backend settings: `~/Developer/AegisCoreLabs-private/azure-poc/backend-*.hcl`).
 - **AWS (2026-11-26, checked read-only):** verification documents submitted; no reply yet. The DR test
