@@ -209,22 +209,94 @@ const LIVE_RESULTS: LiveResult[] = [
   },
 ];
 
-function LiveTestResults() {
-  return (
-    <div className="mt-12 landing-ring rounded-2xl bg-aether-panel p-5 sm:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className="font-semibold text-white">Measured in a live AWS test</h3>
-        <span className="rounded-md border border-aether-cyan/30 bg-aether-cyan/10 px-2 py-0.5 text-[10px] font-mono tracking-wider text-aether-cyan">
-          REAL DATA · 17–18 NOV 2026
-        </span>
-      </div>
-      <p className="mt-2 text-sm text-zinc-400 leading-relaxed">
+/** Real results from our own Azure test subscription (docs/AZURE_LIVE_POC.md, 27–28 Nov 2026). Not a customer. */
+const AZURE_RESULTS: LiveResult[] = [
+  {
+    name: 'Warm-up drill',
+    pass: false,
+    facts: [
+      ['Database working', '3 min 55 s'],
+      ['Data lost', '5 min 7 s'],
+      ['Targets', '15 min · 1 min'],
+    ],
+    note: 'Recovery target met. Data loss missed: Azure creates recovery points every 5 minutes.',
+  },
+  {
+    name: 'Drill 2',
+    pass: false,
+    facts: [
+      ['Database working', '3 min 57 s'],
+      ['Data lost', '4 min 4 s'],
+      ['Targets', '15 min · 1 min'],
+    ],
+    note: 'Same result an hour later: recovery in under 4 minutes, minutes of data lost.',
+  },
+  {
+    name: 'Drill 3',
+    pass: false,
+    facts: [
+      ['Database working', '3 min 56 s'],
+      ['Data lost', '6 min 15 s'],
+      ['Targets', '15 min · 1 min'],
+    ],
+    note: 'Used Azure\'s "Latest (lowest RPO)" option. No gain: replication had fallen about 4 minutes behind.',
+  },
+];
+
+type LivePanel = {
+  cloud: string;
+  title: string;
+  badge: string;
+  intro: ReactNode;
+  results: LiveResult[];
+};
+
+const LIVE_PANELS: LivePanel[] = [
+  {
+    cloud: 'aws',
+    title: 'Measured in a live AWS test',
+    badge: 'REAL DATA · 17–18 NOV 2026',
+    intro: (
+      <>
         Our own AWS test account, not a customer: one test server replicating from us-east-1 to
         us-west-2 with AWS Elastic Disaster Recovery. Times come from AWS&apos;s job logs and
         CloudTrail. Both drills are shown, including the miss.
-      </p>
+      </>
+    ),
+    results: LIVE_RESULTS,
+  },
+  {
+    cloud: 'azure',
+    title: 'Measured in a live Azure test',
+    badge: 'REAL DATA · 27–28 NOV 2026',
+    intro: (
+      <>
+        Our own Azure test subscription, not a customer: one test server replicating from North
+        Central US to West US 2 with Azure Site Recovery. Recovery times come from Azure&apos;s job
+        logs; data loss from the recovered database itself. All three drills are shown. Azure
+        recovered faster than AWS but lost minutes of data every time: the kind of difference
+        AetherVault measures for you.
+      </>
+    ),
+    results: AZURE_RESULTS,
+  },
+];
+
+function LiveTestResults({ cloud, title, badge, intro, results }: LivePanel) {
+  return (
+    <div
+      className="mt-12 landing-ring rounded-2xl bg-aether-panel p-5 sm:p-6"
+      data-testid={`live-results-${cloud}`}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h3 className="font-semibold text-white">{title}</h3>
+        <span className="rounded-md border border-aether-cyan/30 bg-aether-cyan/10 px-2 py-0.5 text-[10px] font-mono tracking-wider text-aether-cyan">
+          {badge}
+        </span>
+      </div>
+      <p className="mt-2 text-sm text-zinc-400 leading-relaxed">{intro}</p>
       <ul className="mt-5 grid gap-4 md:grid-cols-3">
-        {LIVE_RESULTS.map(({ name, pass, facts, note }) => (
+        {results.map(({ name, pass, facts, note }) => (
           <li key={name} className="rounded-xl border border-white/10 bg-black/30 p-4">
             <div className="flex items-center justify-between gap-3">
               <span className="text-sm font-semibold text-white">{name}</span>
@@ -587,7 +659,9 @@ export default function LandingPage({
             </div>
             <EvidencePreview />
           </div>
-          <LiveTestResults />
+          {LIVE_PANELS.map((panel) => (
+            <LiveTestResults key={panel.cloud} {...panel} />
+          ))}
         </Section>
 
         <Section

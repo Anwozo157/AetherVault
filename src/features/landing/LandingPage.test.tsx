@@ -30,12 +30,41 @@ describe('LandingPage', () => {
 
   test('live AWS test results are real, dated, and show the miss', () => {
     render(<LandingPage />);
-    expect(screen.getByText('Measured in a live AWS test')).toBeInTheDocument();
-    expect(screen.getByText(/REAL DATA · 17–18 NOV 2026/)).toBeInTheDocument();
-    expect(screen.getByText(/not a customer/)).toBeInTheDocument();
-    expect(screen.getByText('12 min 29 s')).toBeInTheDocument();
-    expect(screen.getByText('17 min 14 s')).toBeInTheDocument();
-    expect(screen.getByText('FAIL')).toBeInTheDocument();
+    const aws = screen.getByTestId('live-results-aws');
+    expect(within(aws).getByText('Measured in a live AWS test')).toBeInTheDocument();
+    expect(within(aws).getByText(/REAL DATA · 17–18 NOV 2026/)).toBeInTheDocument();
+    expect(within(aws).getByText(/not a customer/)).toBeInTheDocument();
+    expect(within(aws).getByText('12 min 29 s')).toBeInTheDocument();
+    expect(within(aws).getByText('17 min 14 s')).toBeInTheDocument();
+    expect(within(aws).getAllByText('FAIL')).toHaveLength(1);
+  });
+
+  test('live Azure test results are real, dated, and show every data-loss miss', () => {
+    render(<LandingPage />);
+    const azure = screen.getByTestId('live-results-azure');
+    expect(within(azure).getByText('Measured in a live Azure test')).toBeInTheDocument();
+    expect(within(azure).getByText(/REAL DATA · 27–28 NOV 2026/)).toBeInTheDocument();
+    expect(within(azure).getByText(/not a customer/)).toBeInTheDocument();
+    // Recovery times (docs/AZURE_LIVE_POC.md) and the data lost on each drill.
+    for (const t of [
+      '3 min 55 s',
+      '3 min 57 s',
+      '3 min 56 s',
+      '5 min 7 s',
+      '4 min 4 s',
+      '6 min 15 s',
+    ]) {
+      expect(within(azure).getByText(t)).toBeInTheDocument();
+    }
+    // Every drill missed the 1-minute data-loss target, so none may be shown as a pass.
+    expect(within(azure).getAllByText('FAIL')).toHaveLength(3);
+    expect(within(azure).queryByText('PASS')).not.toBeInTheDocument();
+  });
+
+  test('no claim of Azure product support beyond the measured test', () => {
+    render(<LandingPage />);
+    expect(screen.queryByText(/supports? (AWS and )?Azure/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Azure integration/i)).not.toBeInTheDocument();
   });
 
   test('3D visuals load lazily (globe and replication scene)', async () => {
