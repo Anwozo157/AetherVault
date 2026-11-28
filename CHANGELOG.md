@@ -24,6 +24,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 - The results panel is now one component fed per cloud. Tests pin the Azure numbers, require every
   Azure card to show FAIL, and fail if the page claims Azure product support.
 - Checked in a real browser at desktop width and at 390 px.
+- Added drill 4 and the database standby result (2 promote drills: 0.17 s and 0.27 s lost, PASS,
+  labeled as an experiment promoted by hand). Tests pin 4 Site Recovery FAILs and 1 standby PASS.
 
 ### Azure Terraform state moved to Azure storage (2026-11-28)
 

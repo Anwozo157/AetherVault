@@ -241,6 +241,26 @@ const AZURE_RESULTS: LiveResult[] = [
     ],
     note: 'Used Azure\'s "Latest (lowest RPO)" option. No gain: replication had fallen about 4 minutes behind.',
   },
+  {
+    name: 'Drill 4',
+    pass: false,
+    facts: [
+      ['Database working', '3 min 22 s'],
+      ['Data lost', '5 min 26 s'],
+      ['Targets', '15 min · 1 min'],
+    ],
+    note: '"Latest (lowest RPO)" again, with replication only 74 s behind. Azure still used its 5-minute recovery point.',
+  },
+  {
+    name: 'Database standby (2 drills)',
+    pass: true,
+    facts: [
+      ['Writable after', '0.3 s'],
+      ['Data lost', '0.17 s · 0.27 s'],
+      ['Targets', '15 min · 1 min'],
+    ],
+    note: 'Experiment: a PostgreSQL standby in the recovery region, promoted by hand. Failure detection and app reconnect not included.',
+  },
 ];
 
 type LivePanel = {
@@ -273,9 +293,9 @@ const LIVE_PANELS: LivePanel[] = [
       <>
         Our own Azure test subscription, not a customer: one test server replicating from North
         Central US to West US 2 with Azure Site Recovery. Recovery times come from Azure&apos;s job
-        logs; data loss from the recovered database itself. All three drills are shown. Azure
-        recovered faster than AWS but lost minutes of data every time: the kind of difference
-        AetherVault measures for you.
+        logs; data loss from the recovered database itself. Every drill is shown. Site Recovery
+        recovered faster than AWS but lost minutes of data every time; a database standby lost under
+        a second. That is the kind of difference AetherVault measures for you.
       </>
     ),
     results: AZURE_RESULTS,
