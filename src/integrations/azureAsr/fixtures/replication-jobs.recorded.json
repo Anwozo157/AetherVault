@@ -1,0 +1,319 @@
+{
+  "value": [
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/154311bd-7c91-4991-80c0-9bb2a284b832",
+      "name": "154311bd-7c91-4991-80c0-9bb2a284b832",
+      "properties": {
+        "scenarioName": "TestFailoverCleanup",
+        "friendlyName": "Test failover cleanup",
+        "state": "InProgress",
+        "stateDescription": "InProgress",
+        "startTime": "2026-11-28T01:09:19.5083701Z",
+        "endTime": null,
+        "targetObjectName": "vm-aethervault-source",
+        "targetInstanceType": "ProtectionEntity",
+        "allowedActions": ["Cancel"]
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/1f70dc6a-261f-456a-ac61-cc182c1596d7",
+      "name": "1f70dc6a-261f-456a-ac61-cc182c1596d7",
+      "properties": {
+        "scenarioName": "TestFailover",
+        "friendlyName": "Test failover",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-28T00:51:34.7534301Z",
+        "endTime": "2026-11-28T00:54:11Z",
+        "targetObjectName": "vm-aethervault-source",
+        "targetInstanceType": "ProtectionEntity",
+        "allowedActions": []
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/0dcc6523-94b7-4bdc-b225-e72b0e864587",
+      "name": "0dcc6523-94b7-4bdc-b225-e72b0e864587",
+      "properties": {
+        "scenarioName": "TestFailoverCleanup",
+        "friendlyName": "Test failover cleanup",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-28T00:31:30.6901938Z",
+        "endTime": "2026-11-28T00:32:43Z",
+        "targetObjectName": "vm-aethervault-source",
+        "targetInstanceType": "ProtectionEntity",
+        "allowedActions": []
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/fa278527-600a-4264-b40b-5c0914d1809f",
+      "name": "fa278527-600a-4264-b40b-5c0914d1809f",
+      "properties": {
+        "scenarioName": "TestFailover",
+        "friendlyName": "Test failover",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-28T00:27:22.2073626Z",
+        "endTime": "2026-11-28T00:30:37Z",
+        "targetObjectName": "vm-aethervault-source",
+        "targetInstanceType": "ProtectionEntity",
+        "allowedActions": []
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/096086ef-3b4a-4c8a-aba9-9d0d51b1ea77",
+      "name": "096086ef-3b4a-4c8a-aba9-9d0d51b1ea77",
+      "properties": {
+        "scenarioName": "TestFailoverCleanup",
+        "friendlyName": "Test failover cleanup",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-28T00:09:17.8179202Z",
+        "endTime": "2026-11-28T00:10:30Z",
+        "targetObjectName": "vm-aethervault-source",
+        "targetInstanceType": "ProtectionEntity",
+        "allowedActions": []
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/1c93edb6-efba-4335-8559-58b646c40906",
+      "name": "1c93edb6-efba-4335-8559-58b646c40906",
+      "properties": {
+        "scenarioName": "TestFailover",
+        "friendlyName": "Test failover",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-28T00:05:09.2472934Z",
+        "endTime": "2026-11-28T00:08:28Z",
+        "targetObjectName": "vm-aethervault-source",
+        "targetInstanceType": "ProtectionEntity",
+        "allowedActions": []
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/1199d2cc-6080-4d28-af02-c51cc4e77aca",
+      "name": "1199d2cc-6080-4d28-af02-c51cc4e77aca",
+      "properties": {
+        "scenarioName": "TestFailoverCleanup",
+        "friendlyName": "Test failover cleanup",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-27T23:50:27.388648Z",
+        "endTime": "2026-11-27T23:51:40Z",
+        "targetObjectName": "vm-aethervault-source",
+        "targetInstanceType": "ProtectionEntity",
+        "allowedActions": []
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/74a5d4de-54f6-45d8-8dd1-674078c4d2cd",
+      "name": "74a5d4de-54f6-45d8-8dd1-674078c4d2cd",
+      "properties": {
+        "scenarioName": "TestFailover",
+        "friendlyName": "Test failover",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-27T23:46:10.5934739Z",
+        "endTime": "2026-11-27T23:49:20Z",
+        "targetObjectName": "vm-aethervault-source",
+        "targetInstanceType": "ProtectionEntity",
+        "allowedActions": []
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/623e74a6-900a-45b7-994a-ffd1326e2565",
+      "name": "623e74a6-900a-45b7-994a-ffd1326e2565",
+      "properties": {
+        "scenarioName": "UpdateVmProperties",
+        "friendlyName": "Update the virtual machine",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-27T23:24:36.2408994Z",
+        "endTime": "2026-11-27T23:24:43Z",
+        "targetObjectName": "vm-aethervault-source",
+        "targetInstanceType": "ProtectionEntity",
+        "allowedActions": []
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/9f4c3d10-47de-4460-91fa-6f6917f4fd16",
+      "name": "9f4c3d10-47de-4460-91fa-6f6917f4fd16",
+      "properties": {
+        "scenarioName": "SecondaryIrCompletion",
+        "friendlyName": "Finalize protection on the recovery virtual machine",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-27T23:23:24.3864565Z",
+        "endTime": "2026-11-27T23:23:40Z",
+        "targetObjectName": "vm-aethervault-source",
+        "targetInstanceType": "ProtectionEntity",
+        "allowedActions": []
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/db163d53-b6f7-409e-8389-604624528ec6",
+      "name": "db163d53-b6f7-409e-8389-604624528ec6",
+      "properties": {
+        "scenarioName": "PrimaryIrCompletion",
+        "friendlyName": "Finalize protection on the primary virtual machine",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-27T23:14:53.622955Z",
+        "endTime": "2026-11-27T23:14:55Z",
+        "targetObjectName": "vm-aethervault-source",
+        "targetInstanceType": "ProtectionEntity",
+        "allowedActions": []
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/10cec66e-2814-43fb-ba09-b94b8957188a",
+      "name": "10cec66e-2814-43fb-ba09-b94b8957188a",
+      "properties": {
+        "scenarioName": "EnableDr",
+        "friendlyName": "Enable replication",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-27T22:55:00.3200254Z",
+        "endTime": "2026-11-27T23:05:14Z",
+        "targetObjectName": "vm-aethervault-source",
+        "targetInstanceType": "ProtectionEntity",
+        "allowedActions": []
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/758efc61-fea7-42c1-b5ab-25f403a0c5cb",
+      "name": "758efc61-fea7-42c1-b5ab-25f403a0c5cb",
+      "properties": {
+        "scenarioName": "DisableDr",
+        "friendlyName": "Disable replication",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-27T22:49:26.7687651Z",
+        "endTime": "2026-11-27T22:49:35Z",
+        "targetObjectName": "vm-aethervault-source",
+        "targetInstanceType": "ProtectionEntity",
+        "allowedActions": []
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/dbac0237-34e1-4469-a77c-029d6e40cf34",
+      "name": "dbac0237-34e1-4469-a77c-029d6e40cf34",
+      "properties": {
+        "scenarioName": "EnableDr",
+        "friendlyName": "Enable replication",
+        "state": "Failed",
+        "stateDescription": "Failed",
+        "startTime": "2026-11-27T22:35:46.7090546Z",
+        "endTime": "2026-11-27T22:41:36Z",
+        "targetObjectName": "vm-aethervault-source",
+        "targetInstanceType": "ProtectionEntity",
+        "allowedActions": ["Restart"]
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/0ba889d6-36c7-4ae2-a44d-f7d56d6273f9",
+      "name": "0ba889d6-36c7-4ae2-a44d-f7d56d6273f9",
+      "properties": {
+        "scenarioName": "AssociateProtectionProfile",
+        "friendlyName": "Associate replication policy",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-27T22:33:11.6778959Z",
+        "endTime": "2026-11-27T22:35:33Z",
+        "targetObjectName": "policy-aethervault-1day",
+        "targetInstanceType": "ProtectionProfile",
+        "allowedActions": []
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/76b62d92-4114-4423-95a5-53ddef726c21",
+      "name": "76b62d92-4114-4423-95a5-53ddef726c21",
+      "properties": {
+        "scenarioName": "CreateCloud",
+        "friendlyName": "Create protection container",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-27T22:32:39.5563148Z",
+        "endTime": "2026-11-27T22:32:40Z",
+        "targetObjectName": "container-secondary",
+        "targetInstanceType": "ProtectionContainer",
+        "allowedActions": []
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/7d4a8731-cdb4-4a7b-8818-834e8e341dfe",
+      "name": "7d4a8731-cdb4-4a7b-8818-834e8e341dfe",
+      "properties": {
+        "scenarioName": "NetworkPairing",
+        "friendlyName": "Map Networks",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-27T22:32:39.5423981Z",
+        "endTime": "2026-11-27T22:32:43Z",
+        "targetObjectName": "vnet-aethervault-source",
+        "targetInstanceType": "Network",
+        "allowedActions": []
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/b86eac62-c603-485c-bf68-71eede0ab519",
+      "name": "b86eac62-c603-485c-bf68-71eede0ab519",
+      "properties": {
+        "scenarioName": "CreateSite",
+        "friendlyName": "Create a site",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-27T22:31:06.3574509Z",
+        "endTime": "2026-11-27T22:32:37Z",
+        "targetObjectName": "fabric-secondary",
+        "targetInstanceType": "Server",
+        "allowedActions": []
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/3cff2fd3-f742-4531-9c7a-6637e41e2fd3",
+      "name": "3cff2fd3-f742-4531-9c7a-6637e41e2fd3",
+      "properties": {
+        "scenarioName": "CreateCloud",
+        "friendlyName": "Create protection container",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-27T22:31:01.8394608Z",
+        "endTime": "2026-11-27T22:31:02Z",
+        "targetObjectName": "container-primary",
+        "targetInstanceType": "ProtectionContainer",
+        "allowedActions": []
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/e3985456-0ce9-4f20-b6f1-05abe292ebbb",
+      "name": "e3985456-0ce9-4f20-b6f1-05abe292ebbb",
+      "properties": {
+        "scenarioName": "AddProtectionProfile",
+        "friendlyName": "Create replication policy",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-27T22:29:32.6885655Z",
+        "endTime": "2026-11-27T22:29:33Z",
+        "targetObjectName": "policy-aethervault-1day",
+        "targetInstanceType": "ProtectionProfile",
+        "allowedActions": []
+      }
+    },
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationJobs/6716e413-82c0-4726-9388-5f819adda23b",
+      "name": "6716e413-82c0-4726-9388-5f819adda23b",
+      "properties": {
+        "scenarioName": "CreateSite",
+        "friendlyName": "Create a site",
+        "state": "Succeeded",
+        "stateDescription": "Completed",
+        "startTime": "2026-11-27T22:29:28.1724948Z",
+        "endTime": "2026-11-27T22:30:58Z",
+        "targetObjectName": "fabric-primary",
+        "targetInstanceType": "Server",
+        "allowedActions": []
+      }
+    }
+  ]
+}

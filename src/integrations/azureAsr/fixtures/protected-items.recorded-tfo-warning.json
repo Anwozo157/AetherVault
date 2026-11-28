@@ -1,0 +1,47 @@
+{
+  "value": [
+    {
+      "id": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-aethervault-poc-target/providers/Microsoft.RecoveryServices/vaults/rsv-aethervault-poc/replicationFabrics/fabric-primary/replicationProtectionContainers/container-primary/replicationProtectedItems/vm-aethervault-source",
+      "name": "vm-aethervault-source",
+      "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectedItems",
+      "properties": {
+        "friendlyName": "vm-aethervault-source",
+        "protectionState": "Protected",
+        "protectionStateDescription": "Protected",
+        "replicationHealth": "Normal",
+        "testFailoverState": "None",
+        "lastSuccessfulTestFailoverTime": null,
+        "healthErrors": [
+          {
+            "errorCode": "161011",
+            "errorLevel": "Warning",
+            "errorMessage": "No successful test failover has been done on the virtual machine 'vm-aethervault-source'.",
+            "recommendedAction": "Do a test failover on the virtual machine.",
+            "creationTimeUtc": "2026-11-27T23:24:46.7550499Z"
+          }
+        ],
+        "providerSpecificDetails": {
+          "instanceType": "A2A",
+          "rpoInSeconds": 105,
+          "lastRpoCalculatedTime": "2026-11-27T23:22:43.3892992Z",
+          "lastHeartbeat": "2026-11-27T23:22:28.7447655Z",
+          "monitoringPercentageCompletion": 0,
+          "vmProtectionState": "Protected",
+          "primaryFabricLocation": "northcentralus",
+          "recoveryFabricLocation": "westus2",
+          "agentVersion": "9.68.7978.1",
+          "protectedManagedDisks": [
+            {
+              "diskName": "osdisk-aethervault-source",
+              "diskCapacityInBytes": 34359738368,
+              "dataPendingAtSourceAgentInMB": 0.2890625,
+              "dataPendingInStagingStorageAccountInMB": 0.0,
+              "diskState": "Protected",
+              "resyncRequired": false
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -21,7 +21,8 @@ export interface SnapshotServer {
 }
 
 export interface ReplicationSnapshotPayload {
-  source: 'aws-drs' | 'fixture';
+  /** Shared by every cloud's collector (azure-asr: src/integrations/azureAsr/snapshot.ts). */
+  source: 'aws-drs' | 'azure-asr' | 'fixture';
   collected_at: string;
   aws_account_id: string | null;
   aws_region: string;

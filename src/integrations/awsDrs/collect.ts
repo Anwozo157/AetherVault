@@ -172,14 +172,14 @@ export function pushRecoveryJobs(
   region: string,
   jobs: RecoveryJobPayload[],
   fetchImpl: typeof fetch = fetch,
+  source: 'aws-drs' | 'azure-asr' = 'aws-drs',
 ): Promise<{ accepted: boolean; jobs: number; changed: number }> {
-  return rpc(
-    target,
-    'ingest_recovery_jobs',
-    { p_token: target.token, p_region: region, p_jobs: jobs },
-    'recovery jobs',
-    fetchImpl,
-  );
+  // p_source is sent only for Azure, so AWS collectors keep matching the original signature.
+  const body =
+    source === 'aws-drs'
+      ? { p_token: target.token, p_region: region, p_jobs: jobs }
+      : { p_token: target.token, p_region: region, p_jobs: jobs, p_source: source };
+  return rpc(target, 'ingest_recovery_jobs', body, 'recovery jobs', fetchImpl);
 }
 
 /** Serves recorded DescribeSourceServers pages in order (tests and --fixture mode). */
