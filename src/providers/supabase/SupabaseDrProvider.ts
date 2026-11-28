@@ -383,6 +383,7 @@ export class SupabaseDrProvider implements DrProvider {
       recoveries: async () =>
         (await api.listRecoveryJobs(org)).map((j) => ({
           jobId: j.job_id,
+          source: j.source ?? 'aws-drs',
           kind: j.kind,
           status: j.status,
           awsRegion: j.aws_region,

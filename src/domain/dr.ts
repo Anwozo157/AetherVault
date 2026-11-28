@@ -496,12 +496,14 @@ export interface IngestTokenStatus {
  */
 export interface MeasuredRecovery {
   jobId: string;
+  /** Which cloud measured the job. */
+  source: 'aws-drs' | 'azure-asr';
   kind: 'drill' | 'recovery' | 'failback';
   status: 'PENDING' | 'STARTED' | 'COMPLETED';
   awsRegion: string;
   startedAt: string;
   endedAt: string | null;
-  /** AWS job time: recovery requested -> servers launched. null while running. */
+  /** Cloud job time: recovery requested -> servers launched (AWS) or job finished (Azure). null while running. */
   durationSeconds: number | null;
   servers: number;
   launched: number;
