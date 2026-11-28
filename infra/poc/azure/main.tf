@@ -6,7 +6,7 @@
 #   down                -> everything destroyed; leftovers listed by tag
 #
 # Shape (cheapest honest test):
-#   source region (eastus)                     target region (westus2)
+#   source region (northcentralus)             target region (westus2)
 #   ┌──────────────────────────────┐           ┌─────────────────────────────────────────┐
 #   │ VNet 10.10/16                │  Site     │ Recovery Services vault (not in source)  │
 #   │  VM: Ubuntu 24.04, B2ats_v2, │ Recovery  │ VNet 10.20/16  (failover network)        │
