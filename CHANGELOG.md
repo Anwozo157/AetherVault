@@ -18,6 +18,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
   free trial; warm-up drill recovered a working database in West US 2 in 3 min 55 s (PASS against
   15 min) with 306.7 s data loss (FAIL against 60 s; Azure makes recovery points every 5 minutes).
   Drill 2 (2026-11-28 00:05 UTC): 3 min 57 s recovery (PASS), 243.9 s data loss (FAIL).
+  Drill 3 (portal, "Latest (lowest RPO)", 00:27 UTC): 3 min 56 s (PASS), 374.8 s (FAIL); no gain
+  because replication had fallen ~4 minutes behind (cause open).
 
 ### Azure account baseline applied (2026-11-27)
 
