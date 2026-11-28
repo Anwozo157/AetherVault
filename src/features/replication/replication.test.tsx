@@ -132,6 +132,22 @@ describe('ReplicationPanel', () => {
     expect(screen.getByText('Only admins manage the collector token.')).toBeInTheDocument();
   });
 
+  test('Azure data is labeled Azure Site Recovery and shows no account number', async () => {
+    const azure = fake({
+      latest: vi.fn(async () =>
+        status({ source: 'azure-asr', awsAccountId: null, awsRegion: 'westus2' }),
+      ),
+    });
+    render(<ReplicationPanel replication={azure} myRole="viewer" refreshKey={0} />);
+    expect(await screen.findByTestId('replication-badge')).toHaveTextContent(
+      'LIVE · AZURE SITE RECOVERY',
+    );
+    expect(screen.getByText('Replication · Azure Site Recovery')).toBeInTheDocument();
+    expect(
+      screen.getByText('Azure subscription · westus2 · collected 20 s ago'),
+    ).toBeInTheDocument();
+  });
+
   test('stale and sample data are labeled', async () => {
     const { unmount } = render(
       <ReplicationPanel

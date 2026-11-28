@@ -90,7 +90,7 @@ export interface RunRow {
   rpo_met: boolean | null;
   rpo_seconds: number | string | null;
   rpo_target_seconds: number | null;
-  replication_source: 'aws-drs' | 'fixture' | null;
+  replication_source: 'aws-drs' | 'azure-asr' | 'fixture' | null;
   recovery_job_id?: string | null;
 }
 
@@ -163,7 +163,7 @@ export interface ReplicationServerRow {
 }
 
 export interface ReplicationSnapshotRow {
-  source: 'aws-drs' | 'fixture';
+  source: 'aws-drs' | 'azure-asr' | 'fixture';
   collected_at: string;
   received_at: string;
   server_now: string;

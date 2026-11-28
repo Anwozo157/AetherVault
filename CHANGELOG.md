@@ -16,6 +16,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
   Function app with a system-assigned identity that holds only Site Recovery Reader on the vault;
   key-less deployment storage; ingest token as an app setting (so state uses the remote backend).
   CI now formats, validates and scans this folder too.
+- **Console labels Azure data:** the replication panel reads "LIVE · AZURE SITE RECOVERY" and
+  "Replication · Azure Site Recovery" for `azure-asr` snapshots (no account number shown), and
+  drill evidence names Azure Site Recovery as the source.
 
 ### Azure: database-level standby meets the 60 s target (2026-11-28)
 
