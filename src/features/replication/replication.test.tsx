@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import type { ReplicationCapability, ReplicationStatus } from '../../domain/dr';
 import { formatDuration } from './MeasuredRecoveries';
@@ -91,6 +91,7 @@ afterEach(() => vi.useRealTimers());
 
 const job = {
   jobId: 'drsjob-506416001759e958f',
+  source: 'aws-drs' as const,
   kind: 'drill' as const,
   status: 'COMPLETED' as const,
   awsRegion: 'us-west-2',
@@ -146,7 +147,9 @@ describe('ReplicationPanel', () => {
 
   test('Azure data is labeled Azure Site Recovery and shows no account number', async () => {
     const azure = fake({
-      recoveries: vi.fn(async () => [{ ...job, jobId: '1c93edb6-efba-4335-8559-58b646c40906' }]),
+      recoveries: vi.fn(async () => [
+        { ...job, jobId: '1c93edb6-efba-4335-8559-58b646c40906', source: 'azure-asr' as const },
+      ]),
       latest: vi.fn(async () =>
         status({ source: 'azure-asr', awsAccountId: null, awsRegion: 'westus2' }),
       ),
@@ -237,6 +240,28 @@ describe('ReplicationPanel', () => {
 });
 
 describe('recoveries measured by AWS', () => {
+  test('a list with AWS and Azure jobs labels each row by the cloud that measured it', async () => {
+    const replication = fake({
+      latest: vi.fn(async () =>
+        status({ source: 'azure-asr', awsAccountId: null, awsRegion: 'westus2' }),
+      ),
+      recoveries: vi.fn(async () => [
+        {
+          ...job,
+          jobId: '1c93edb6-efba-4335-8559-58b646c40906',
+          source: 'azure-asr' as const,
+          awsRegion: 'westus2',
+        },
+        job,
+      ]),
+    });
+    render(<ReplicationPanel replication={replication} myRole="viewer" refreshKey={0} />);
+    expect(await screen.findByText('Recoveries measured by Azure and AWS')).toBeInTheDocument();
+    const rows = within(screen.getByTestId('measured-recoveries')).getAllByRole('row').slice(1);
+    expect(rows[0]).toHaveTextContent('measured by Azure');
+    expect(rows[1]).toHaveTextContent('measured by AWS');
+  });
+
   test('formats long durations in minutes and seconds', () => {
     expect(formatDuration(1035)).toBe('17 min 15 s');
     expect(formatDuration(900)).toBe('15 min');

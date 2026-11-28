@@ -741,6 +741,8 @@ describe('SupabaseDrProvider', () => {
     await expect(admin.replication.recoveries()).resolves.toEqual([
       {
         jobId: 'drsjob-506416001759e958f',
+        // The row has no source (a database before the multicloud migration): AWS.
+        source: 'aws-drs',
         kind: 'drill',
         status: 'COMPLETED',
         awsRegion: 'us-west-2',

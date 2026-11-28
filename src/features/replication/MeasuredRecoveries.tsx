@@ -22,6 +22,12 @@ export function formatDuration(seconds: number | null): string {
  * Recovery launch jobs measured by AWS Elastic Disaster Recovery (real, not simulated).
  * The time is AWS's job time: from the recovery request until the servers are launched.
  */
+const EXPLAIN: Record<string, string> = {
+  AWS: 'Real recovery times from AWS Elastic Disaster Recovery: from the recovery request until the recovery servers launched.',
+  Azure:
+    'Real recovery times from Azure Site Recovery: from the test failover or failover request until the job finished with the VM created in the recovery region.',
+};
+
 export default function MeasuredRecoveries({
   recoveries,
   rtoTargetSeconds,
@@ -34,7 +40,10 @@ export default function MeasuredRecoveries({
   rtoTargetSeconds?: number;
 }) {
   if (recoveries.length === 0) return null;
-  const by = cloud === 'azure' ? 'Azure' : 'AWS';
+  // Each job names the cloud that measured it; the heading names every cloud in the list.
+  const cloudName = (r: MeasuredRecovery) => (r.source === 'azure-asr' ? 'Azure' : 'AWS');
+  const clouds = [...new Set(recoveries.map(cloudName))];
+  const by = clouds.length ? clouds.join(' and ') : cloud === 'azure' ? 'Azure' : 'AWS';
   return (
     <div className="flex flex-col gap-2" data-testid="measured-recoveries">
       <div>
@@ -42,9 +51,9 @@ export default function MeasuredRecoveries({
           {`Recoveries measured by ${by}`}
         </h3>
         <p className="text-[11px] font-mono text-zinc-400 mt-1 max-w-2xl">
-          {cloud === 'azure'
-            ? 'Real recovery times from Azure Site Recovery: from the test failover or failover request until the job finished with the VM created in the recovery region.'
-            : 'Real recovery times from AWS Elastic Disaster Recovery: from the recovery request until the recovery servers launched.'}{' '}
+          {(clouds.length ? clouds : [cloud === 'azure' ? 'Azure' : 'AWS'])
+            .map((c) => EXPLAIN[c])
+            .join(' ')}{' '}
           Checking that your applications work adds time on top.
         </p>
       </div>
@@ -118,7 +127,7 @@ export default function MeasuredRecoveries({
                         {met === null ? '' : met ? ' · within target' : ' · over target'}
                       </span>
                     )}
-                    <span className="block text-zinc-500">measured by {by}</span>
+                    <span className="block text-zinc-500">measured by {cloudName(r)}</span>
                   </td>
                 </tr>
               );

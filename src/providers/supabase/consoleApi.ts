@@ -182,6 +182,8 @@ export interface ReplicationSnapshotRow {
 
 export interface RecoveryJobRow {
   job_id: string;
+  /** From the multicloud migration on; absent from older databases (then AWS). */
+  source?: 'aws-drs' | 'azure-asr';
   kind: 'drill' | 'recovery' | 'failback';
   status: 'PENDING' | 'STARTED' | 'COMPLETED';
   aws_region: string;

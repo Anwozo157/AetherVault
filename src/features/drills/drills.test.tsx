@@ -552,6 +552,7 @@ describe('recovery times measured by AWS', () => {
   });
   const job = (over: Partial<MeasuredRecovery> = {}): MeasuredRecovery => ({
     jobId: 'drsjob-5d5a5be173b3a4499',
+    source: 'aws-drs',
     kind: 'drill',
     status: 'COMPLETED',
     awsRegion: 'us-west-2',

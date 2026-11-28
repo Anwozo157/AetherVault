@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+- **Fix: each measured recovery names its own cloud.** With Azure data live, older AWS drills read
+  "measured by Azure". Each row now uses the job's `source`, and the heading lists every cloud
+  present ("Recoveries measured by Azure and AWS"). Rows from a database before the multicloud
+  migration count as AWS.
+
 - **Landing page: one badge per target** on the live-test cards ("Recovery PASS · Data loss FAIL")
   instead of a single PASS/FAIL, so a drill that met the recovery target but missed the data-loss
   target reads as exactly that. Same numbers, nothing hidden.
