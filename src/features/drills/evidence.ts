@@ -82,7 +82,7 @@ export function rpoSummary(e: DrillEvidence): string {
     rep.problem_count > 0
       ? `${rep.problem_count} of ${rep.server_count} servers not replicating normally`
       : `all ${rep.server_count} servers replicating`;
-  const where = `AWS DRS ${rep.aws_region}${rep.aws_account_id ? `, account …${rep.aws_account_id.slice(-4)}` : ''}`;
+  const where = `${rep.source === 'azure-asr' ? 'Azure Site Recovery' : 'AWS DRS'} ${rep.aws_region}${rep.aws_account_id ? `, account …${rep.aws_account_id.slice(-4)}` : ''}`;
   return `${sample}${rep.rpo_met ? 'Met' : 'MISSED'}: ${lag} at launch (target ${target}); ${servers}. Measured from ${where}, collected ${new Date(rep.collected_at).toLocaleString()}.`;
 }
 

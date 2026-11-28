@@ -89,6 +89,18 @@ const fake = (over: Partial<ReplicationCapability> = {}): ReplicationCapability 
 
 afterEach(() => vi.useRealTimers());
 
+const job = {
+  jobId: 'drsjob-506416001759e958f',
+  kind: 'drill' as const,
+  status: 'COMPLETED' as const,
+  awsRegion: 'us-west-2',
+  startedAt: '2026-11-17T18:09:27Z',
+  endedAt: '2026-11-17T18:26:42Z',
+  durationSeconds: 1035,
+  servers: 1,
+  launched: 1,
+};
+
 describe('formatting', () => {
   test('bytes, lag, relative time, freshness', () => {
     expect(formatBytes(512)).toBe('512 B');
@@ -130,6 +142,24 @@ describe('ReplicationPanel', () => {
     expect(screen.getByTestId('server-reports-server-01')).toHaveTextContent('INITIAL_SYNC · 32%');
     expect(screen.getByText('Worst lag, last 2 reports')).toBeInTheDocument();
     expect(screen.getByText('Only admins manage the collector token.')).toBeInTheDocument();
+  });
+
+  test('Azure data is labeled Azure Site Recovery and shows no account number', async () => {
+    const azure = fake({
+      recoveries: vi.fn(async () => [{ ...job, jobId: '1c93edb6-efba-4335-8559-58b646c40906' }]),
+      latest: vi.fn(async () =>
+        status({ source: 'azure-asr', awsAccountId: null, awsRegion: 'westus2' }),
+      ),
+    });
+    render(<ReplicationPanel replication={azure} myRole="viewer" refreshKey={0} />);
+    expect(await screen.findByTestId('replication-badge')).toHaveTextContent(
+      'LIVE · AZURE SITE RECOVERY',
+    );
+    expect(screen.getByText('Replication · Azure Site Recovery')).toBeInTheDocument();
+    expect(
+      screen.getByText('Azure subscription · westus2 · collected 20 s ago'),
+    ).toBeInTheDocument();
+    expect(await screen.findByText('Recoveries measured by Azure')).toBeInTheDocument();
   });
 
   test('stale and sample data are labeled', async () => {
@@ -207,18 +237,6 @@ describe('ReplicationPanel', () => {
 });
 
 describe('recoveries measured by AWS', () => {
-  const job = {
-    jobId: 'drsjob-506416001759e958f',
-    kind: 'drill' as const,
-    status: 'COMPLETED' as const,
-    awsRegion: 'us-west-2',
-    startedAt: '2026-11-17T18:09:27Z',
-    endedAt: '2026-11-17T18:26:42Z',
-    durationSeconds: 1035,
-    servers: 1,
-    launched: 1,
-  };
-
   test('formats long durations in minutes and seconds', () => {
     expect(formatDuration(1035)).toBe('17 min 15 s');
     expect(formatDuration(900)).toBe('15 min');

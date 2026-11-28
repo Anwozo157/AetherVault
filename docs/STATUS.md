@@ -104,6 +104,20 @@ Details of every change: `CHANGELOG.md`. Full plan: `docs/CONTINUE_BUILD_PROMPT.
 
 5. **Landing page** shows the real AWS test results (2026-11-18, "Measured in a live AWS test"; pricing slide roadmap labels fixed the same day). Built (2026-11-09) on `feat/landing-page`: ✅ `CONTACT_EMAIL` set to antonio@getaethervault.com (2026-11-11); add real console screenshots and a pilot-customer case study when available.
 
+- **Azure collector built 2026-11-28 (branch `feat/azure-collector`):** `src/integrations/azureAsr/`
+  (mapping + redacted recorded fixtures), `collector-azure/` (CLI with `--fixture/--dry-run/--record/--watch`,
+  Functions entry, `npm run collector:azure:package`), `collector-azure/terraform/` (validated, not
+  applied), console labels "LIVE · AZURE SITE RECOVERY" and "Recoveries measured by Azure". Verified
+  end to end locally: the real test vault pushed into local Supabase; console checked at desktop and
+  390 px. **Founder next:** OK to apply migration `20261126000014_multicloud_groundwork` to the hosted
+  project (dry run 2026-11-28: only that migration pending), then create an Azure collector token in the
+  hosted console and approve deploying the Function (plan reviewed first). Still to build: "Connect your
+  Azure subscription" guide in the console (the AWS guide shows today).
+- **24 h Azure lag record running** since 2026-11-28T02:01Z (`scripts/poc/azure-lag-record.sh`, log in the
+  private folder): hourly RPO + DB-standby samples, ASR drills at hours 2/8/14/20, DB drills at 5/17;
+  auto-shutdown is off until it ends (~2026-11-29T02:00Z) and re-enables it. Scale test (bigger disk,
+  heavier writes) after that, with approval.
+
 ## Open decisions for the founder
 
 - **AWS, decided 2026-11-22: the standard DR test account is AetherVault's single AWS home.** Its hold became a suspension for identity verification (AWS fraud prevention); AWS closes the account and deletes its data if documents aren't received by **26 Nov 2026**. **Founder:** upload the full set through that account's Support Center (payment-method statement, government ID, business documents). Agent access is refused until it's restored. Then: re-check access, `terraform destroy` the collector leftovers, rebuild and rehearse failback. The first (AWS "projects") account can't run DRS without a paid support plan and an irreversible Advanced Features switch (AWS Support, 17 Nov), so it will be retired once the DR account is back (founder's OK before closing; its promotional credits are lost). AWS accounts can't be merged.

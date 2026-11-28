@@ -5,6 +5,25 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+- **Azure Site Recovery collector** (`collector-azure/`, `src/integrations/azureAsr/`): reads one
+  Recovery Services vault with GETs only (managed identity or `az login`), maps protected items to
+  the shared replication snapshot (`azure-asr`, RPO from `rpoInSeconds`, no subscription ID) and
+  test failovers/failovers to recovery jobs. Same flags as the AWS collector (`--fixture`,
+  `--dry-run`, `--record`, `--watch`); `npm run collector:azure:package` builds the Functions zip.
+  Fixtures are redacted recordings from our own test subscription plus marked hand-built variants.
+  A dry run against the live test vault on 28 Nov mapped 1 VM (CONTINUOUS) and all 4 drills.
+- **Collector Terraform** (`collector-azure/terraform/`, validated, not applied): Flex Consumption
+  Function app with a system-assigned identity that holds only Site Recovery Reader on the vault;
+  key-less deployment storage; ingest token as an app setting (so state uses the remote backend).
+  CI now formats, validates and scans this folder too.
+- **Console labels Azure data:** the replication panel reads "LIVE · AZURE SITE RECOVERY" and
+  "Replication · Azure Site Recovery" for `azure-asr` snapshots (no account number shown), and
+  drill evidence names Azure Site Recovery as the source; "Recoveries measured by Azure" lists
+  test failovers with Azure's job times. Checked in a browser (desktop and 390 px) with the real
+  test vault pushing into local Supabase.
+- `scripts/poc/azure-lag-record.sh`: 24 h record (hourly RPO and standby samples, drills spread
+  through the day), re-enables auto-shutdown when it ends.
+
 ### Azure: database-level standby meets the 60 s target (2026-11-28)
 
 - `infra/poc/azure/db-standby.tf` (off by default): PostgreSQL streaming standby in West US 2, global

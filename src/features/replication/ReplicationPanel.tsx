@@ -84,9 +84,19 @@ export function freshness(status: ReplicationStatus): Freshness {
   return age > STALE_AFTER_MS ? 'stale' : 'live';
 }
 
+/** Which cloud's collector sent this status (fixture data is AWS-shaped sample data). */
+export function cloudOf(status: Pick<ReplicationStatus, 'source'>): {
+  short: string;
+  long: string;
+} {
+  return status.source === 'azure-asr'
+    ? { short: 'AZURE SITE RECOVERY', long: 'Azure Site Recovery' }
+    : { short: 'AWS DRS', long: 'AWS Elastic Disaster Recovery' };
+}
+
 const BADGE: Record<Freshness, { text: string; className: string }> = {
   live: {
-    text: 'LIVE · AWS DRS',
+    text: 'LIVE',
     className: 'border-aether-green/40 bg-aether-green/10 text-aether-green',
   },
   stale: {
@@ -347,11 +357,11 @@ export default function ReplicationPanel({
             id="replication-title"
             className="text-sm font-mono uppercase tracking-widest text-white"
           >
-            Replication · AWS Elastic Disaster Recovery
+            Replication · {status ? cloudOf(status).long : 'AWS Elastic Disaster Recovery'}
           </h2>
           <p className="text-[11px] font-mono text-zinc-400 mt-1">
             {status
-              ? `Account ${status.awsAccountId ?? 'unknown'} · ${status.awsRegion} · collected ${ago(status.collectedAt, status.serverNow)}`
+              ? `${status.source === 'azure-asr' ? 'Azure subscription' : `Account ${status.awsAccountId ?? 'unknown'}`} · ${status.awsRegion} · collected ${ago(status.collectedAt, status.serverNow)}`
               : 'Real replication status from your AWS account, once the collector is connected.'}
           </p>
         </div>
@@ -361,7 +371,7 @@ export default function ReplicationPanel({
               data-testid="replication-badge"
               className={`rounded-md border px-2 py-0.5 text-[10px] font-mono tracking-wider ${BADGE[fresh].className}`}
             >
-              {BADGE[fresh].text}
+              {fresh === 'live' && status ? `LIVE · ${cloudOf(status).short}` : BADGE[fresh].text}
             </span>
           )}
           <button
@@ -390,7 +400,11 @@ export default function ReplicationPanel({
           {fresh === 'stale' && (
             <p className="text-[11px] font-mono text-aether-amber">
               No update for over 5 minutes. The figures below are the last ones received; check the
-              collector&apos;s Lambda logs in the AWS account.
+              collector&apos;s{' '}
+              {status.source === 'azure-asr'
+                ? 'Function logs in the Azure subscription'
+                : 'Lambda logs in the AWS account'}
+              .
             </p>
           )}
           <div className="flex flex-wrap gap-3">
@@ -497,7 +511,11 @@ export default function ReplicationPanel({
         </>
       )}
 
-      <MeasuredRecoveries recoveries={recoveries} rtoTargetSeconds={rtoTarget} />
+      <MeasuredRecoveries
+        recoveries={recoveries}
+        rtoTargetSeconds={rtoTarget}
+        cloud={status?.source === 'azure-asr' ? 'azure' : 'aws'}
+      />
 
       {status !== undefined && (
         <ConnectAwsWizard

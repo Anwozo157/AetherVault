@@ -101,11 +101,11 @@ jobs:
         with:
           terraform_version: 1.9.7
       - name: Formatting
-        run: terraform fmt -check -recursive infra collector/terraform
+        run: terraform fmt -check -recursive infra collector/terraform collector-azure/terraform
       # No cloud credentials in CI: init without a backend, validate the configuration only.
       - name: Validate every Terraform folder
         run: |
-          for dir in collector/terraform infra/accounts/azure infra/poc/azure; do
+          for dir in collector/terraform collector-azure/terraform infra/accounts/azure infra/poc/azure; do
             echo "::group::$dir"
             terraform -chdir="$dir" init -backend=false -input=false
             terraform -chdir="$dir" validate
@@ -114,4 +114,4 @@ jobs:
       - name: Security scan (Checkov, report only for now)
         run: |
           pip install --quiet checkov==3.2.*
-          checkov --directory infra --directory collector/terraform --framework terraform --compact --quiet --soft-fail
+          checkov --directory infra --directory collector/terraform --directory collector-azure/terraform --framework terraform --compact --quiet --soft-fail

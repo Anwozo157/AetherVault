@@ -213,7 +213,7 @@ export interface RunSummary {
   rpoMet: boolean | null;
   rpoSeconds: number | null;
   rpoTargetSeconds: number | null;
-  replicationSource: 'aws-drs' | 'fixture' | null;
+  replicationSource: 'aws-drs' | 'azure-asr' | 'fixture' | null;
   /** AWS DRS job whose measured time is used; null: recovery time is simulated. */
   recoveryJobId: string | null;
 }
@@ -267,7 +267,7 @@ export interface RunbooksCapability {
 /** Replication snapshot summary copied onto a run when it launched. */
 export interface ReplicationAtLaunch {
   snapshot_id: number;
-  source: 'aws-drs' | 'fixture';
+  source: 'aws-drs' | 'azure-asr' | 'fixture';
   collected_at: string;
   received_at: string;
   aws_account_id: string | null;
@@ -280,9 +280,9 @@ export interface ReplicationAtLaunch {
   rpo_met: boolean | null;
 }
 
-/** AWS DRS job facts copied onto a run when an operator linked it (see link_recovery_job()). */
+/** Cloud job facts (AWS DRS or Azure Site Recovery) copied onto a run when an operator linked it (see link_recovery_job()). */
 export interface RecoveryMeasured {
-  source: 'aws-drs';
+  source: 'aws-drs' | 'azure-asr';
   job_id: string;
   job_kind: 'drill' | 'recovery' | 'failback';
   aws_region: string;
@@ -456,10 +456,10 @@ export interface ReplicatedServer {
   lastLaunchResult: string | null;
 }
 
-/** Latest replication status pushed by the collector in the customer's AWS account. */
+/** Latest replication status pushed by the collector in the customer's AWS account or Azure subscription. */
 export interface ReplicationStatus {
   /** 'fixture' = sample data from the collector's --fixture mode, never real. */
-  source: 'aws-drs' | 'fixture';
+  source: 'aws-drs' | 'azure-asr' | 'fixture';
   collectedAt: string;
   receivedAt: string;
   serverNow: string;

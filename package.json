@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p collector",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p collector && tsc --noEmit -p collector-azure",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -23,7 +23,10 @@
     "e2e:console": "bash scripts/e2e-console.sh",
     "collector:build": "vite build -c collector/vite.config.ts --logLevel warn",
     "collector": "npm run collector:build && node dist-collector/cli/cli.mjs",
-    "collector:package": "COLLECTOR_ENTRY=lambda npm run collector:build && cd dist-collector/lambda && zip -q -FS lambda.zip lambda.mjs THIRD_PARTY_NOTICES.txt && echo dist-collector/lambda/lambda.zip"
+    "collector:package": "COLLECTOR_ENTRY=lambda npm run collector:build && cd dist-collector/lambda && zip -q -FS lambda.zip lambda.mjs THIRD_PARTY_NOTICES.txt && echo dist-collector/lambda/lambda.zip",
+    "collector:azure:build": "vite build -c collector-azure/vite.config.ts --logLevel warn",
+    "collector:azure": "npm run collector:azure:build && node dist-collector-azure/cli/cli.mjs",
+    "collector:azure:package": "COLLECTOR_ENTRY=function npm run collector:azure:build && sh collector-azure/package.sh"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
@@ -39,6 +42,7 @@
   },
   "devDependencies": {
     "@aws-sdk/client-drs": "3.1156.0",
+    "@azure/functions": "^4.17.1",
     "@eslint/js": "^9.14.0",
     "@playwright/test": "^1.65.0",
     "@testing-library/dom": "^10.4.2",
